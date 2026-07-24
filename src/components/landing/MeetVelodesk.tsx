@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-
+import { motion } from 'framer-motion'
 export default function MeetVelodesk() {
   return (
     <section className="mv-section">
@@ -172,16 +172,28 @@ export default function MeetVelodesk() {
       <div className="mv-container">
 
         {/* HEADER */}
-        <div className="mv-header">
+        <motion.div 
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="mv-header"
+        >
           <div className="mv-tag">Introducing</div>
           <h2 className="mv-title">Meet VeloDesk — <em>clarity</em> for founders who are done guessing.</h2>
           <p className="mv-intro">
             Every startup tool gives you more data. VeloDesk is the first to give you a definitive answer: do people actually want what you're building?
           </p>
-        </div>
+        </motion.div>
 
         {/* STORY ARC */}
-        <div className="mv-story">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 1 }}
+          className="mv-story"
+        >
 
           {/* 1. The customer's problem */}
           <div className="mv-block">
@@ -260,7 +272,7 @@ export default function MeetVelodesk() {
             </div>
           </div>
 
-        </div>
+        </motion.div>
 
         {/* DASHBOARD SCREENSHOT */}
         <div className="mv-dashboard-wrap">
