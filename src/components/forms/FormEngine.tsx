@@ -145,6 +145,55 @@ export function FormEngine({ schema, sessionId, onSubmit }: FormEngineProps) {
                             />
                         )}
 
+                        {field.type === 'textarea' && (
+                            <textarea
+                                value={answers[field.id] || ''}
+                                onChange={(e) => handleChange(field.id, e.target.value)}
+                                onFocus={() => handleFocus(field.id)}
+                                onBlur={() => handleBlur(field.id)}
+                                className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded focus:outline-none focus:border-[#22c55e] transition min-h-[100px]"
+                                placeholder={field.placeholder}
+                                required={field.required}
+                            />
+                        )}
+
+                        {field.type === 'select' && (
+                            <select
+                                value={answers[field.id] || ''}
+                                onChange={(e) => handleChange(field.id, e.target.value)}
+                                onFocus={() => handleFocus(field.id)}
+                                onBlur={() => handleBlur(field.id)}
+                                className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded focus:outline-none focus:border-[#22c55e] transition appearance-none"
+                                required={field.required}
+                            >
+                                <option value="" disabled>Select an option...</option>
+                                {field.options?.map(opt => (
+                                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                ))}
+                            </select>
+                        )}
+
+                        {field.type === 'radio' && (
+                            <div className="space-y-2">
+                                {field.options?.map(opt => (
+                                    <label key={opt.value} className="flex items-center gap-3 text-sm text-gray-300 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name={field.id}
+                                            value={opt.value}
+                                            checked={answers[field.id] === opt.value}
+                                            onChange={(e) => handleChange(field.id, e.target.value)}
+                                            onFocus={() => handleFocus(field.id)}
+                                            onBlur={() => handleBlur(field.id)}
+                                            className="w-4 h-4 text-[#22c55e] bg-white/[0.03] border-white/10 focus:ring-[#22c55e] focus:ring-2"
+                                            required={field.required && !answers[field.id]}
+                                        />
+                                        <span>{opt.label}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        )}
+
                         {field.type === 'checkbox' && (
                             <label className="flex items-start gap-2 text-sm text-gray-400 cursor-pointer">
                                 <input
