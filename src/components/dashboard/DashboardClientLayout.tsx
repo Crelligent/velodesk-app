@@ -27,6 +27,7 @@ import {
 import PropertiesSidebar from './PropertiesSidebar'
 import AIAgentWindow from './AIAgentWindow'
 import CommandPalette from './CommandPalette'
+import InvestorModeOverlay from './InvestorModeOverlay'
 
 const navSections = [
     {
@@ -88,6 +89,7 @@ interface DashboardClientLayoutProps {
 export default function DashboardClientLayout({ children, user }: DashboardClientLayoutProps) {
     const pathname = usePathname()
     const [userMenuOpen, setUserMenuOpen] = useState(false)
+    const [isInvestorModeOpen, setIsInvestorModeOpen] = useState(false)
 
     const showSidebar = !fullWidthPages.includes(pathname)
 
@@ -127,6 +129,12 @@ export default function DashboardClientLayout({ children, user }: DashboardClien
                 <div className="flex items-center justify-end gap-4 flex-shrink-0">
                     <button className="px-4 py-2 bg-white/5 border border-white/10 text-white text-xs font-medium hover:bg-white/10 transition rounded flex items-center gap-2 whitespace-nowrap">
                         <Activity size={14} className="text-[#7B61FF]" /> Live Sync
+                    </button>
+                    <button
+                        onClick={() => setIsInvestorModeOpen(true)}
+                        className="px-4 py-2 bg-[#22c55e]/10 border border-[#22c55e]/30 text-[#22c55e] text-xs font-medium hover:bg-[#22c55e]/20 transition rounded whitespace-nowrap flex items-center gap-2"
+                    >
+                        <PlaySquare size={14} /> Fundraising Deck
                     </button>
                     <Link
                         href="/dashboard/pmf-report"
@@ -258,6 +266,13 @@ export default function DashboardClientLayout({ children, user }: DashboardClien
                 
                 {/* Global Command Palette */}
                 <CommandPalette />
+
+                {/* Investor Mode Overlay */}
+                <InvestorModeOverlay 
+                    isOpen={isInvestorModeOpen} 
+                    onClose={() => setIsInvestorModeOpen(false)} 
+                    companyName="Crelligent" 
+                />
             </div>
         </div>
     )
