@@ -172,8 +172,6 @@ export default function AcceleratorDashboard() {
                     </table>
                 </div>
             </div>
-        </div>
-
             {/* Actionable Interventions Slide-out Panel */}
             {showInterventions && (
                 <>
