@@ -36,7 +36,6 @@ export function useScrollReveal(threshold = 0.15) {
  */
 export function useParallax(speed = 0.15) {
   const ref = useRef<HTMLDivElement>(null)
-  const [offset, setOffset] = useState(0)
 
   useEffect(() => {
     let ticking = false
@@ -49,7 +48,8 @@ export function useParallax(speed = 0.15) {
             const rect = el.getBoundingClientRect()
             const viewportCenter = window.innerHeight / 2
             const elCenter = rect.top + rect.height / 2
-            setOffset((elCenter - viewportCenter) * speed)
+            const offset = (elCenter - viewportCenter) * speed
+            el.style.transform = `translateY(${offset}px)`
           }
           ticking = false
         })
@@ -62,7 +62,7 @@ export function useParallax(speed = 0.15) {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [speed])
 
-  return { ref, offset }
+  return { ref }
 }
 
 /**

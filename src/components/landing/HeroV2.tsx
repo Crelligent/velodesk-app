@@ -6,7 +6,7 @@ import { useParallax, useScrollReveal } from '@/hooks/useScrollAnimations'
 import WavyBackground from './WavyBackground'
 
 export default function HeroV2() {
-  const { ref: parallaxRef, offset } = useParallax(0.12)
+  const { ref: parallaxRef } = useParallax(0.12)
   const { ref: intRef, isVisible: intVisible } = useScrollReveal(0.3)
   const logoRefs = useRef<(HTMLImageElement | null)[]>([])
   const [scrolled, setScrolled] = useState(false)
@@ -150,7 +150,7 @@ export default function HeroV2() {
         <div
           ref={parallaxRef}
           className="animate-fade-up delay-500 relative w-full max-w-6xl mx-auto"
-          style={{ transform: `translateY(${offset}px)`, transition: 'transform 0.1s linear' }}
+          style={{ transition: 'transform 0.1s linear' }}
         >
           <div className="relative rounded-2xl md:rounded-[32px] overflow-hidden border border-white/10 shadow-2xl bg-[#050505]">
             <img 
