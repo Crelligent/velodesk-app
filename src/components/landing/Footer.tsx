@@ -166,7 +166,7 @@ export default function Footer() {
             <a href="#how-it-works" className="ft-link">How it Works</a>
             <a href="#features" className="ft-link">Features</a>
             <a href="#research" className="ft-link">The Research</a>
-            <a href="#for-investors" className="ft-link">For Investors</a>
+            <Link href="/investors" className="ft-link">For Investors</Link>
           </div>
         </div>
 

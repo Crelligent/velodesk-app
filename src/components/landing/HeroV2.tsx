@@ -112,7 +112,7 @@ export default function HeroV2() {
         <div className="hidden md:flex items-center gap-10">
           <Link href="#how-it-works" className="text-sm font-light text-white/50 hover:text-white transition">How it Works</Link>
           <Link href="#research" className="text-sm font-light text-white/50 hover:text-white transition">Research</Link>
-          <Link href="#for-investors" className="text-sm font-light text-white/50 hover:text-white transition">For Investors</Link>
+          <Link href="/investors" className="text-sm font-light text-white/50 hover:text-white transition">For Investors</Link>
         </div>
 
         <div className="flex items-center gap-4 relative z-10">
