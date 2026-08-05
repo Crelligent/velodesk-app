@@ -21,7 +21,8 @@ import {
     Copy,
     MessageSquare,
     Users,
-    TrendingUp
+    TrendingUp,
+    Network
 } from 'lucide-react'
 
 import PropertiesSidebar from './PropertiesSidebar'
@@ -57,6 +58,7 @@ const navSections = [
             { href: '/dashboard/benchmarks', icon: TrendingUp, label: 'Cohort Benchmarks', color: 'text-teal-400' },
             { href: '/dashboard/data-room', icon: FolderOpen, label: 'Live Data Room', color: 'text-emerald-400' },
             { href: '/dashboard/pmf-report', icon: FileText, label: 'PMF Report', color: 'text-cyan-400' },
+            { href: '/dashboard/investor-api', icon: Network, label: 'Investor API Sync', color: 'text-indigo-400' },
         ]
     },
     {

@@ -17,7 +17,8 @@ import {
     PlaySquare,
     Link2,
     Copy,
-    MessageSquare
+    MessageSquare,
+    Network
 } from 'lucide-react'
 
 import CommandPalette from '../dashboard/CommandPalette'
@@ -41,6 +42,7 @@ const navSections = [
         title: 'Workspace',
         items: [
             { href: '/investor/team', icon: Users, label: 'Partners & Analysts', color: 'text-slate-400' },
+            { href: '/investor/api-integrations', icon: Network, label: 'API Integrations', color: 'text-indigo-400' },
             { href: '/investor/settings', icon: Settings, label: 'Settings', color: 'text-slate-400' },
         ]
     },
