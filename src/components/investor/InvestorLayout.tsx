@@ -12,7 +12,12 @@ import {
     Users,
     Building2,
     FileText,
-    TrendingUp
+    TrendingUp,
+    Activity,
+    PlaySquare,
+    Link2,
+    Copy,
+    MessageSquare
 } from 'lucide-react'
 
 import CommandPalette from '../dashboard/CommandPalette'
@@ -88,8 +93,36 @@ export default function InvestorLayout({ children, user }: InvestorLayoutProps) 
                     </button>
                 </div>
 
-                {/* Right Profile Placeholder (Kept simple for layout balance) */}
-                <div className="flex items-center justify-end gap-4 flex-shrink-0 w-[240px]">
+                {/* Right Actions & Profile */}
+                <div className="flex items-center justify-end gap-4 flex-shrink-0">
+                    <button className="px-4 py-2 bg-white/5 border border-white/10 text-white text-xs font-medium hover:bg-white/10 transition rounded flex items-center gap-2 whitespace-nowrap">
+                        <Activity size={14} className="text-[#7B61FF]" /> Global Sync
+                    </button>
+                    <button
+                        className="px-4 py-2 bg-[#22c55e]/10 border border-[#22c55e]/30 text-[#22c55e] text-xs font-medium hover:bg-[#22c55e]/20 transition rounded whitespace-nowrap flex items-center gap-2"
+                    >
+                        <PlaySquare size={14} /> Fund Performance
+                    </button>
+                    <Link
+                        href="/investor/reports"
+                        className="px-4 py-2 bg-[#7B61FF] text-white text-xs font-medium hover:bg-[#8A73FF] transition rounded whitespace-nowrap"
+                    >
+                        Export Portfolio
+                    </Link>
+
+                    {/* Linear-Style Actions Header */}
+                    <div className="flex items-center gap-1 text-white/40 border-l border-white/10 pl-4 ml-2">
+                        <span className="text-[12px] font-medium text-white/60 mr-2 font-mono">PORT-99</span>
+                        <button className="p-1.5 hover:bg-white/5 hover:text-white rounded transition-colors" title="Copy Link">
+                            <Link2 className="w-4 h-4" />
+                        </button>
+                        <button className="p-1.5 hover:bg-white/5 hover:text-white rounded transition-colors" title="Copy ID">
+                            <Copy className="w-4 h-4" />
+                        </button>
+                        <button className="p-1.5 hover:bg-white/5 hover:text-[#7B61FF] rounded transition-colors" title="Send to Slack">
+                            <MessageSquare className="w-4 h-4" />
+                        </button>
+                    </div>
                 </div>
             </header>
 
