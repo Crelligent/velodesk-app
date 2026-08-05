@@ -4,16 +4,29 @@ import { ArrowRight, BarChart3, Building2, ShieldCheck } from 'lucide-react'
 export default function InvestorsLandingPage() {
     return (
         <div className="min-h-screen bg-[#04060D] text-white selection:bg-[#7B61FF]/30 font-inter">
-            {/* Minimal Navbar */}
-            <nav className="h-16 flex items-center justify-between px-6 border-b border-white/5 sticky top-0 bg-[#04060D]/80 backdrop-blur-xl z-50">
-                <Link href="/" className="flex items-center gap-3">
-                    <img src="/velodesk (2).png" alt="Velodesk" className="h-8 w-auto" />
-                    <span className="font-orbitron font-bold text-lg tracking-[0.15em] text-white">VELODESK</span>
+            {/* Premium Navbar */}
+            <nav className="h-20 flex items-center justify-between px-8 border-b border-white/5 sticky top-0 bg-[#04060D]/60 backdrop-blur-2xl z-50">
+                <Link href="/" className="flex items-center gap-3 group">
+                    <div className="relative">
+                        <div className="absolute inset-0 bg-[#7B61FF] blur-md opacity-20 group-hover:opacity-40 transition-opacity rounded-full"></div>
+                        <img src="/velodesk (2).png" alt="Velodesk" className="h-10 w-auto relative z-10" />
+                    </div>
+                    <div className="flex flex-col justify-center">
+                        <span className="font-orbitron font-bold text-xl tracking-[0.15em] text-white leading-none">VELODESK</span>
+                        <span className="font-mono text-[9px] text-[#7B61FF] tracking-widest mt-1 uppercase">For Investors</span>
+                    </div>
                 </Link>
-                <div className="flex items-center gap-4">
-                    <Link href="/auth/login" className="text-sm font-medium text-white/70 hover:text-white transition">Sign In</Link>
-                    <Link href="/investor/dashboard" className="px-4 py-2 bg-[#7B61FF] hover:bg-[#8A73FF] text-white text-sm font-medium rounded transition">
-                        Enter Investor Portal
+                
+                <div className="hidden md:flex items-center gap-10">
+                    <Link href="#features" className="text-sm font-light text-white/50 hover:text-white transition">Platform Overview</Link>
+                    <Link href="#dealflow" className="text-sm font-light text-white/50 hover:text-white transition">Dealflow Intelligence</Link>
+                    <Link href="#security" className="text-sm font-light text-white/50 hover:text-white transition">Data Security</Link>
+                </div>
+
+                <div className="flex items-center gap-6">
+                    <Link href="/auth/login" className="text-sm font-medium text-white/70 hover:text-white transition">Fund Login</Link>
+                    <Link href="/investor/dashboard" className="px-6 py-2.5 bg-gradient-to-r from-[#7B61FF] via-[#5B8DEF] to-[#38BDF8] hover:brightness-110 text-white text-sm font-medium rounded-full transition shadow-[0_0_20px_rgba(123,97,255,0.3)] border border-white/10">
+                        Enter Portal
                     </Link>
                 </div>
             </nav>
