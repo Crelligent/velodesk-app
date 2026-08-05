@@ -60,12 +60,6 @@ const navSections = [
         ]
     },
     {
-        title: 'Partner Programs',
-        items: [
-            { href: '/dashboard/portfolio', icon: LayoutDashboard, label: 'Portfolio Overview', color: 'text-[#7B61FF]' },
-        ]
-    },
-    {
         title: 'Workspace',
         items: [
             { href: '/dashboard/integrations', icon: Plug, label: 'Integrations', color: 'text-slate-400' },
