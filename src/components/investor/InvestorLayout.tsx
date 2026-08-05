@@ -18,11 +18,12 @@ import {
     Link2,
     Copy,
     MessageSquare,
-    Network,
     Sparkles,
     X,
     Send,
-    Bot
+    Bot,
+    Command,
+    Network
 } from 'lucide-react'
 
 import CommandPalette from '../dashboard/CommandPalette'
@@ -31,7 +32,8 @@ const navSections = [
     {
         title: 'Overview',
         items: [
-            { href: '/investor/dashboard', icon: LayoutDashboard, label: 'Portfolio Overview', color: 'text-[#7B61FF]' },
+            { href: '/investor/command-center', icon: Command, label: 'Command Center', color: 'text-white' },
+            { href: '/investor/dashboard', icon: LayoutDashboard, label: 'Portfolio', color: 'text-[#7B61FF]' },
             { href: '/investor/dealflow', icon: TrendingUp, label: 'Dealflow', color: 'text-emerald-400' },
         ]
     },
