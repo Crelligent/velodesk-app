@@ -126,6 +126,13 @@ export default function AcceleratorDashboard() {
 
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="border-b border-[rgba(255,255,255,0.05)] bg-[rgba(255,255,255,0.01)]">
+                                <th className="py-3 px-6 text-[0.65rem] uppercase tracking-[0.15em] text-[#606060] font-medium w-1/3">Company</th>
+                                <th className="py-3 px-6 text-[0.65rem] uppercase tracking-[0.15em] text-[#606060] font-medium">PMF Score</th>
+                                <th className="py-3 px-6 text-[0.65rem] uppercase tracking-[0.15em] text-[#606060] font-medium text-right">Velocity</th>
+                            </tr>
+                        </thead>
                         <tbody className="divide-y divide-[rgba(255,255,255,0.02)]">
                             {portfolioCompanies.slice(0, 3).map((company) => (
                                 <tr key={company.id} className="hover:bg-[rgba(255,255,255,0.01)] transition-colors group cursor-pointer">
