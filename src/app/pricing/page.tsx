@@ -3,56 +3,134 @@
 import Link from 'next/link'
 import { useState } from 'react'
 
-const plans = [
+const usdPlans = [
     {
         id: 'free',
-        name: 'Free (Validation)',
-        priceUSD: 0,
-        priceNGN: 0,
+        name: 'Free',
+        price: 0,
+        prefix: '$',
         period: '',
         features: [
-            '1 Product',
-            '100 Data Points',
-            'Basic PMF Score',
+            '1 PMF Score per month',
+            '2 integrations',
+            'Basic report'
         ],
     },
     {
         id: 'founder_monthly',
-        name: 'Founder (Traction)',
-        priceUSD: 49,
-        priceNGN: 49000,
+        name: 'Founder',
+        price: 15,
+        prefix: '$',
         period: '/month',
-        popular: true,
         features: [
-            '1 Product',
-            '10,000 Data Points',
-            'Detailed Dimensions',
-            'Signal Feed',
+            'Up to 3 PMF Scores',
+            '5 integrations',
+            'PDF exports'
         ],
     },
     {
         id: 'team_monthly',
-        name: 'Team (Growth)',
-        priceUSD: 149,
-        priceNGN: 149000,
+        name: 'Team',
+        price: 49,
+        prefix: '$',
         period: '/month',
+        popular: true,
         features: [
-            '3 Products',
-            '100k Data Points',
-            'Custom Reports',
-            'Slack Integration',
+            'Unlimited PMF Scores',
+            'Unlimited integrations',
+            'Signal Feed (Daily Alerts)',
+            'Investor-ready Data Room'
         ],
     },
     {
         id: 'accelerator_monthly',
-        name: 'Accelerator (Portfolio)',
-        priceUSD: 499,
-        priceNGN: 499000,
+        name: 'Accelerator',
+        price: 399,
+        prefix: '$',
         period: '/month',
         features: [
-            'Up to 15 startups',
-            'Cohort Comparison',
-            'Deal-flow Analytics',
+            '15 portfolio seats',
+            'Global Portfolio Dashboard',
+            'Cross-company benchmarking'
+        ],
+    },
+    {
+        id: 'enterprise_monthly',
+        name: 'Enterprise',
+        price: 'Custom',
+        prefix: '',
+        period: '',
+        features: [
+            'Everything in Team',
+            'SSO / SAML',
+            'Custom AI models',
+            'Dedicated support'
+        ],
+    },
+]
+
+const ngnPlans = [
+    {
+        id: 'free',
+        name: 'Free',
+        price: 0,
+        prefix: '₦',
+        period: '',
+        features: [
+            '1 PMF Score per month',
+            '2 integrations',
+            'Basic report'
+        ],
+    },
+    {
+        id: 'founder_monthly',
+        name: 'Founder',
+        price: '15,000',
+        prefix: '₦',
+        period: '/month',
+        features: [
+            'Up to 3 PMF Scores',
+            '5 integrations',
+            'PDF exports'
+        ],
+    },
+    {
+        id: 'team_monthly',
+        name: 'Team',
+        price: '35,000',
+        prefix: '₦',
+        period: '/month',
+        popular: true,
+        features: [
+            'Unlimited PMF Scores',
+            'Unlimited integrations',
+            'Signal Feed (Daily Alerts)',
+            'Investor-ready Data Room'
+        ],
+    },
+    {
+        id: 'accelerator_monthly',
+        name: 'Accelerator',
+        price: '200,000',
+        prefix: '₦',
+        period: '/month',
+        features: [
+            '15 portfolio seats',
+            'Global Portfolio Dashboard',
+            'Cross-company benchmarking'
+        ],
+    },
+    {
+        id: 'enterprise_monthly',
+        name: 'Enterprise',
+        price: 'Custom',
+        prefix: '',
+        period: '',
+        features: [
+            'Everything in Team',
+            'SSO / SAML',
+            'Custom AI models',
+            'Dedicated support'
         ],
     },
 ]
@@ -60,6 +138,8 @@ const plans = [
 export default function PricingPage() {
     const [loading, setLoading] = useState<string | null>(null)
     const [usePaystack, setUsePaystack] = useState(false)
+    
+    const plans = usePaystack ? ngnPlans : usdPlans
 
     const handleCheckout = async (planId: string) => {
         if (planId === 'free') {
@@ -143,7 +223,7 @@ export default function PricingPage() {
                 </div>
 
                 {/* Plans */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
                     {plans.map((plan) => (
                         <div
                             key={plan.id}
@@ -163,14 +243,11 @@ export default function PricingPage() {
                             </div>
 
                             <div className="text-4xl font-extralight mb-2">
-                                {usePaystack ? (
-                                    <>
-                                        ₦{plan.priceNGN.toLocaleString()}
-                                        <span className="text-base text-gray-500">{plan.period}</span>
-                                    </>
+                                {plan.price === 'Custom' ? (
+                                    plan.price
                                 ) : (
                                     <>
-                                        ${plan.priceUSD.toLocaleString()}
+                                        {plan.prefix}{plan.price}
                                         <span className="text-base text-gray-500">{plan.period}</span>
                                     </>
                                 )}
