@@ -33,6 +33,7 @@ const navSections = [
         items: [
             { href: '/investor/dashboard', icon: LayoutDashboard, label: 'Portfolio Overview', color: 'text-[#7B61FF]' },
             { href: '/investor/dealflow', icon: TrendingUp, label: 'Dealflow', color: 'text-emerald-400' },
+            { href: '#ask-ai', icon: Bot, label: 'Ask Velodesk AI', color: 'text-purple-400', isAction: true },
         ]
     },
     {
@@ -147,6 +148,21 @@ export default function InvestorLayout({ children, user }: InvestorLayoutProps) 
                                     {section.items.map((item) => {
                                         const IconComponent = item.icon
                                         const isActive = pathname === item.href
+
+                                        if (item.isAction) {
+                                            return (
+                                                <li key={item.label}>
+                                                    <button
+                                                        onClick={() => setIsAskAIOpen(true)}
+                                                        className={`w-full flex items-center gap-3 px-4 py-2 text-[0.8rem] tracking-wide font-light group transition text-[#606060] hover:text-white`}
+                                                    >
+                                                        <IconComponent className={`w-4 h-4 stroke-[1.5] transition ${item.color} opacity-50 group-hover:opacity-100`} />
+                                                        <span>{item.label}</span>
+                                                    </button>
+                                                </li>
+                                            )
+                                        }
+
                                         return (
                                             <li key={item.href}>
                                                 <Link
