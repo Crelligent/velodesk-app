@@ -4,7 +4,7 @@ import { Activity, Zap, Server, Network, Terminal, Shield, ArrowUpRight, ArrowDo
 
 export default function CommandCenterPage() {
     return (
-        <div className="animate-fade-in max-w-full h-[calc(100vh-140px)] flex flex-col">
+        <div className="animate-fade-in max-w-full flex flex-col min-h-0 pb-8">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
                 <div>
                     <div className="text-[0.65rem] text-[#7B61FF] uppercase tracking-[0.3em] mb-4 flex items-center gap-2">
@@ -61,7 +61,7 @@ export default function CommandCenterPage() {
             </div>
 
             {/* Main War Room Body */}
-            <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-0">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[450px]">
                 
                 {/* Left: Global Nervous System Map */}
                 <div className="lg:col-span-2 bg-black border border-[rgba(255,255,255,0.05)] rounded-xl relative overflow-hidden flex items-center justify-center group">
@@ -86,7 +86,7 @@ export default function CommandCenterPage() {
                             <div className="absolute -bottom-8 -left-8 w-8 h-8 rounded-full border border-amber-500/30 flex items-center justify-center text-[8px] text-amber-400 bg-black shadow-[0_0_15px_rgba(245,158,11,0.2)]">E1</div>
                             <div className="absolute -bottom-12 right-4 w-8 h-8 rounded-full border border-emerald-500/30 flex items-center justify-center text-[8px] text-emerald-400 bg-black shadow-[0_0_15px_rgba(16,185,129,0.2)]">H1</div>
                         </div>
-                        <div className="mt-8 text-center">
+                        <div className="mt-16 text-center relative z-20">
                             <h3 className="text-white/90 font-outfit font-medium text-lg tracking-wide">Global Data Sync Active</h3>
                             <p className="text-[#606060] text-xs mt-1">14 PortCos streaming securely to Velodesk Vault</p>
                         </div>
