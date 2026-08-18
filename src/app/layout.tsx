@@ -85,6 +85,9 @@ export const metadata: Metadata = {
     },
   },
   manifest: "/site.webmanifest",
+  icons: {
+    icon: "/icon.png",
+  },
 };
 
 // JSON-LD structured data
