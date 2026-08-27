@@ -24,7 +24,7 @@ export default function InvestorsLandingPage() {
                 </div>
 
                 <div className="flex items-center gap-6">
-                    <Link href="/auth/login" className="text-sm font-medium text-white/70 hover:text-white transition">Fund Login</Link>
+                    <Link href="/login" className="text-sm font-medium text-white/70 hover:text-white transition">Fund Login</Link>
                     <Link href="/investor/dashboard" className="px-6 py-2.5 bg-gradient-to-r from-[#7B61FF] via-[#5B8DEF] to-[#38BDF8] hover:brightness-110 text-white text-sm font-medium rounded-full transition shadow-[0_0_20px_rgba(123,97,255,0.3)] border border-white/10">
                         Enter Portal
                     </Link>

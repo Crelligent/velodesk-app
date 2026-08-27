@@ -109,7 +109,7 @@ export default function ScoreDimensions() {
               Stop spending 40 hours a month pasting charts into PowerPoint. With one click, VeloDesk exports your certified PMF Score and underlying telemetry into a stunning, board-ready pitch deck.
             </p>
 
-            <Link href="/auth/register" className="inline-flex items-center gap-3 bg-gradient-to-r from-[#7B61FF] to-[#38BDF8] bg-clip-text text-transparent font-medium hover:brightness-125 transition group">
+            <Link href="/signup" className="inline-flex items-center gap-3 bg-gradient-to-r from-[#7B61FF] to-[#38BDF8] bg-clip-text text-transparent font-medium hover:brightness-125 transition group">
               See a sample Board Report 
               <ArrowRight size={18} className="text-[#7B61FF] transform group-hover:translate-x-1 transition" />
             </Link>

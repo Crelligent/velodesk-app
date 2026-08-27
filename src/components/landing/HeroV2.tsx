@@ -116,8 +116,8 @@ export default function HeroV2() {
         </div>
 
         <div className="flex items-center gap-4 relative z-10">
-          <Link href="/auth/login" className="text-sm font-medium text-white hover:text-[#7B61FF] transition">Sign In</Link>
-          <Link href="/auth/register" className="px-5 py-2.5 bg-gradient-to-r from-[#7B61FF] via-[#5B8DEF] to-[#38BDF8] hover:brightness-110 text-white text-sm font-medium rounded-full transition border border-white/10">Get Early Access</Link>
+          <Link href="/login" className="text-sm font-medium text-white hover:text-[#7B61FF] transition">Sign In</Link>
+          <Link href="/signup" className="px-5 py-2.5 bg-gradient-to-r from-[#7B61FF] via-[#5B8DEF] to-[#38BDF8] hover:brightness-110 text-white text-sm font-medium rounded-full transition border border-white/10">Get Early Access</Link>
         </div>
       </nav>
 
@@ -138,7 +138,7 @@ export default function HeroV2() {
 
         {/* Call to Action */}
         <div className="animate-fade-up delay-300 flex flex-col sm:flex-row items-center gap-4 mb-20">
-          <Link href="/auth/register" className="px-8 py-4 bg-gradient-to-r from-[#7B61FF] via-[#5B8DEF] to-[#38BDF8] text-white text-lg font-medium transition-all duration-300 rounded-full transform hover:-translate-y-1 hover:brightness-110 border border-white/10">
+          <Link href="/signup" className="px-8 py-4 bg-gradient-to-r from-[#7B61FF] via-[#5B8DEF] to-[#38BDF8] text-white text-lg font-medium transition-all duration-300 rounded-full transform hover:-translate-y-1 hover:brightness-110 border border-white/10">
             Calculate My Score
           </Link>
           <Link href="#demo" className="px-8 py-4 bg-transparent text-white/70 hover:text-white text-lg font-medium transition rounded-full flex items-center gap-2">
