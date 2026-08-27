@@ -7,7 +7,7 @@ import {
     LayoutDashboard,
     Settings,
     LogOut,
-    ChevronDown,
+    ChevronDown, ChevronRight,
     Search,
     Users,
     Building2,
