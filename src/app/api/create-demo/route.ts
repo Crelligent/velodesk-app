@@ -8,24 +8,55 @@ export async function GET() {
         
         const supabase = createClient(supabaseUrl, serviceRoleKey)
 
-        const { data, error } = await supabase.auth.admin.createUser({
+        // 1. Create standard US Demo
+        await supabase.auth.admin.createUser({
             email: 'demo@velodesk.com',
             password: 'presentation2026',
             email_confirm: true,
             user_metadata: {
                 full_name: 'Demo Founder',
-                company_name: 'Stark Industries',
+                company_name: 'Acme Industries',
+                region: 'US'
             }
         })
 
-        if (error) {
-            if (error.message.includes('already registered')) {
-                return NextResponse.json({ success: true, message: 'Demo account already exists!' })
+        // 2. Create NG Demo
+        await supabase.auth.admin.createUser({
+            email: 'demo-ng@velodesk.com',
+            password: 'presentation2026',
+            email_confirm: true,
+            user_metadata: {
+                full_name: 'Demo Founder NG',
+                company_name: 'Dangote Industries',
+                region: 'NG'
             }
-            return NextResponse.json({ error: error.message }, { status: 500 })
-        }
+        })
 
-        return NextResponse.json({ success: true, message: 'Demo account created successfully! You can now log in.' })
+        // 3. Create US Investor
+        await supabase.auth.admin.createUser({
+            email: 'investor@velodesk.com',
+            password: 'presentation2026',
+            email_confirm: true,
+            user_metadata: {
+                full_name: 'Demo Investor',
+                company_name: 'Sequoia Capital',
+                region: 'US'
+            }
+        })
+
+        // 4. Create NG Investor
+        await supabase.auth.admin.createUser({
+            email: 'investor-ng@velodesk.com',
+            password: 'presentation2026',
+            email_confirm: true,
+            user_metadata: {
+                full_name: 'Demo Investor NG',
+                company_name: 'Ventures Platform',
+                region: 'NG'
+            }
+        })
+
+        return NextResponse.json({ success: true, message: 'All Demo and Investor accounts generated successfully!' })
     } catch (err: any) {
         return NextResponse.json({ error: err.message }, { status: 500 })
     }

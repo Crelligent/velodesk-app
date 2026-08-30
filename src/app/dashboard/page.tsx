@@ -1,8 +1,11 @@
-import { createClient } from '@/lib/supabase/server'
+﻿import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { Activity, TrendingUp, Users, DollarSign, ArrowUpRight, ArrowDownRight, Zap, CreditCard, BarChart2 } from 'lucide-react'
 
 export default async function DashboardPage() {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const isNG = user?.email === 'demo-ng@velodesk.com' || user?.user_metadata?.region === 'NG'
     // MOCK DATA FOR FEED
     const latestScore = {
         score: 84,
@@ -32,7 +35,7 @@ export default async function DashboardPage() {
             icon: CreditCard,
             iconColor: 'text-indigo-400',
             title: 'Unexpected MRR expansion',
-            description: 'Acme Corp upgraded to Enterprise, boosting MRR by $2,400. Overall expansion revenue up 12% this week.',
+            description: ' upgraded to Enterprise, boosting MRR by ${isNG ? "₦2.4M" : "$2,400"}. Overall expansion revenue up 12% this week.',
             metadata: 'Stripe webhook',
             time: '45 min ago'
         },
@@ -52,7 +55,7 @@ export default async function DashboardPage() {
             icon: Zap,
             iconColor: 'text-[#7B61FF]',
             title: 'Reallocate Ad Spend for better CAC',
-            description: 'Your Blended CAC has dropped 12% via LinkedIn campaigns over the last 14 days, while Meta CAC is rising. Shift $5k budget to LinkedIn to instantly boost PMF Score by +2.',
+            description: 'Your Blended CAC has dropped 12% via LinkedIn campaigns over the last 14 days, while Meta CAC is rising. Shift ${isNG ? "₦5M" : "$5k"} budget to LinkedIn to instantly boost PMF Score by +2.',
             metadata: 'VeloDesk AI recommendation',
             time: '5 hours ago'
         }
@@ -99,7 +102,7 @@ export default async function DashboardPage() {
                             <ArrowUpRight size={12} /> 12.4%
                         </div>
                     </div>
-                    <div className="text-2xl font-light tracking-tight tabular-nums text-white/90">$142,500</div>
+                    <div className="text-2xl font-light tracking-tight tabular-nums text-white/90">{isNG ? "₦142.5M" : "$142,500"}</div>
                 </div>
 
                 {/* NRR Card */}
@@ -127,7 +130,7 @@ export default async function DashboardPage() {
                             <ArrowDownRight size={12} /> 8.2%
                         </div>
                     </div>
-                    <div className="text-2xl font-light tracking-tight tabular-nums text-white/90">$845</div>
+                    <div className="text-2xl font-light tracking-tight tabular-nums text-white/90">{isNG ? "₦84,500" : "$845"}</div>
                 </div>
 
                 {/* Users Card */}
@@ -182,7 +185,7 @@ export default async function DashboardPage() {
                                     </p>
                                     <div className="flex items-center gap-2 text-[10px] text-white/40 font-medium">
                                         <span>{signal.metadata}</span>
-                                        <span>•</span>
+                                        <span>â€¢</span>
                                         <span>{signal.time}</span>
                                     </div>
                                 </div>

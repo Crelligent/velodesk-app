@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -29,7 +29,7 @@ export default function LoginPage() {
             setError(error.message)
             setLoading(false)
         } else {
-            router.push('/dashboard')
+            if (email.includes('investor')) { router.push('/investor/dashboard') } else if (email.includes('demo')) { router.push('/onboarding') } else { router.push('/dashboard') }
         }
     }
 
@@ -95,7 +95,7 @@ export default function LoginPage() {
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     className="w-full px-4 py-3 bg-white/[0.02] border border-white/10 rounded-xl focus:outline-none focus:border-[#7B61FF] text-white transition-colors tracking-widest"
-                                    placeholder="••••••••"
+                                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                                     required
                                 />
                             </div>
@@ -141,7 +141,7 @@ export default function LoginPage() {
                 </div>
                 
                 <div className="text-xs text-gray-600 font-mono flex items-center justify-between">
-                    <span>© 2026 Velodesk</span>
+                    <span>Â© 2026 Velodesk</span>
                     <a href="mailto:support@velodesk.com" className="hover:text-gray-400">support@velodesk.com</a>
                 </div>
             </div>
@@ -165,7 +165,7 @@ export default function LoginPage() {
                             </div>
                             <div>
                                 <h3 className="text-white font-medium text-lg">Real-time Telemetry</h3>
-                                <p className="text-gray-400 text-sm">Monitor your PMF Score™ as it evolves.</p>
+                                <p className="text-gray-400 text-sm">Monitor your PMF Scoreâ„¢ as it evolves.</p>
                             </div>
                         </div>
 
