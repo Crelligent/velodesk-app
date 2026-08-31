@@ -104,55 +104,60 @@ export default function DashboardClientLayout({ children, user }: DashboardClien
                     <span className="font-outfit font-light tracking-widest text-sm text-white">VELODESK</span>
                 </div>
 
-                {/* Center: Global Search Trigger */}
-                <div className="flex-1 flex items-center justify-center hidden md:flex">
-                    <button 
-                        onClick={() => window.dispatchEvent(new Event('open-command-palette'))}
-                        className="flex items-center justify-between w-full max-w-md px-3 py-1.5 bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 rounded-md transition-colors text-white/40 group"
-                    >
-                        <div className="flex items-center gap-2">
-                            <Search className="w-3.5 h-3.5" />
-                            <span className="text-[13px] font-light">Search or type a command...</span>
+                {/* Center & Right Actions - Only visible on main dashboard */}
+                {pathname === '/dashboard' && (
+                    <>
+                        {/* Center: Global Search Trigger */}
+                        <div className="flex-1 flex items-center justify-center hidden md:flex">
+                            <button 
+                                onClick={() => window.dispatchEvent(new Event('open-command-palette'))}
+                                className="flex items-center justify-between w-full max-w-md px-3 py-1.5 bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 rounded-md transition-colors text-white/40 group"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <Search className="w-3.5 h-3.5" />
+                                    <span className="text-[13px] font-light">Search or type a command...</span>
+                                </div>
+                                <div className="flex items-center gap-1 font-mono text-[10px] tracking-widest uppercase opacity-60 group-hover:opacity-100 transition-opacity">
+                                    <span className="bg-white/10 px-1 rounded">⌘</span>
+                                    <span className="bg-white/10 px-1 rounded">K</span>
+                                </div>
+                            </button>
                         </div>
-                        <div className="flex items-center gap-1 font-mono text-[10px] tracking-widest uppercase opacity-60 group-hover:opacity-100 transition-opacity">
-                            <span className="bg-white/10 px-1 rounded">⌘</span>
-                            <span className="bg-white/10 px-1 rounded">K</span>
+
+                        {/* Right Actions & Profile */}
+                        <div className="flex items-center justify-end gap-4 flex-shrink-0">
+                            <button className="px-4 py-2 bg-white/5 border border-white/10 text-white text-xs font-medium hover:bg-white/10 transition rounded flex items-center gap-2 whitespace-nowrap">
+                                <Activity size={14} className="text-[#7B61FF]" /> Live Sync
+                            </button>
+                            <button
+                                onClick={() => setIsInvestorModeOpen(true)}
+                                className="px-4 py-2 bg-[#22c55e]/10 border border-[#22c55e]/30 text-[#22c55e] text-xs font-medium hover:bg-[#22c55e]/20 transition rounded whitespace-nowrap flex items-center gap-2"
+                            >
+                                <PlaySquare size={14} /> Fundraising Deck
+                            </button>
+                            <Link
+                                href="/dashboard/pmf-report"
+                                className="px-4 py-2 bg-[#7B61FF] text-white text-xs font-medium hover:bg-[#8A73FF] transition rounded whitespace-nowrap"
+                            >
+                                Export Report
+                            </Link>
+
+                            {/* Linear-Style Actions Header */}
+                            <div className="flex items-center gap-1 text-white/40 border-l border-white/10 pl-4 ml-2">
+                                <span className="text-[12px] font-medium text-white/60 mr-2 font-mono">SIG-1042</span>
+                                <button className="p-1.5 hover:bg-white/5 hover:text-white rounded transition-colors" title="Copy Link">
+                                    <Link2 className="w-4 h-4" />
+                                </button>
+                                <button className="p-1.5 hover:bg-white/5 hover:text-white rounded transition-colors" title="Copy ID">
+                                    <Copy className="w-4 h-4" />
+                                </button>
+                                <button className="p-1.5 hover:bg-white/5 hover:text-[#7B61FF] rounded transition-colors" title="Send to Slack">
+                                    <MessageSquare className="w-4 h-4" />
+                                </button>
+                            </div>
                         </div>
-                    </button>
-                </div>
-
-                {/* Right Actions & Profile */}
-                <div className="flex items-center justify-end gap-4 flex-shrink-0">
-                    <button className="px-4 py-2 bg-white/5 border border-white/10 text-white text-xs font-medium hover:bg-white/10 transition rounded flex items-center gap-2 whitespace-nowrap">
-                        <Activity size={14} className="text-[#7B61FF]" /> Live Sync
-                    </button>
-                    <button
-                        onClick={() => setIsInvestorModeOpen(true)}
-                        className="px-4 py-2 bg-[#22c55e]/10 border border-[#22c55e]/30 text-[#22c55e] text-xs font-medium hover:bg-[#22c55e]/20 transition rounded whitespace-nowrap flex items-center gap-2"
-                    >
-                        <PlaySquare size={14} /> Fundraising Deck
-                    </button>
-                    <Link
-                        href="/dashboard/pmf-report"
-                        className="px-4 py-2 bg-[#7B61FF] text-white text-xs font-medium hover:bg-[#8A73FF] transition rounded whitespace-nowrap"
-                    >
-                        Export Report
-                    </Link>
-
-                    {/* Linear-Style Actions Header */}
-                    <div className="flex items-center gap-1 text-white/40 border-l border-white/10 pl-4 ml-2">
-                        <span className="text-[12px] font-medium text-white/60 mr-2 font-mono">SIG-1042</span>
-                        <button className="p-1.5 hover:bg-white/5 hover:text-white rounded transition-colors" title="Copy Link">
-                            <Link2 className="w-4 h-4" />
-                        </button>
-                        <button className="p-1.5 hover:bg-white/5 hover:text-white rounded transition-colors" title="Copy ID">
-                            <Copy className="w-4 h-4" />
-                        </button>
-                        <button className="p-1.5 hover:bg-white/5 hover:text-[#7B61FF] rounded transition-colors" title="Send to Slack">
-                            <MessageSquare className="w-4 h-4" />
-                        </button>
-                    </div>
-                </div>
+                    </>
+                )}
             </header>
 
             <div className="flex pt-16">
