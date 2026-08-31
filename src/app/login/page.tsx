@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { signInUser } from '@/app/actions'
 import { motion } from 'framer-motion'
 import { ArrowRight, Activity, TrendingUp, Shield } from 'lucide-react'
 
@@ -20,10 +21,7 @@ export default function LoginPage() {
         setError(null)
         setLoading(true)
 
-        const { error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-        })
+        const { error } = await signInUser(email, password)
 
         if (error) {
             setError(error.message)

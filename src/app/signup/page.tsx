@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { signUpUser } from '@/app/actions'
 import { FormEngine, FormSchema } from '@/components/forms/FormEngine'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
@@ -66,17 +66,7 @@ export default function SignupPage() {
         const { email, password, fullName, companyName } = answers
         setEmail(email)
 
-        const { data, error } = await supabase.auth.signUp({
-            email,
-            password,
-            options: {
-                data: {
-                    full_name: fullName,
-                    company_name: companyName,
-                },
-                emailRedirectTo: `${window.location.origin}/auth/callback?next=/onboarding`,
-            },
-        })
+        const { data, error } = await signUpUser(email, password, fullName, companyName, window.location.origin)
 
         if (error) {
             throw new Error(error.message)
@@ -115,7 +105,7 @@ export default function SignupPage() {
                         Click the link inside to verify your identity and access your dashboard.
                     </p>
                     <Link href="/login" className="text-sm text-[#7B61FF] hover:text-white transition">
-                        ← Back to Sign In
+                        â† Back to Sign In
                     </Link>
                 </div>
             </div>
@@ -153,7 +143,7 @@ export default function SignupPage() {
                 </div>
                 
                 <div className="text-xs text-gray-600 font-mono flex items-center justify-between mt-10 shrink-0">
-                    <span>© 2026 Velodesk</span>
+                    <span>Â© 2026 Velodesk</span>
                     <a href="mailto:support@velodesk.com" className="hover:text-gray-400">support@velodesk.com</a>
                 </div>
             </div>
