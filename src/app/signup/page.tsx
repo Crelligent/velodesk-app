@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -71,16 +71,6 @@ export default function SignupPage() {
         if (error) {
             throw new Error(error)
         }
-
-        await fetch('/api/forms/submit', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                form_id: signupSchema.id,
-                session_id: sessionId,
-                answers: answers
-            })
-        }).catch(() => console.log('Analytics tracking blocked/failed, proceeding.'))
 
         if (data?.user && data.session) {
             router.push('/onboarding')

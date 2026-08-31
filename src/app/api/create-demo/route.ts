@@ -1,10 +1,10 @@
-import { NextResponse } from 'next/server'
+﻿import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export async function GET() {
     try {
-        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://trrklkqogomnqvvofhxg.supabase.co"
-        const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRycmtsa3FvZ29tbnF2dm9maHhnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NjQ1MTk3NywiZXhwIjoyMDgyMDI3OTc3fQ.8oXwWO28vFjeBRQ4jD692fVtHXBwTo1tcEiG0p-xQW4"
+        const supabaseUrl = (process.env.NEXT_PUBLIC_SUPABASE_URL?.trim() || (() => { throw new Error('Missing SUPABASE_URL') })())
+        const serviceRoleKey = (process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() || (() => { throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY') })())
         
         const supabase = createClient(supabaseUrl, serviceRoleKey)
 
