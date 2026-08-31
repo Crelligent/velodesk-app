@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
@@ -56,7 +56,7 @@ export default function SignupPage() {
     const [showConfirmation, setShowConfirmation] = useState(false)
     const [email, setEmail] = useState('')
     const router = useRouter()
-    const supabase = createClient()
+    // removed
 
     useEffect(() => {
         setSessionId(Math.random().toString(36).substring(2, 15))
@@ -69,7 +69,7 @@ export default function SignupPage() {
         const { data, error } = await signUpUser(email, password, fullName, companyName, window.location.origin)
 
         if (error) {
-            throw new Error(error.message)
+            throw new Error(error)
         }
 
         await fetch('/api/forms/submit', {
@@ -82,9 +82,9 @@ export default function SignupPage() {
             })
         }).catch(() => console.log('Analytics tracking blocked/failed, proceeding.'))
 
-        if (data.user && data.session) {
+        if (data?.user && data.session) {
             router.push('/onboarding')
-        } else if (data.user && !data.session) {
+        } else if (data?.user && !data.session) {
             setShowConfirmation(true)
         } else {
             router.push('/onboarding')
@@ -105,7 +105,7 @@ export default function SignupPage() {
                         Click the link inside to verify your identity and access your dashboard.
                     </p>
                     <Link href="/login" className="text-sm text-[#7B61FF] hover:text-white transition">
-                        â† Back to Sign In
+                        Ã¢â€ Â Back to Sign In
                     </Link>
                 </div>
             </div>
@@ -143,7 +143,7 @@ export default function SignupPage() {
                 </div>
                 
                 <div className="text-xs text-gray-600 font-mono flex items-center justify-between mt-10 shrink-0">
-                    <span>Â© 2026 Velodesk</span>
+                    <span>Ã‚Â© 2026 Velodesk</span>
                     <a href="mailto:support@velodesk.com" className="hover:text-gray-400">support@velodesk.com</a>
                 </div>
             </div>

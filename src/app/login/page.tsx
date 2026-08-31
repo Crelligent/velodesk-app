@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import Link from 'next/link'
@@ -24,7 +24,7 @@ export default function LoginPage() {
         const { error } = await signInUser(email, password)
 
         if (error) {
-            setError(error.message)
+            setError(error)
             setLoading(false)
         } else {
             if (email.includes('investor')) { router.push('/investor/dashboard') } else if (email.includes('demo')) { router.push('/onboarding') } else { router.push('/dashboard') }
