@@ -1,11 +1,11 @@
-import React from 'react'
+﻿import React from 'react'
 import { Activity, MapPin } from 'lucide-react'
 
 export default function PulsePage() {
     return (
-        <div className="h-[calc(100vh-80px)] -mt-8 -mx-8 relative overflow-hidden bg-[#050505]">
+        <div className="min-h-[calc(100vh-80px)] -mt-8 -mx-8 relative overflow-y-auto overflow-x-hidden bg-[#050505] flex flex-col justify-between p-8">
             {/* Overlay Header */}
-            <div className="absolute top-8 left-8 z-10">
+            <div className="relative z-20">
                 <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FF6B35]/10 text-[#FF6B35] text-xs font-medium tracking-widest uppercase mb-4">
                     <Activity size={14} className="animate-pulse" /> Live Event Stream
                 </div>
@@ -18,7 +18,7 @@ export default function PulsePage() {
             </div>
 
             {/* Simulated Live Feed */}
-            <div className="absolute bottom-8 left-8 z-10 w-80 space-y-3">
+            <div className="relative z-20 w-80 space-y-3 mt-8">
                 <div className="text-xs uppercase tracking-widest text-gray-500 mb-4">Live Signals</div>
                 
                 <div className="p-4 bg-white/[0.05] border border-white/10 rounded-lg backdrop-blur-md animate-in slide-in-from-left duration-500">
@@ -32,7 +32,7 @@ export default function PulsePage() {
                     </div>
                 </div>
 
-                <div className="p-4 bg-white/[0.05] border border-white/10 rounded-lg backdrop-blur-md animate-in slide-in-from-left duration-500 delay-150 relative overflow-hidden">
+                <div className="p-4 bg-white/[0.05] border border-white/10 rounded-lg backdrop-blur-md animate-in slide-in-from-left duration-500 delay-150 relative overflow-y-auto overflow-x-hidden">
                     <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF6B35]" />
                     <div className="flex items-center justify-between mb-2">
                         <span className="text-xs text-[#FF6B35] font-mono">Core Action</span>
