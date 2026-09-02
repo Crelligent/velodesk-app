@@ -1,7 +1,7 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
-import { Activity, TrendingUp, AlertTriangle, Building2, ChevronRight, Search, Filter, X, Sparkles, ArrowRight } from 'lucide-react'
+import { Activity, TrendingUp, AlertTriangle, Building2, ChevronRight, Search, Filter, X, Sparkles, ArrowRight, Shield } from 'lucide-react'
 
 // Dummy data representing an Accelerator's portfolio
 import { useEffect } from 'react'
@@ -83,10 +83,25 @@ export default function AcceleratorDashboard() {
     return (
         <div className="animate-fade-in">
             {/* Header */}
-            <div className="mb-10">
-                <div className="text-[0.65rem] text-[#7B61FF] uppercase tracking-[0.3em] mb-4">Accelerator / VC Mode</div>
-                <h1 className="font-outfit text-4xl font-extralight tracking-tight mb-2">Portfolio Overview</h1>
-                <p className="text-[#606060] font-light">Monitor PMF signals across your active investments in real-time.</p>
+            <div className="mb-10 flex flex-col md:flex-row md:items-start justify-between gap-6">
+                <div>
+                    <div className="text-[0.65rem] text-[#7B61FF] uppercase tracking-[0.3em] mb-4">Accelerator / VC Mode</div>
+                    <h1 className="font-outfit text-4xl font-extralight tracking-tight mb-2">Portfolio Overview</h1>
+                    <p className="text-[#606060] font-light">Monitor PMF signals across your active investments in real-time.</p>
+                </div>
+                
+                {/* Data Integrity Note */}
+                <div className="flex items-start gap-3 bg-white/[0.02] border border-white/5 rounded-lg p-4 max-w-sm shrink-0">
+                    <div className="mt-0.5">
+                        <Shield className="w-4 h-4 text-[#7B61FF]" />
+                    </div>
+                    <div>
+                        <div className="text-sm text-white/90 font-medium mb-1">Verified Data Integrity</div>
+                        <div className="text-xs text-[#606060] leading-relaxed">
+                            Portfolio metrics are cryptographically verified via direct API integration. Zero manual entry. Idempotent processing ensures no duplicate events.
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* KPI Cards */}

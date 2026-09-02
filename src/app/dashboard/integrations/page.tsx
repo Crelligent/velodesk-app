@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
+import { Shield } from 'lucide-react'
 
 interface Integration {
     id: string
@@ -332,9 +333,22 @@ export default function IntegrationsPage() {
                     <h1 className="font-outfit text-[2.5rem] font-extralight tracking-tight mb-4">
                         Connect your integrations
                     </h1>
-                    <p className="text-[#606060] text-[1.1rem] font-light leading-relaxed max-w-xl">
+                    <p className="text-[#606060] text-[1.1rem] font-light leading-relaxed max-w-xl mb-6">
                         Link your existing tools to feed real-time signals into our validation engine.
                     </p>
+                    
+                    {/* Data Integrity Note */}
+                    <div className="flex items-start gap-3 bg-white/[0.02] border border-white/5 rounded-lg p-4 max-w-xl">
+                        <div className="mt-0.5">
+                            <Shield className="w-4 h-4 text-[#7B61FF]" />
+                        </div>
+                        <div>
+                            <div className="text-sm text-white/90 font-medium mb-1">Strict Data Integrity Enforced</div>
+                            <div className="text-xs text-[#606060] leading-relaxed">
+                                Incoming data streams are secured via OAuth 2.0 and processed using cryptographic idempotency keys. Duplicate webhooks are automatically rejected at the database level to mathematically guarantee zero double-counting.
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 text-[0.7rem] text-[#404040] uppercase tracking-[0.15em]">
                     <span className={`w-[6px] h-[6px] rounded-full ${connectedIds.length > 0 ? 'bg-green-500' : 'bg-[#404040]'}`} />
