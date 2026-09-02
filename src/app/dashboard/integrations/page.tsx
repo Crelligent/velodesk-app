@@ -345,7 +345,7 @@ export default function IntegrationsPage() {
                         <div>
                             <div className="text-sm text-white/90 font-medium mb-1">Strict Data Integrity Enforced</div>
                             <div className="text-xs text-[#606060] leading-relaxed">
-                                Incoming data streams are secured via OAuth 2.0 and processed using cryptographic idempotency keys. Duplicate webhooks are automatically rejected at the database level to mathematically guarantee zero double-counting.
+                                Incoming data streams are secured via OAuth 2.0 and processed using cryptographic idempotency keys. Duplicate webhooks are automatically rejected at the database level to mathematically guarantee zero double-counting. <strong>VeloDesk guarantees that your data is strictly used for calculating your PMF score and is never shared, trained on, or monetized.</strong>
                             </div>
                         </div>
                     </div>

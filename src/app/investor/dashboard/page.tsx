@@ -98,7 +98,7 @@ export default function AcceleratorDashboard() {
                     <div>
                         <div className="text-sm text-white/90 font-medium mb-1">Verified Data Integrity</div>
                         <div className="text-xs text-[#606060] leading-relaxed">
-                            Portfolio metrics are cryptographically verified via direct API integration. Zero manual entry. Idempotent processing ensures no duplicate events.
+                            Portfolio metrics are cryptographically verified via direct API integration. Zero manual entry. Idempotent processing ensures no duplicate events. <strong>VeloDesk guarantees that all portfolio data is strictly used for PMF calculation and is never shared, trained on, or monetized.</strong>
                         </div>
                     </div>
                 </div>
