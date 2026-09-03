@@ -301,6 +301,13 @@ export default function IntegrationsPage() {
                             />
                         )}
 
+                        <div className="bg-[#050505] border border-[rgba(255,255,255,0.05)] rounded p-4 mb-6 text-[11px] text-[#808080] leading-relaxed">
+                            <span className="text-white/90 font-medium block mb-1">You're in control.</span>
+                            VeloDesk always respects your data preferences, and is limited to the specific read-only permissions you've explicitly granted during integration.<br/><br/>
+                            <span className="text-white/90 font-medium block mb-1">Data shared during integration.</span>
+                            By connecting {apiKeyModal.name}, you allow VeloDesk to securely access: (1) basic account information, and (2) a real-time stream of product and revenue events necessary to calculate your PMF Score. Our policies require that VeloDesk only reads relevant content required to generate your signals. We guarantee that your data is strictly used for calculating your PMF score and is never shared, trained on, or monetized. This data will be used as described in the Crelligent <Link href="#" className="text-white/70 hover:text-white underline decoration-white/30">Terms of Use</Link> and <Link href="#" className="text-white/70 hover:text-white underline decoration-white/30">Privacy Notice</Link>.
+                        </div>
+
                         <div className="flex gap-4">
                             <button
                                 onClick={() => setApiKeyModal(null)}
