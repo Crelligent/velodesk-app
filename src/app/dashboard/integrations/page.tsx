@@ -40,6 +40,12 @@ const integrations: Integration[] = [
     { id: 'pipedrive', name: 'Pipedrive', description: 'Sales pipeline management', category: 'crm', icon: '🎯', logo: '/pipedrive.svg', authType: 'api_key' },
     { id: 'close', name: 'Close', description: 'Sales engagement CRM', category: 'crm', icon: '📞', logo: '/close.svg', authType: 'api_key' },
 
+
+    // Finance & Spend
+    { id: 'quickbooks', name: 'QuickBooks', description: 'Cloud accounting and bookkeeping', category: 'finance', icon: 'Q', authType: 'oauth', recommended: true },
+    { id: 'xero', name: 'Xero', description: 'Online accounting software', category: 'finance', icon: 'X', authType: 'oauth' },
+    { id: 'ramp', name: 'Ramp', description: 'Corporate cards and spend management', category: 'finance', icon: 'R', authType: 'api_key' },
+
     // Support & Feedback
     { id: 'intercom', name: 'Intercom', description: 'Customer messaging platform', category: 'support', icon: '💬', logo: '/intercom-2.svg', authType: 'oauth', recommended: true },
     { id: 'zendesk', name: 'Zendesk', description: 'Customer service and support', category: 'support', icon: '🎧', logo: '/zendesk-1.svg', authType: 'oauth' },
@@ -53,6 +59,7 @@ const integrations: Integration[] = [
 const categories = [
     { id: 'analytics', label: 'Analytics & Product Intelligence' },
     { id: 'payments', label: 'Payments & Revenue' },
+    { id: 'finance', label: 'Accounting & Spend Management' },
     { id: 'crm', label: 'CRM & Sales' },
     { id: 'support', label: 'Support & Feedback' },
     { id: 'sentiment', label: 'Customer Sentiment & Reviews' },
