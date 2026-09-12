@@ -8,7 +8,7 @@ export const STRIPE_PRICES = {
     enterprise_monthly: 'price_xxx',
     enterprise_yearly: 'price_xxx',
     founder_monthly: 'price_founder_xxx',
-    team_monthly: 'price_team_xxx',
+    startup_monthly: 'price_startup_xxx',
     accelerator_monthly: 'price_accel_xxx'
 }
 

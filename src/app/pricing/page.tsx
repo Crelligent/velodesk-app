@@ -17,8 +17,8 @@ const usdPlans = [
         ],
     },
     {
-        id: 'team_monthly',
-        name: 'Team',
+        id: 'startup_monthly',
+        name: 'Startup',
         price: 49,
         prefix: '$',
         period: '/month',
@@ -30,18 +30,7 @@ const usdPlans = [
             'Investor-ready Data Room'
         ],
     },
-    {
-        id: 'accelerator_monthly',
-        name: 'Accelerator',
-        price: 399,
-        prefix: '$',
-        period: '/month',
-        features: [
-            '15 portfolio seats',
-            'Global Portfolio Dashboard',
-            'Cross-company benchmarking'
-        ],
-    },
+    
     {
         id: 'enterprise_monthly',
         name: 'Enterprise',
@@ -49,7 +38,7 @@ const usdPlans = [
         prefix: '',
         period: '',
         features: [
-            'Everything in Team',
+            'Everything in Startup',
             'SSO / SAML',
             'Custom AI models',
             'Dedicated support'
@@ -71,8 +60,8 @@ const ngnPlans = [
         ],
     },
     {
-        id: 'team_monthly',
-        name: 'Team',
+        id: 'startup_monthly',
+        name: 'Startup',
         price: '35,000',
         prefix: '₦',
         period: '/month',
@@ -84,18 +73,7 @@ const ngnPlans = [
             'Investor-ready Data Room'
         ],
     },
-    {
-        id: 'accelerator_monthly',
-        name: 'Accelerator',
-        price: '200,000',
-        prefix: '₦',
-        period: '/month',
-        features: [
-            '15 portfolio seats',
-            'Global Portfolio Dashboard',
-            'Cross-company benchmarking'
-        ],
-    },
+    
     {
         id: 'enterprise_monthly',
         name: 'Enterprise',
@@ -103,7 +81,7 @@ const ngnPlans = [
         prefix: '',
         period: '',
         features: [
-            'Everything in Team',
+            'Everything in Startup',
             'SSO / SAML',
             'Custom AI models',
             'Dedicated support'
@@ -167,7 +145,7 @@ export default function PricingPage() {
                 <div className="text-center mb-16 max-w-3xl mx-auto flex flex-col items-center">
                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-medium text-gray-300 mb-8 backdrop-blur-sm">
                         <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                        14-Day Free Trial on all plans
+                        14-Day Free Trial on Founder & Startup plans
                     </div>
                     
                     <h1 className="text-5xl md:text-7xl font-semibold mb-6 tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-500">
@@ -217,7 +195,7 @@ export default function PricingPage() {
                 </div>
 
                 {/* Plans Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {plans.map((plan) => (
                         <div
                             key={plan.id}
@@ -287,6 +265,38 @@ export default function PricingPage() {
                                                 ? 'Contact Sales'
                                                 : 'Become an Early Supporter'}
                             </button>
+                            
+                            <button
+                                onClick={() => setExpandedTable(expandedTable === plan.id ? null : plan.id)}
+                                className="text-xs text-gray-500 hover:text-white mt-6 w-full text-center flex items-center justify-center gap-1 transition"
+                            >
+                                See full features
+                                <svg className={`w-3 h-3 transition-transform ${expandedTable === plan.id ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            {expandedTable === plan.id && (
+                                <div className="mt-6 pt-6 border-t border-white/5 animate-in slide-in-from-top-2 fade-in duration-200">
+                                    <div className="space-y-3">
+                                        {featureComparison.map((f) => {
+                                            const val = plan.id.includes('founder') ? f.founder : plan.id.includes('startup') ? f.startup : f.enterprise;
+                                            return (
+                                                <div key={f.name} className="flex justify-between items-center text-xs">
+                                                    <span className="text-gray-400">{f.name}</span>
+                                                    <span className={`font-medium ${val === '-' ? 'text-gray-600' : 'text-gray-200'}`}>
+                                                        {val === 'Included' ? (
+                                                            <svg className="w-3.5 h-3.5 text-[#38BDF8]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                        ) : val}
+                                                    </span>
+                                                </div>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>

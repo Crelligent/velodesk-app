@@ -10,7 +10,6 @@ import BenchmarksFeature from '@/components/landing/BenchmarksFeature'
 import DataroomFeature from '@/components/landing/DataroomFeature'
 import PersonaTabs from '@/components/landing/PersonaTabs'
 import AcceleratorPartners from '@/components/landing/AcceleratorPartners'
-import ForAccelerators from '@/components/landing/ForAccelerators'
 import ChangelogTeaser from '@/components/landing/ChangelogTeaser'
 import Footer from '@/components/landing/Footer'
 
@@ -28,8 +27,7 @@ export default function LandingPage() {
       <TrustpilotUseCases />
       <PersonaTabs />
       <AcceleratorPartners />
-      <ForAccelerators />
-      <DataroomFeature />
+            <DataroomFeature />
       <ChangelogTeaser />
       <Footer />
     </main>

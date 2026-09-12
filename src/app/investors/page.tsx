@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ArrowRight, BarChart3, Building2, ShieldCheck } from 'lucide-react'
+import ForAccelerators from '@/components/landing/ForAccelerators'
 
 export default function InvestorsLandingPage() {
     return (
@@ -88,6 +89,8 @@ export default function InvestorsLandingPage() {
                     </div>
                 </div>
             </section>
+
+            <ForAccelerators />
 
             {/* Footer CTA */}
             <section className="py-32 px-6 text-center border-t border-white/5">
