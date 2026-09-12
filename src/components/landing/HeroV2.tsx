@@ -102,23 +102,27 @@ export default function HeroV2() {
         }`}
       >
         <Link href="/" className="flex items-center gap-3 relative z-10">
-          <img src="/velodesk%20(2).png" alt="Velodesk" className="h-12 w-auto" />
+          <img src="/velodesk%20(2).png" alt="Velodesk" className="h-8 w-auto" />
           <div className="flex flex-col justify-center">
-            <span className="font-orbitron font-bold text-lg tracking-[0.15em] text-white leading-none">VELODESK</span>
-            <span className="font-mono text-[9px] text-white/30 tracking-widest mt-1 uppercase">By Crelligent & Co.</span>
+            <span className="font-orbitron font-bold text-sm tracking-[0.15em] text-white leading-none">VELODESK</span>
+            <span className="font-mono text-[8px] text-white/30 tracking-widest mt-1 uppercase">By Crelligent</span>
           </div>
         </Link>
         
         <div className="hidden md:flex items-center gap-10">
-          <Link href="#how-it-works" className="text-sm font-light text-white/50 hover:text-white transition">How it Works</Link>
-          <Link href="#research" className="text-sm font-light text-white/50 hover:text-white transition">Research</Link>
-          <Link href="/investors" className="text-sm font-light text-white/50 hover:text-white transition">For Investors</Link>
-            <Link href="/pricing" className="text-sm font-light text-white/50 hover:text-white transition">Pricing</Link>
+          <Link href="/#how-it-works" className="text-sm font-light text-gray-400 hover:text-white transition">Features</Link>
+          <Link href="/#research" className="text-sm font-light text-gray-400 hover:text-white transition">AI Tools</Link>
+          <Link href="/pricing" className="text-sm font-light text-gray-400 hover:text-white transition">Pricing</Link>
+          <Link href="/investors" className="text-sm font-light text-gray-400 hover:text-white transition">Investors</Link>
         </div>
 
         <div className="flex items-center gap-4 relative z-10">
-          <Link href="/login" className="text-sm font-medium text-white hover:text-[#7B61FF] transition">Sign In</Link>
-          <Link href="/signup" className="px-5 py-2.5 bg-gradient-to-r from-[#7B61FF] via-[#5B8DEF] to-[#38BDF8] hover:brightness-110 text-white text-sm font-medium rounded-full transition border border-white/10">Get Early Access</Link>
+          <Link href="/login" className="text-sm font-medium text-gray-300 hover:text-white transition">
+            Sign In
+          </Link>
+          <Link href="/signup" className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-full transition border border-white/5 backdrop-blur-sm">
+            Get Early Access
+          </Link>
         </div>
       </nav>
 
