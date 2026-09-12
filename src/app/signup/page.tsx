@@ -58,6 +58,7 @@ function SignupForm() {
     const router = useRouter()
     const searchParams = useSearchParams()
     const planId = searchParams.get('plan')
+    const gateway = searchParams.get('gateway') || 'stripe'
 
     useEffect(() => {
         if (planId) {
@@ -84,7 +85,7 @@ function SignupForm() {
             if (planId) {
                 console.log(`[Analytics] user_signed_up, redirecting to checkout`)
                 try {
-                    const res = await fetch('/api/stripe/checkout', {
+                    const res = await fetch(`/api/${gateway}/checkout`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ planId }),

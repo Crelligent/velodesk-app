@@ -2,10 +2,11 @@ const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY!
 const PAYSTACK_BASE_URL = 'https://api.paystack.co'
 
 export const PAYSTACK_PLANS = {
-    pro_monthly: 'PLN_xxx', // Replace with your Paystack plan code
-    pro_yearly: 'PLN_xxx',
+    founder_monthly: 'PLN_xxx', // Replace with actual Paystack plan code
+    founder_yearly: 'PLN_xxx',
+    startup_monthly: 'PLN_xxx',
+    startup_yearly: 'PLN_xxx',
     enterprise_monthly: 'PLN_xxx',
-    enterprise_yearly: 'PLN_xxx',
 }
 
 interface InitializeTransactionResponse {

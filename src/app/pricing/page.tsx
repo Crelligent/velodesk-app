@@ -118,7 +118,7 @@ export default function PricingPage() {
             window.location.href = '/contact'
             return
         }
-        window.location.href = `/signup?plan=${planId}`
+        window.location.href = `/signup?plan=${planId}&gateway=${usePaystack ? 'paystack' : 'stripe'}`
     }
 
     return (
