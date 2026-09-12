@@ -133,9 +133,9 @@ export default function FinalCTA() {
 
       <div className="cta-container">
         <div className="cta-tag">Limited Availability</div>
-        <h2 className="cta-title">First 500 founders get 3 months free.</h2>
+        <h2 className="cta-title">First 500 founders get prioritized onboarding.</h2>
         <p className="cta-subtitle">
-          Join the waitlist today. When we launch, you'll receive an extended free trial and a personalized 1-on-1 PMF diagnostic session with our data team.
+          Join the waitlist today. When we launch, you'll receive a personalized 1-on-1 PMF diagnostic session with our data team.
         </p>
         
         <form className="cta-form" onSubmit={(e) => e.preventDefault()}>

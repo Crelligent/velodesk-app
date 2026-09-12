@@ -113,6 +113,7 @@ export default function HeroV2() {
           <Link href="#how-it-works" className="text-sm font-light text-white/50 hover:text-white transition">How it Works</Link>
           <Link href="#research" className="text-sm font-light text-white/50 hover:text-white transition">Research</Link>
           <Link href="/investors" className="text-sm font-light text-white/50 hover:text-white transition">For Investors</Link>
+            <Link href="/pricing" className="text-sm font-light text-white/50 hover:text-white transition">Pricing</Link>
         </div>
 
         <div className="flex items-center gap-4 relative z-10">

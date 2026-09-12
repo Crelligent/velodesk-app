@@ -5,18 +5,6 @@ import { useState } from 'react'
 
 const usdPlans = [
     {
-        id: 'free',
-        name: 'Free',
-        price: 0,
-        prefix: '$',
-        period: '',
-        features: [
-            '1 PMF Score per month',
-            '2 integrations',
-            'Basic report'
-        ],
-    },
-    {
         id: 'founder_monthly',
         name: 'Founder',
         price: 15,
@@ -70,18 +58,6 @@ const usdPlans = [
 ]
 
 const ngnPlans = [
-    {
-        id: 'free',
-        name: 'Free',
-        price: 0,
-        prefix: '₦',
-        period: '',
-        features: [
-            '1 PMF Score per month',
-            '2 integrations',
-            'Basic report'
-        ],
-    },
     {
         id: 'founder_monthly',
         name: 'Founder',
@@ -142,10 +118,6 @@ export default function PricingPage() {
     const plans = usePaystack ? ngnPlans : usdPlans
 
     const handleCheckout = async (planId: string) => {
-        if (planId === 'free') {
-            window.location.href = '/signup'
-            return
-        }
         if (planId === 'enterprise_monthly') {
             window.location.href = '/contact'
             return
@@ -187,6 +159,12 @@ export default function PricingPage() {
                         <span className="font-mono text-[9px] text-white/30 tracking-widest mt-1 uppercase">By Crelligent & Co.</span>
                     </div>
                 </Link>
+                <div className="hidden md:flex items-center gap-10">
+                    <Link href="/#how-it-works" className="text-sm font-light text-white/50 hover:text-white transition">How it Works</Link>
+                    <Link href="/#research" className="text-sm font-light text-white/50 hover:text-white transition">Research</Link>
+                    <Link href="/investors" className="text-sm font-light text-white/50 hover:text-white transition">For Investors</Link>
+                    <Link href="/pricing" className="text-sm font-light text-white/50 hover:text-white transition">Pricing</Link>
+                </div>
                 <div className="flex items-center gap-4 relative z-10">
                     <Link href="/login" className="text-sm font-medium text-white hover:text-[#7B61FF] transition">
                         Sign In
@@ -201,7 +179,7 @@ export default function PricingPage() {
             <div className="pt-32 pb-24 px-8 max-w-5xl mx-auto">
                 <div className="text-center mb-12">
                     <h1 className="text-4xl font-extralight mb-4">Simple, transparent pricing</h1>
-                    <p className="text-gray-400">Start free. Upgrade when you need more.</p>
+                    <p className="text-gray-400">Choose the plan that fits your growth stage.</p>
                 </div>
 
                 {/* Payment Toggle */}
@@ -271,11 +249,9 @@ export default function PricingPage() {
                             >
                                 {loading === plan.id
                                     ? 'Processing...'
-                                    : plan.id === 'free'
-                                        ? 'Get Started'
-                                        : plan.id.includes('accelerator')
+                                    : plan.id.includes('accelerator')
                                             ? 'Apply Now'
-                                            : 'Start Free Trial'}
+                                            : 'Get Started'}
                             </button>
                         </div>
                     ))}
