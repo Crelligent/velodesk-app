@@ -93,6 +93,18 @@ export default function PricingPage() {
     const [loading, setLoading] = useState<string | null>(null)
     const [usePaystack, setUsePaystack] = useState(false)
     const [billingPeriod, setBillingPeriod] = useState<'Monthly' | 'Yearly'>('Monthly')
+    const [expandedTable, setExpandedTable] = useState<string | null>(null)
+
+    const featureComparison = [
+        { name: 'PMF Scores', founder: 'Up to 3', startup: 'Unlimited', enterprise: 'Unlimited' },
+        { name: 'Integrations', founder: '5', startup: 'Unlimited', enterprise: 'Unlimited' },
+        { name: 'PDF Exports', founder: 'Included', startup: 'Included', enterprise: 'Included' },
+        { name: 'Signal Feed', founder: '-', startup: 'Included', enterprise: 'Included' },
+        { name: 'Data Room', founder: '-', startup: 'Included', enterprise: 'Included' },
+        { name: 'SSO / SAML', founder: '-', startup: '-', enterprise: 'Included' },
+        { name: 'Custom AI Models', founder: '-', startup: '-', enterprise: 'Included' },
+        { name: 'Support', founder: 'Standard', startup: 'Priority', enterprise: 'Dedicated' },
+    ]
     
     const plans = usePaystack ? ngnPlans : usdPlans
 
