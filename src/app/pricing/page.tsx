@@ -275,7 +275,7 @@ export default function PricingPage() {
                                             ? 'Apply Now'
                                             : plan.id.includes('enterprise')
                                                 ? 'Contact Sales'
-                                                : 'Become an Early Supporter'}
+                                                : 'Start 14-Day Free Trial'}
                             </button>
                             
                             <button
