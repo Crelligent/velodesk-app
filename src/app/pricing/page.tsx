@@ -177,21 +177,23 @@ export default function PricingPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#050505] text-white">
+        <div className="min-h-screen bg-[#04060D] text-white">
             {/* Nav */}
-            <nav className="fixed top-0 left-0 right-0 z-50 px-8 py-4 bg-[#050505]/80 backdrop-blur-xl border-b border-white/5">
-                <div className="max-w-7xl mx-auto flex items-center justify-between">
-                    <Link href="/" className="text-xl font-light">
-                        <span className="text-[#22c55e]">Velo</span>desk
-                    </Link>
-                    <div className="flex items-center gap-4">
-                        <Link href="/login" className="text-sm text-gray-400 hover:text-white">
-                            Login
-                        </Link>
-                        <Link href="/signup" className="text-sm px-4 py-2 bg-[#22c55e] rounded">
-                            Start Free
-                        </Link>
+            <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-6 backdrop-blur-xl bg-[#04060D]/80 border-b border-white/5">
+                <Link href="/" className="flex items-center gap-3 relative z-10">
+                    <img src="/velodesk%20(2).png" alt="Velodesk" className="h-12 w-auto" />
+                    <div className="flex flex-col justify-center">
+                        <span className="font-orbitron font-bold text-lg tracking-[0.15em] text-white leading-none">VELODESK</span>
+                        <span className="font-mono text-[9px] text-white/30 tracking-widest mt-1 uppercase">By Crelligent & Co.</span>
                     </div>
+                </Link>
+                <div className="flex items-center gap-4 relative z-10">
+                    <Link href="/login" className="text-sm font-medium text-white hover:text-[#7B61FF] transition">
+                        Sign In
+                    </Link>
+                    <Link href="/signup" className="px-5 py-2.5 bg-gradient-to-r from-[#7B61FF] via-[#5B8DEF] to-[#38BDF8] hover:brightness-110 text-white text-sm font-medium rounded-full transition border border-white/10">
+                        Get Early Access
+                    </Link>
                 </div>
             </nav>
 
@@ -228,12 +230,12 @@ export default function PricingPage() {
                         <div
                             key={plan.id}
                             className={`p-8 border rounded-lg relative ${plan.popular
-                                    ? 'border-[#22c55e] border-2'
+                                    ? 'border-[#7B61FF] border-2'
                                     : 'border-white/10'
                                 }`}
                         >
                             {plan.popular && (
-                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-[#22c55e] text-black text-xs font-medium rounded-full">
+                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-[#7B61FF] via-[#5B8DEF] to-[#38BDF8] text-white text-xs font-medium rounded-full">
                                     Most Popular
                                 </div>
                             )}
@@ -263,7 +265,7 @@ export default function PricingPage() {
                                 onClick={() => handleCheckout(plan.id)}
                                 disabled={loading === plan.id}
                                 className={`w-full py-3 rounded font-medium transition disabled:opacity-50 ${plan.popular
-                                        ? 'bg-[#22c55e] text-black hover:bg-[#16a34a]'
+                                        ? 'bg-gradient-to-r from-[#7B61FF] via-[#5B8DEF] to-[#38BDF8] text-white hover:brightness-110 border border-white/10'
                                         : 'border border-white/10 hover:bg-white/5'
                                     }`}
                             >
