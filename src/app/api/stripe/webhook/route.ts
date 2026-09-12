@@ -75,20 +75,20 @@ export async function POST(req: Request) {
             }
             case 'invoice.payment_succeeded': {
                 const invoice = event.data.object as Stripe.Invoice
-                if (invoice.subscription) {
+                if ((invoice as any).subscription) {
                     await supabaseAdmin.from('subscriptions')
                         .update({ status: 'active' })
-                        .eq('stripe_subscription_id', invoice.subscription)
+                        .eq('stripe_subscription_id', (invoice as any).subscription)
                 }
                 // TODO: Send receipt/welcome email
                 break
             }
             case 'invoice.payment_failed': {
                 const invoice = event.data.object as Stripe.Invoice
-                if (invoice.subscription) {
+                if ((invoice as any).subscription) {
                     await supabaseAdmin.from('subscriptions')
                         .update({ status: 'past_due' })
-                        .eq('stripe_subscription_id', invoice.subscription)
+                        .eq('stripe_subscription_id', (invoice as any).subscription)
                     
                     // TODO: Trigger dunning email sequence
                     console.log(`Payment failed, entering dunning for subscription: ${invoice.subscription}`)
