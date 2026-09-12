@@ -50,7 +50,7 @@ const ngnPlans = [
     {
         id: 'founder_monthly',
         name: 'Founder',
-        price: '15,000',
+        price: '30,000',
         prefix: '₦',
         period: '/month',
         features: [
@@ -62,7 +62,7 @@ const ngnPlans = [
     {
         id: 'startup_monthly',
         name: 'Startup',
-        price: '35,000',
+        price: '50,000',
         prefix: '₦',
         period: '/month',
         popular: true,
