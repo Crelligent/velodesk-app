@@ -114,6 +114,7 @@ const ngnPlans = [
 export default function PricingPage() {
     const [loading, setLoading] = useState<string | null>(null)
     const [usePaystack, setUsePaystack] = useState(false)
+    const [billingPeriod, setBillingPeriod] = useState<'Monthly' | 'Yearly'>('Monthly')
     
     const plans = usePaystack ? ngnPlans : usdPlans
 
@@ -131,112 +132,169 @@ export default function PricingPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#04060D] text-white">
+        <div className="min-h-screen bg-[#0A0A0A] text-white relative overflow-hidden font-sans">
+            {/* Background Glows */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-to-b from-white/[0.05] to-transparent rounded-full blur-[120px] pointer-events-none" />
+            <div className="absolute top-[20%] left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-gradient-to-r from-[#7B61FF]/10 to-[#38BDF8]/10 rounded-full blur-[120px] pointer-events-none" />
+
             {/* Nav */}
-            <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-6 backdrop-blur-xl bg-[#04060D]/80 border-b border-white/5">
+            <nav className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-6 backdrop-blur-xl bg-[#0A0A0A]/70 border-b border-white/5">
                 <Link href="/" className="flex items-center gap-3 relative z-10">
-                    <img src="/velodesk%20(2).png" alt="Velodesk" className="h-12 w-auto" />
+                    <img src="/velodesk%20(2).png" alt="Velodesk" className="h-8 w-auto" />
                     <div className="flex flex-col justify-center">
-                        <span className="font-orbitron font-bold text-lg tracking-[0.15em] text-white leading-none">VELODESK</span>
-                        <span className="font-mono text-[9px] text-white/30 tracking-widest mt-1 uppercase">By Crelligent & Co.</span>
+                        <span className="font-orbitron font-bold text-sm tracking-[0.15em] text-white leading-none">VELODESK</span>
+                        <span className="font-mono text-[8px] text-white/30 tracking-widest mt-1 uppercase">By Crelligent</span>
                     </div>
                 </Link>
                 <div className="hidden md:flex items-center gap-10">
-                    <Link href="/#how-it-works" className="text-sm font-light text-white/50 hover:text-white transition">How it Works</Link>
-                    <Link href="/#research" className="text-sm font-light text-white/50 hover:text-white transition">Research</Link>
-                    <Link href="/investors" className="text-sm font-light text-white/50 hover:text-white transition">For Investors</Link>
-                    <Link href="/pricing" className="text-sm font-light text-white/50 hover:text-white transition">Pricing</Link>
+                    <Link href="/#how-it-works" className="text-sm font-light text-gray-400 hover:text-white transition">Features</Link>
+                    <Link href="/#research" className="text-sm font-light text-gray-400 hover:text-white transition">AI Tools</Link>
+                    <Link href="/pricing" className="text-sm font-light text-white hover:text-white transition">Pricing</Link>
+                    <Link href="/investors" className="text-sm font-light text-gray-400 hover:text-white transition">Investors</Link>
                 </div>
                 <div className="flex items-center gap-4 relative z-10">
-                    <Link href="/login" className="text-sm font-medium text-white hover:text-[#7B61FF] transition">
+                    <Link href="/login" className="text-sm font-medium text-gray-300 hover:text-white transition">
                         Sign In
                     </Link>
-                    <Link href="/signup" className="px-5 py-2.5 bg-gradient-to-r from-[#7B61FF] via-[#5B8DEF] to-[#38BDF8] hover:brightness-110 text-white text-sm font-medium rounded-full transition border border-white/10">
+                    <Link href="/signup" className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-full transition border border-white/5 backdrop-blur-sm">
                         Get Early Access
                     </Link>
                 </div>
             </nav>
 
             {/* Content */}
-            <div className="pt-32 pb-24 px-8 max-w-5xl mx-auto">
-                <div className="text-center mb-12">
-                    <h1 className="text-4xl font-extralight mb-4">Simple, transparent pricing</h1>
-                    <p className="text-gray-400">Choose the plan that fits your growth stage.</p>
+            <div className="pt-40 pb-24 px-6 md:px-8 max-w-[1200px] mx-auto relative z-10">
+                <div className="text-center mb-16 max-w-3xl mx-auto flex flex-col items-center">
+                    <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs font-medium text-gray-300 mb-8 backdrop-blur-sm">
+                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                        14-Day Free Trial on all plans
+                    </div>
+                    
+                    <h1 className="text-5xl md:text-7xl font-semibold mb-6 tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-500">
+                        All-in-one product intelligence.<br />Powered by AI.
+                    </h1>
+                    <p className="text-lg text-gray-400 font-light max-w-xl leading-relaxed">
+                        PMF tracking, integrations, AI Assistant, automated dataroom generator, and benchmarking - all in one powerful package.
+                    </p>
                 </div>
 
-                {/* Payment Toggle */}
-                <div className="flex justify-center mb-12">
-                    <div className="inline-flex items-center gap-4 p-2 bg-white/5 rounded-lg">
+                {/* Toggles */}
+                <div className="flex flex-col items-center gap-6 mb-16">
+                    {/* Monthly/Yearly Toggle */}
+                    <div className="inline-flex items-center p-1 bg-[#111] rounded-full border border-white/5">
                         <button
-                            onClick={() => setUsePaystack(false)}
-                            className={`px-4 py-2 text-sm rounded transition ${!usePaystack ? 'bg-white/10' : 'text-gray-400'
-                                }`}
+                            onClick={() => setBillingPeriod('Monthly')}
+                            className={`px-6 py-2 text-sm rounded-full transition-all ${billingPeriod === 'Monthly' ? 'bg-white/10 text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
                         >
-                            💳 Card (Stripe)
+                            Monthly
                         </button>
                         <button
-                            onClick={() => setUsePaystack(true)}
-                            className={`px-4 py-2 text-sm rounded transition ${usePaystack ? 'bg-white/10' : 'text-gray-400'
-                                }`}
+                            onClick={() => setBillingPeriod('Yearly')}
+                            className={`px-6 py-2 text-sm rounded-full transition-all flex items-center gap-2 ${billingPeriod === 'Yearly' ? 'bg-white/10 text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
                         >
-                            🇳🇬 Africa (Paystack)
+                            Yearly
+                            <span className="text-[10px] uppercase font-bold text-[#38BDF8] bg-[#38BDF8]/10 px-2 py-0.5 rounded-full">Save 20%</span>
+                        </button>
+                    </div>
+
+                    {/* Currency Toggle */}
+                    <div className="inline-flex items-center gap-2 text-xs text-gray-500">
+                        <span>Currency:</span>
+                        <button
+                            onClick={() => setUsePaystack(false)}
+                            className={`transition hover:text-gray-300 ${!usePaystack ? 'text-white underline underline-offset-4 decoration-white/30' : ''}`}
+                        >
+                            USD ($)
+                        </button>
+                        <span className="text-white/10">|</span>
+                        <button
+                            onClick={() => setUsePaystack(true)}
+                            className={`transition hover:text-gray-300 ${usePaystack ? 'text-white underline underline-offset-4 decoration-white/30' : ''}`}
+                        >
+                            NGN (?)
                         </button>
                     </div>
                 </div>
 
-                {/* Plans */}
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
+                {/* Plans Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                     {plans.map((plan) => (
                         <div
                             key={plan.id}
-                            className={`p-8 border rounded-lg relative ${plan.popular
-                                    ? 'border-[#7B61FF] border-2'
-                                    : 'border-white/10'
-                                }`}
+                            className={`p-8 rounded-2xl relative flex flex-col transition-all duration-300 ${
+                                plan.popular
+                                    ? 'bg-[#151515] border border-white/10 shadow-[0_0_40px_rgba(123,97,255,0.05)]'
+                                    : 'bg-[#0A0A0A] border border-white/5 hover:bg-[#0D0D0D]'
+                            }`}
                         >
                             {plan.popular && (
-                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-[#7B61FF] via-[#5B8DEF] to-[#38BDF8] text-white text-xs font-medium rounded-full">
-                                    Most Popular
-                                </div>
+                                <div className="absolute top-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-[#7B61FF] to-transparent opacity-50" />
                             )}
-
-                            <div className="text-xs uppercase tracking-[0.15em] text-gray-500 mb-4">
-                                {plan.name}
-                            </div>
-
-                            <div className="text-4xl font-extralight mb-2">
-                                {plan.price === 'Custom' ? (
-                                    plan.price
-                                ) : (
-                                    <>
-                                        {plan.prefix}{plan.price}
-                                        <span className="text-base text-gray-500">{plan.period}</span>
-                                    </>
+                            
+                            <div className="flex items-center gap-2 mb-6">
+                                <h3 className="text-lg font-medium text-white">{plan.name}</h3>
+                                {plan.popular && (
+                                    <span className="text-[10px] text-gray-400 bg-white/5 px-2 py-0.5 rounded-sm">+30% off during early access</span>
                                 )}
                             </div>
 
-                            <ul className="space-y-3 text-sm text-gray-400 my-8">
-                                {plan.features.map((f) => (
-                                    <li key={f}>✓ {f}</li>
+                            <div className="mb-8">
+                                <div className="flex items-baseline gap-1">
+                                    <span className="text-4xl font-semibold text-white tracking-tight">
+                                        {plan.price === 'Custom' ? plan.price : (
+                                            <>
+                                                {plan.prefix}
+                                                {billingPeriod === 'Yearly' && plan.price !== 'Custom' 
+                                                    ? (parseFloat(plan.price.replace(/,/g, '')) * 0.8).toLocaleString() 
+                                                    : plan.price}
+                                            </>
+                                        )}
+                                    </span>
+                                    {plan.price !== 'Custom' && (
+                                        <span className="text-sm text-gray-500 font-light">/ month</span>
+                                    )}
+                                </div>
+                                {plan.price !== 'Custom' && billingPeriod === 'Yearly' && (
+                                    <div className="text-xs text-gray-500 mt-1">billed yearly</div>
+                                )}
+                            </div>
+
+                            <ul className="space-y-4 text-sm text-gray-400 flex-grow mb-8">
+                                {plan.features.map((f, i) => (
+                                    <li key={i} className="flex items-start gap-3 group">
+                                        <svg className="w-4 h-4 mt-0.5 text-[#38BDF8] opacity-70 group-hover:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        </svg>
+                                        <span className="leading-tight">{f}</span>
+                                    </li>
                                 ))}
                             </ul>
 
                             <button
                                 onClick={() => handleCheckout(plan.id)}
                                 disabled={loading === plan.id}
-                                className={`w-full py-3 rounded font-medium transition disabled:opacity-50 ${plan.popular
-                                        ? 'bg-gradient-to-r from-[#7B61FF] via-[#5B8DEF] to-[#38BDF8] text-white hover:brightness-110 border border-white/10'
-                                        : 'border border-white/10 hover:bg-white/5'
-                                    }`}
+                                className={`w-full py-3 rounded-lg text-sm font-medium transition-all disabled:opacity-50 mt-auto ${
+                                    plan.popular
+                                        ? 'bg-[#7B61FF]/10 text-[#7B61FF] hover:bg-[#7B61FF]/20 border border-[#7B61FF]/20'
+                                        : 'bg-white/5 text-gray-300 hover:bg-white/10 hover:text-white border border-white/5'
+                                }`}
                             >
                                 {loading === plan.id
                                     ? 'Processing...'
                                     : plan.id.includes('accelerator')
                                             ? 'Apply Now'
-                                            : 'Get Started'}
+                                            : plan.id.includes('enterprise')
+                                                ? 'Contact Sales'
+                                                : 'Become an Early Supporter'}
                             </button>
                         </div>
                     ))}
+                </div>
+
+                <div className="mt-20 text-center">
+                    <p className="text-sm text-gray-500 max-w-2xl mx-auto leading-relaxed">
+                        Supporters receive a 30% discount on early access, plus an extra 20% off the yearly plan. They also get behind-the-scenes access to the product, code, insights, and the opportunity to help shape its development.
+                    </p>
                 </div>
             </div>
         </div>
