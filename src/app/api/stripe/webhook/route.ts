@@ -91,7 +91,7 @@ export async function POST(req: Request) {
                         .eq('stripe_subscription_id', (invoice as any).subscription)
                     
                     // TODO: Trigger dunning email sequence
-                    console.log(`Payment failed, entering dunning for subscription: ${invoice.subscription}`)
+                    console.log(`Payment failed, entering dunning for subscription: ${(invoice as any).subscription}`)
                 }
                 break
             }

@@ -245,7 +245,7 @@ export default function PricingPage() {
                                             <>
                                                 {plan.prefix}
                                                 {billingPeriod === 'Yearly' && plan.price !== 'Custom' 
-                                                    ? (parseFloat(plan.price.replace(/,/g, '')) * 0.8).toLocaleString() 
+                                                    ? (parseFloat(String(plan.price).replace(/,/g, '')) * 0.8).toLocaleString() 
                                                     : plan.price}
                                             </>
                                         )}
