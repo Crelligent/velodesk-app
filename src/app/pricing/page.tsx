@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const usdPlans = [
     {
@@ -117,35 +117,17 @@ export default function PricingPage() {
     
     const plans = usePaystack ? ngnPlans : usdPlans
 
+    useEffect(() => {
+        console.log('[Analytics] pricing_viewed')
+    }, [])
+
     const handleCheckout = async (planId: string) => {
+        console.log(`[Analytics] plan_selected: plan=${planId}`)
         if (planId === 'enterprise_monthly') {
             window.location.href = '/contact'
             return
         }
-
-        setLoading(planId)
-
-        const endpoint = usePaystack ? '/api/paystack/checkout' : '/api/stripe/checkout'
-
-        try {
-            const res = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ planId }),
-            })
-
-            const data = await res.json()
-
-            if (data.url) {
-                window.location.href = data.url
-            } else {
-                alert(data.error || 'Something went wrong')
-            }
-        } catch {
-            alert('Failed to start checkout')
-        } finally {
-            setLoading(null)
-        }
+        window.location.href = `/signup?plan=${planId}`
     }
 
     return (

@@ -19,11 +19,13 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Invalid plan' }, { status: 400 })
         }
 
-        // Create checkout session
+        // Create checkout session with 14-day trial
         const session = await createCheckoutSession({
             priceId,
-            successUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/settings?success=true`,
+            successUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?trial=started`,
             cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?canceled=true`,
+            clientReferenceId: user.id,
+            customerEmail: user.email,
         })
 
         return NextResponse.json({ url: session.url })

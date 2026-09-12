@@ -7,6 +7,9 @@ export const STRIPE_PRICES = {
     pro_yearly: 'price_xxx',
     enterprise_monthly: 'price_xxx',
     enterprise_yearly: 'price_xxx',
+    founder_monthly: 'price_founder_xxx',
+    team_monthly: 'price_team_xxx',
+    accelerator_monthly: 'price_accel_xxx'
 }
 
 export async function createCheckoutSession({
@@ -14,11 +17,15 @@ export async function createCheckoutSession({
     customerId,
     successUrl,
     cancelUrl,
+    clientReferenceId,
+    customerEmail,
 }: {
     priceId: string
     customerId?: string
     successUrl: string
     cancelUrl: string
+    clientReferenceId?: string
+    customerEmail?: string
 }) {
     const session = await stripe.checkout.sessions.create({
         mode: 'subscription',
@@ -30,9 +37,14 @@ export async function createCheckoutSession({
             },
         ],
         customer: customerId,
+        customer_email: customerId ? undefined : customerEmail,
+        client_reference_id: clientReferenceId,
         success_url: successUrl,
         cancel_url: cancelUrl,
         allow_promotion_codes: true,
+        subscription_data: {
+            trial_period_days: 14,
+        },
     })
 
     return session

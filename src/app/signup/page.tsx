@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect, Suspense } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { signUpUser } from '@/app/actions'
 import { FormEngine, FormSchema } from '@/components/forms/FormEngine'
 import { motion } from 'framer-motion'
@@ -11,7 +11,7 @@ import { Database, LineChart, Sparkles } from 'lucide-react'
 const signupSchema: FormSchema = {
     id: 'velodesk-signup-form-v1',
     title: 'Get Early Access',
-    description: 'No credit card required. Connect your data in minutes.',
+    description: 'Start your 14-day free trial. Connect your data in minutes.',
     fields: [
         {
             id: 'fullName',
@@ -51,11 +51,20 @@ const signupSchema: FormSchema = {
     ]
 }
 
-export default function SignupPage() {
+function SignupForm() {
     const [sessionId, setSessionId] = useState('')
     const [showConfirmation, setShowConfirmation] = useState(false)
     const [email, setEmail] = useState('')
     const router = useRouter()
+    const searchParams = useSearchParams()
+    const planId = searchParams.get('plan')
+
+    useEffect(() => {
+        if (planId) {
+            console.log(`[Analytics] signup_started: plan=${planId}`)
+        }
+    }, [planId])
+
     // removed
 
     useEffect(() => {
@@ -71,8 +80,24 @@ export default function SignupPage() {
         if (error) {
             throw new Error(error)
         }
-
         if (data?.user && data.session) {
+            if (planId) {
+                console.log(`[Analytics] user_signed_up, redirecting to checkout`)
+                try {
+                    const res = await fetch('/api/stripe/checkout', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ planId }),
+                    })
+                    const checkoutData = await res.json()
+                    if (checkoutData.url) {
+                        window.location.href = checkoutData.url
+                        return
+                    }
+                } catch (e) {
+                    console.error('Checkout error', e)
+                }
+            }
             router.push('/onboarding')
         } else if (data?.user && !data.session) {
             setShowConfirmation(true)
@@ -195,5 +220,13 @@ export default function SignupPage() {
                 </motion.div>
             </div>
         </div>
+    )
+}
+
+export default function SignupPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-[#050505]" />}>
+            <SignupForm />
+        </Suspense>
     )
 }
