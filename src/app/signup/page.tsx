@@ -59,6 +59,7 @@ function SignupForm() {
     const searchParams = useSearchParams()
     const planId = searchParams.get('plan')
     const gateway = searchParams.get('gateway') || 'stripe'
+    const currency = searchParams.get('currency') || 'USD'
 
     useEffect(() => {
         if (planId) {
@@ -88,7 +89,7 @@ function SignupForm() {
                     const res = await fetch(`/api/${gateway}/checkout`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ planId }),
+                        body: JSON.stringify({ planId, currency }),
                     })
                     const checkoutData = await res.json()
                     if (checkoutData.url) {

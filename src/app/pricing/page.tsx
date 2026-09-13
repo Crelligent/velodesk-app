@@ -91,7 +91,8 @@ const ngnPlans = [
 
 export default function PricingPage() {
     const [loading, setLoading] = useState<string | null>(null)
-    const [usePaystack, setUsePaystack] = useState(false)
+    const [currency, setCurrency] = useState<'USD' | 'NGN'>('USD')
+    const [gateway, setGateway] = useState<'stripe' | 'paystack'>('stripe')
     const [billingPeriod, setBillingPeriod] = useState<'Monthly' | 'Yearly'>('Monthly')
     const [expandedTable, setExpandedTable] = useState<string | null>(null)
 
@@ -106,7 +107,7 @@ export default function PricingPage() {
         { name: 'Support', founder: 'Standard', startup: 'Priority', enterprise: 'Dedicated' },
     ]
     
-    const plans = usePaystack ? ngnPlans : usdPlans
+    const plans = currency === 'NGN' ? ngnPlans : usdPlans
 
     useEffect(() => {
         console.log('[Analytics] pricing_viewed')
@@ -118,7 +119,7 @@ export default function PricingPage() {
             window.location.href = '/contact'
             return
         }
-        window.location.href = `/signup?plan=${planId}&gateway=${usePaystack ? 'paystack' : 'stripe'}`
+        window.location.href = `/signup?plan=${planId}&gateway=${gateway}&currency=${currency}`
     }
 
     return (
@@ -187,23 +188,52 @@ export default function PricingPage() {
                         </button>
                     </div>
 
-                    {/* Currency Toggle */}
-                    <div className="inline-flex items-center gap-2 text-xs text-gray-500">
-                        <span>Currency:</span>
-                        <button
-                            onClick={() => setUsePaystack(false)}
-                            className={`transition hover:text-gray-300 ${!usePaystack ? 'text-white underline underline-offset-4 decoration-white/30' : ''}`}
-                        >
-                            USD ($)
-                        </button>
-                        <span className="text-white/10">|</span>
-                        <button
-                            onClick={() => setUsePaystack(true)}
-                            className={`transition hover:text-gray-300 ${usePaystack ? 'text-white underline underline-offset-4 decoration-white/30' : ''}`}
-                        >
-                            NGN (?)
-                        </button>
-                    </div>
+                    {/* Currency & Gateway Toggles */}
+                    <div className="flex flex-col sm:flex-row items-center gap-6">
+                        <div className="inline-flex items-center gap-2 text-xs text-gray-500">
+                            <span>Currency:</span>
+                            <button
+                                onClick={() => {
+                                    setCurrency('USD')
+                                }}
+                                className={`transition hover:text-gray-300 ${currency === 'USD' ? 'text-white underline underline-offset-4 decoration-white/30' : ''}`}
+                            >
+                                USD ($)
+                            </button>
+                            <span className="text-white/10">|</span>
+                            <button
+                                onClick={() => {
+                                    setCurrency('NGN')
+                                    setGateway('paystack') // Stripe doesn't support NGN
+                                }}
+                                className={`transition hover:text-gray-300 ${currency === 'NGN' ? 'text-white underline underline-offset-4 decoration-white/30' : ''}`}
+                            >
+                                NGN (?)
+                            </button>
+                        </div>
+
+                        <div className="w-px h-4 bg-white/10 hidden sm:block"></div>
+
+                        <div className="inline-flex items-center gap-2 text-xs text-gray-500">
+                            <span>Processor:</span>
+                            <button
+                                onClick={() => {
+                                    setGateway('stripe')
+                                    setCurrency('USD') // Stripe must be USD
+                                }}
+                                className={`transition hover:text-gray-300 ${gateway === 'stripe' ? 'text-white underline underline-offset-4 decoration-white/30' : ''}`}
+                            >
+                                Stripe (Global)
+                            </button>
+                            <span className="text-white/10">|</span>
+                            <button
+                                onClick={() => setGateway('paystack')}
+                                className={`transition hover:text-gray-300 ${gateway === 'paystack' ? 'text-white underline underline-offset-4 decoration-white/30' : ''}`}
+                            >
+                                Paystack (Africa)
+                            </button>
+                        </div>
+                    </div></div>
                 </div>
 
                 {/* Plans Grid */}

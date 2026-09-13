@@ -11,10 +11,11 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        const { planId } = await request.json()
+        const { planId, currency } = await request.json()
 
         // Get plan code
-        const planCode = PAYSTACK_PLANS[planId as keyof typeof PAYSTACK_PLANS]
+        const planCodeKey = `${planId}_${(currency || 'USD').toLowerCase()}` as keyof typeof PAYSTACK_PLANS
+        const planCode = PAYSTACK_PLANS[planCodeKey]
         if (!planCode) {
             return NextResponse.json({ error: 'Invalid plan' }, { status: 400 })
         }
