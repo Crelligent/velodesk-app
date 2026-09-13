@@ -205,7 +205,7 @@ export default function PricingPage() {
                                 }`}
                             />
                         </button>
-                        <span className={`text-sm font-medium transition-colors ${currency === 'NGN' ? 'text-white' : 'text-gray-500'}`}>NGN (?)</span>
+                        <span className={`text-sm font-medium transition-colors ${currency === 'NGN' ? 'text-white' : 'text-gray-500'}`}>NGN (&#8358;)</span>
                     </div>
                 </div>
 
