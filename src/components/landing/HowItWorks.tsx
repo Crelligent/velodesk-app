@@ -13,6 +13,7 @@ export default function HowItWorks() {
 
   return (
     <section
+      id="how-it-works"
       ref={sectionRef}
       className="relative bg-[#04060D] text-white py-24 overflow-hidden border-t border-white/5"
       style={{
