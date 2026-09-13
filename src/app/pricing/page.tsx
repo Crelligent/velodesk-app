@@ -233,7 +233,7 @@ export default function PricingPage() {
                                 Paystack (Africa)
                             </button>
                         </div>
-                    </div></div>
+                    </div>
                 </div>
 
                 {/* Plans Grid */}
