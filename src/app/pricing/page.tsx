@@ -208,6 +208,99 @@ export default function PricingPage() {
                     </div>
                 </div>
 
+                {/* Middle Horizontal Suites */}
+                <div className="mt-8 space-y-8">
+                    
+                    {/* Investor Intelligence Suite */}
+                    <div className="bg-[#0A0A0A] border border-white/5 rounded-2xl overflow-hidden">
+                        <div className="p-6 md:p-8 border-b border-white/5">
+                            <h3 className="text-[#38BDF8] text-xs font-bold uppercase tracking-wider mb-2">Intelligence Suite</h3>
+                            <h4 className="text-xl font-medium text-white">The easy solution to investor reporting.</h4>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/5">
+                            {/* Founder Col */}
+                            <div className="p-6 md:p-8">
+                                <div className="text-sm font-medium text-white mb-6 flex items-center gap-2">
+                                    Intelligence in <span className="bg-white/10 px-2 py-0.5 rounded text-xs text-gray-300">Founder</span>
+                                </div>
+                                <ul className="space-y-4">
+                                    <li className="flex items-start gap-3 text-sm text-gray-400"><Check className="w-4 h-4 text-[#7B61FF] shrink-0 mt-0.5" /><span>Up to 3 PMF baseline scores</span></li>
+                                    <li className="flex items-start gap-3 text-sm text-gray-400"><Check className="w-4 h-4 text-[#7B61FF] shrink-0 mt-0.5" /><span>Static PDF tear-sheet exports</span></li>
+                                    <li className="flex items-start gap-3 text-sm text-gray-400"><Check className="w-4 h-4 text-[#7B61FF] shrink-0 mt-0.5" /><span>Standard metric tracking</span></li>
+                                </ul>
+                            </div>
+                            {/* Startup Col */}
+                            <div className="p-6 md:p-8">
+                                <div className="text-sm font-medium text-white mb-6 flex items-center gap-2">
+                                    Intelligence in <span className="bg-[#38BDF8]/20 text-[#38BDF8] px-2 py-0.5 rounded text-xs">Startup</span>
+                                </div>
+                                <ul className="space-y-4">
+                                    <li className="flex items-start gap-3 text-sm text-gray-400"><Check className="w-4 h-4 text-[#38BDF8] shrink-0 mt-0.5" /><span>Live investor-ready data room</span></li>
+                                    <li className="flex items-start gap-3 text-sm text-gray-400"><Check className="w-4 h-4 text-[#38BDF8] shrink-0 mt-0.5" /><span>Automated daily Signal Feeds</span></li>
+                                    <li className="flex items-start gap-3 text-sm text-gray-400"><Check className="w-4 h-4 text-[#38BDF8] shrink-0 mt-0.5" /><span>Unlimited historical tracking</span></li>
+                                </ul>
+                            </div>
+                            {/* Add-on Col */}
+                            <div className="p-6 md:p-8 relative">
+                                <div className="text-sm font-medium text-white mb-6 flex items-center justify-between">
+                                    <span>Enterprise AI Add-on</span>
+                                    <span className="text-xs text-gray-500">Custom</span>
+                                </div>
+                                <ul className="space-y-4">
+                                    <li className="flex items-start gap-3 text-sm text-gray-400"><Check className="w-4 h-4 text-white/40 shrink-0 mt-0.5" /><span>Custom trained PMF models</span></li>
+                                    <li className="flex items-start gap-3 text-sm text-gray-400"><Check className="w-4 h-4 text-white/40 shrink-0 mt-0.5" /><span>Dedicated cloud deployment</span></li>
+                                    <li className="flex items-start gap-3 text-sm text-gray-400"><Check className="w-4 h-4 text-white/40 shrink-0 mt-0.5" /><span>SSO / SAML authentication</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Integrations Suite */}
+                    <div className="bg-[#0A0A0A] border border-white/5 rounded-2xl overflow-hidden">
+                        <div className="p-6 md:p-8 border-b border-white/5">
+                            <h3 className="text-[#7B61FF] text-xs font-bold uppercase tracking-wider mb-2">Ecosystem Sync</h3>
+                            <h4 className="text-xl font-medium text-white">Connect your entire growth stack.</h4>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-white/5">
+                            {/* Founder Col */}
+                            <div className="p-6 md:p-8">
+                                <div className="text-sm font-medium text-white mb-6 flex items-center gap-2">
+                                    Integrations in <span className="bg-white/10 px-2 py-0.5 rounded text-xs text-gray-300">Founder</span>
+                                </div>
+                                <ul className="space-y-4">
+                                    <li className="flex items-start gap-3 text-sm text-gray-400"><Check className="w-4 h-4 text-[#7B61FF] shrink-0 mt-0.5" /><span>Up to 5 active connections</span></li>
+                                    <li className="flex items-start gap-3 text-sm text-gray-400"><Check className="w-4 h-4 text-[#7B61FF] shrink-0 mt-0.5" /><span>Stripe & payment billing sync</span></li>
+                                    <li className="flex items-start gap-3 text-sm text-gray-400"><Check className="w-4 h-4 text-[#7B61FF] shrink-0 mt-0.5" /><span>Basic CRM connectors</span></li>
+                                </ul>
+                            </div>
+                            {/* Startup Col */}
+                            <div className="p-6 md:p-8">
+                                <div className="text-sm font-medium text-white mb-6 flex items-center gap-2">
+                                    Integrations in <span className="bg-[#38BDF8]/20 text-[#38BDF8] px-2 py-0.5 rounded text-xs">Startup</span>
+                                </div>
+                                <ul className="space-y-4">
+                                    <li className="flex items-start gap-3 text-sm text-gray-400"><Check className="w-4 h-4 text-[#38BDF8] shrink-0 mt-0.5" /><span>Unlimited active connections</span></li>
+                                    <li className="flex items-start gap-3 text-sm text-gray-400"><Check className="w-4 h-4 text-[#38BDF8] shrink-0 mt-0.5" /><span>Hubspot & Salesforce native</span></li>
+                                    <li className="flex items-start gap-3 text-sm text-gray-400"><Check className="w-4 h-4 text-[#38BDF8] shrink-0 mt-0.5" /><span>Custom Webhooks & REST APIs</span></li>
+                                </ul>
+                            </div>
+                            {/* Add-on Col */}
+                            <div className="p-6 md:p-8 relative">
+                                <div className="text-sm font-medium text-white mb-6 flex items-center justify-between">
+                                    <span>Infrastructure Add-on</span>
+                                    <span className="text-xs text-gray-500">Custom</span>
+                                </div>
+                                <ul className="space-y-4">
+                                    <li className="flex items-start gap-3 text-sm text-gray-400"><Check className="w-4 h-4 text-white/40 shrink-0 mt-0.5" /><span>Dedicated isolated database</span></li>
+                                    <li className="flex items-start gap-3 text-sm text-gray-400"><Check className="w-4 h-4 text-white/40 shrink-0 mt-0.5" /><span>SLA uptime guarantees</span></li>
+                                    <li className="flex items-start gap-3 text-sm text-gray-400"><Check className="w-4 h-4 text-white/40 shrink-0 mt-0.5" /><span>Enterprise data compliance</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
                 {/* Bottom Blocks */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-white/5 rounded-2xl overflow-hidden mt-8 border border-white/5">
                     
