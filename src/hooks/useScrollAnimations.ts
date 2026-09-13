@@ -45,10 +45,8 @@ export function useParallax(speed = 0.15) {
         requestAnimationFrame(() => {
           const el = ref.current
           if (el) {
-            const rect = el.getBoundingClientRect()
-            const viewportCenter = window.innerHeight / 2
-            const elCenter = rect.top + rect.height / 2
-            const offset = (elCenter - viewportCenter) * speed
+            const scrollY = window.scrollY
+            const offset = scrollY * speed
             el.style.transform = `translateY(${offset}px)`
           }
           ticking = false
