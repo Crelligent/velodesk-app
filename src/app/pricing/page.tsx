@@ -188,52 +188,25 @@ export default function PricingPage() {
                         </button>
                     </div>
 
-                    {/* Currency & Gateway Toggles */}
-                    <div className="flex flex-col sm:flex-row items-center gap-6">
-                        <div className="inline-flex items-center gap-2 text-xs text-gray-500">
-                            <span>Currency:</span>
-                            <button
-                                onClick={() => {
-                                    setCurrency('USD')
-                                }}
-                                className={`transition hover:text-gray-300 ${currency === 'USD' ? 'text-white underline underline-offset-4 decoration-white/30' : ''}`}
-                            >
-                                USD ($)
-                            </button>
-                            <span className="text-white/10">|</span>
-                            <button
-                                onClick={() => {
-                                    setCurrency('NGN')
-                                    setGateway('paystack') // Stripe doesn't support NGN
-                                }}
-                                className={`transition hover:text-gray-300 ${currency === 'NGN' ? 'text-white underline underline-offset-4 decoration-white/30' : ''}`}
-                            >
-                                NGN (?)
-                            </button>
-                        </div>
-
-                        <div className="w-px h-4 bg-white/10 hidden sm:block"></div>
-
-                        <div className="inline-flex items-center gap-2 text-xs text-gray-500">
-                            <span>Processor:</span>
-                            <button
-                                onClick={() => {
-                                    setGateway('stripe')
-                                    setCurrency('USD') // Stripe must be USD
-                                }}
-                                className={`transition hover:text-gray-300 ${gateway === 'stripe' ? 'text-white underline underline-offset-4 decoration-white/30' : ''}`}
-                            >
-                                Stripe (Global)
-                            </button>
-                            <span className="text-white/10">|</span>
-                            <button
-                                onClick={() => setGateway('paystack')}
-                                className={`transition hover:text-gray-300 ${gateway === 'paystack' ? 'text-white underline underline-offset-4 decoration-white/30' : ''}`}
-                            >
-                                Paystack (Africa)
-                            </button>
-                        </div>
-                    </div>
+                    {/* Currency Toggle Switch */}
+                    <div className="flex items-center gap-3 mt-4">
+                        <span className={`text-sm font-medium transition-colors ${currency === 'USD' ? 'text-white' : 'text-gray-500'}`}>USD ($)</span>
+                        <button
+                            onClick={() => {
+                                const newCurr = currency === 'USD' ? 'NGN' : 'USD'
+                                setCurrency(newCurr)
+                                setGateway(newCurr === 'USD' ? 'stripe' : 'paystack')
+                            }}
+                            className="w-12 h-6 rounded-full relative transition-colors duration-300 focus:outline-none bg-[#38BDF8]"
+                        >
+                            <span
+                                className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 ${
+                                    currency === 'NGN' ? 'translate-x-6' : 'translate-x-0'
+                                }`}
+                            />
+                        </button>
+                        <span className={`text-sm font-medium transition-colors ${currency === 'NGN' ? 'text-white' : 'text-gray-500'}`}>NGN (?)</span>
+                    </div></div>
                 </div>
 
                 {/* Plans Grid */}
