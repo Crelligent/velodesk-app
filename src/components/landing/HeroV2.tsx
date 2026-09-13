@@ -120,8 +120,8 @@ export default function HeroV2() {
           <Link href="/login" className="text-sm font-medium text-gray-300 hover:text-white transition">
             Sign In
           </Link>
-          <Link href="/signup" className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-full transition border border-white/5 backdrop-blur-sm">
-            Get Early Access
+          <Link href="/pricing" className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white text-sm font-medium rounded-full transition border border-white/5 backdrop-blur-sm">
+            Start Free Trial
           </Link>
         </div>
       </nav>
