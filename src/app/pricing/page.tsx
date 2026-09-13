@@ -206,7 +206,7 @@ export default function PricingPage() {
                             />
                         </button>
                         <span className={`text-sm font-medium transition-colors ${currency === 'NGN' ? 'text-white' : 'text-gray-500'}`}>NGN (?)</span>
-                    </div></div>
+                    </div>
                 </div>
 
                 {/* Plans Grid */}
