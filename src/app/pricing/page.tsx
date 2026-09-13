@@ -197,11 +197,13 @@ export default function PricingPage() {
                                 setCurrency(newCurr)
                                 setGateway(newCurr === 'USD' ? 'stripe' : 'paystack')
                             }}
-                            className="w-12 h-6 rounded-full relative transition-colors duration-300 focus:outline-none bg-[#38BDF8]"
+                            className={`w-12 h-6 rounded-full relative transition-colors duration-300 focus:outline-none border border-white/10 ${
+                                currency === 'NGN' ? 'bg-[#7B61FF]' : 'bg-white/10'
+                            }`}
                         >
                             <span
-                                className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 ${
-                                    currency === 'NGN' ? 'translate-x-6' : 'translate-x-0'
+                                className={`absolute top-[3px] left-[3px] bg-white w-4 h-4 rounded-full transition-transform duration-300 shadow-sm ${
+                                    currency === 'NGN' ? 'translate-x-[22px]' : 'translate-x-0'
                                 }`}
                             />
                         </button>
