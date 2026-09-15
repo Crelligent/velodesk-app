@@ -3,13 +3,9 @@ import StatsStrip from '@/components/landing/StatsStrip'
 import HowItWorks from '@/components/landing/HowItWorks'
 import TheContrast from '@/components/landing/TheContrast'
 import ScoreDimensions from '@/components/landing/ScoreDimensions'
-import TrustedBy from '@/components/landing/TrustedBy'
-import TrustpilotWidget from '@/components/landing/TrustpilotWidget'
-import TrustpilotUseCases from '@/components/landing/TrustpilotUseCases'
 import BenchmarksFeature from '@/components/landing/BenchmarksFeature'
 import DataroomFeature from '@/components/landing/DataroomFeature'
 import PersonaTabs from '@/components/landing/PersonaTabs'
-import AcceleratorPartners from '@/components/landing/AcceleratorPartners'
 import ChangelogTeaser from '@/components/landing/ChangelogTeaser'
 import Footer from '@/components/landing/Footer'
 
@@ -22,11 +18,7 @@ export default function LandingPage() {
       <TheContrast />
       <BenchmarksFeature />
       <ScoreDimensions />
-      <TrustedBy />
-      <TrustpilotWidget />
-      <TrustpilotUseCases />
       <PersonaTabs />
-      <AcceleratorPartners />
             <DataroomFeature />
       <ChangelogTeaser />
       <Footer />

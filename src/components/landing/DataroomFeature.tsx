@@ -27,7 +27,7 @@ export default function DataroomFeature() {
                                 </div>
                                 <div className="bg-white/5 rounded px-3 py-1 text-[10px] text-white/40 font-mono w-full max-w-sm flex items-center gap-2">
                                     <FileLock className="w-3 h-3" />
-                                    velodesk.com/room/a9b8c7-nexus-ai
+                                    velodesk.com/room/a9b8c7-your-startup
                                 </div>
                             </div>
                             
@@ -35,7 +35,7 @@ export default function DataroomFeature() {
                             <div className="p-6">
                                 <div className="flex justify-between items-center mb-8">
                                     <div>
-                                        <div className="text-white font-medium text-lg">Nexus AI - Series A</div>
+                                        <div className="text-white font-medium text-lg">Your Startup - Series A</div>
                                         <div className="text-xs text-white/40">Expires in 14 days</div>
                                     </div>
                                     <div className="px-3 py-1 rounded bg-[#00B67A]/10 text-[#00B67A] text-[10px] font-mono border border-[#00B67A]/20 uppercase">
