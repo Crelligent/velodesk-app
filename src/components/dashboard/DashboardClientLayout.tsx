@@ -168,7 +168,7 @@ export default function DashboardClientLayout({ children, user }: DashboardClien
                         <nav className="px-6 py-6 space-y-8 flex-1 overflow-y-auto">
                             {navSections.map((section) => (
                                 <div key={section.title}>
-                                    <div className="px-4 mb-4 text-[0.55rem] uppercase tracking-[0.25em] text-[#404040] font-medium">
+                                    <div className="px-4 mb-4 text-xs uppercase tracking-[0.25em] text-[#404040] font-medium">
                                         {section.title}
                                     </div>
                                     <ul className="space-y-0.5">
@@ -179,7 +179,7 @@ export default function DashboardClientLayout({ children, user }: DashboardClien
                                                 <li key={item.href}>
                                                     <Link
                                                         href={item.href}
-                                                        className={`flex items-center gap-3 px-4 py-2 text-[0.8rem] tracking-wide font-light group transition ${isActive
+                                                        className={`flex items-center gap-3 px-4 py-2 text-[0.8rem] tracking-wide font-light group transition rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/40 ${isActive
                                                             ? 'text-white bg-white/5'
                                                             : 'text-[#606060] hover:text-white'
                                                             }`}
@@ -254,7 +254,7 @@ export default function DashboardClientLayout({ children, user }: DashboardClien
                 )}
 
                 {/* Main Content */}
-                <main className={`flex-1 px-16 py-12 ${showSidebar ? 'ml-[260px] mr-[280px]' : ''}`}>
+                <main className={`flex-1 px-4 md:px-8 lg:px-12 py-8 ${showSidebar ? 'ml-[260px] mr-[280px]' : ''}`}>
                     {children}
                 </main>
 

@@ -12,8 +12,8 @@ export default function PropertiesSidebar() {
                 <div className="flex items-center gap-2 pr-3 border-r border-white/5 h-full text-white/40">
                     <span className="text-[12px] font-medium mr-1">02 / 145</span>
                     <div className="flex items-center">
-                        <button className="p-1 hover:bg-white/5 rounded transition-colors"><ChevronUp className="w-3.5 h-3.5" /></button>
-                        <button className="p-1 hover:bg-white/5 rounded transition-colors"><ChevronDown className="w-3.5 h-3.5" /></button>
+                        <button className="p-1 hover:bg-white/5 rounded transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/40" aria-label="Previous signal"><ChevronUp className="w-3.5 h-3.5" /></button>
+                        <button className="p-1 hover:bg-white/5 rounded transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/40" aria-label="Next signal"><ChevronDown className="w-3.5 h-3.5" /></button>
                     </div>
                 </div>
 
@@ -22,13 +22,13 @@ export default function PropertiesSidebar() {
                     <span className="text-[12px] font-medium text-white/60">SIG-1042</span>
                     
                     <div className="flex items-center gap-0.5 text-white/40">
-                        <button className="p-1.5 hover:bg-white/5 hover:text-white rounded transition-colors" title="Copy Link">
+                        <button className="p-1.5 hover:bg-white/5 hover:text-white rounded transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/40" aria-label="Copy link">
                             <Link2 className="w-3.5 h-3.5" />
                         </button>
-                        <button className="p-1.5 hover:bg-white/5 hover:text-white rounded transition-colors" title="Copy ID">
+                        <button className="p-1.5 hover:bg-white/5 hover:text-white rounded transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/40" aria-label="Copy ID">
                             <Copy className="w-3.5 h-3.5" />
                         </button>
-                        <button className="p-1.5 hover:bg-white/5 hover:text-[#7B61FF] rounded transition-colors" title="Send to Slack">
+                        <button className="p-1.5 hover:bg-white/5 hover:text-[#7B61FF] rounded transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#7B61FF]/60" aria-label="Send to Slack">
                             <MessageSquare className="w-3.5 h-3.5" />
                         </button>
                     </div>
@@ -77,7 +77,7 @@ export default function PropertiesSidebar() {
                 </div>
 
                 <div className="mt-8">
-                    <button className="w-full py-2 bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 text-white/80 text-xs font-medium transition-colors rounded">
+                    <button className="w-full py-2 bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 text-white/80 text-xs font-medium transition-colors rounded focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-white/40">
                         Add Custom Property...
                     </button>
                 </div>

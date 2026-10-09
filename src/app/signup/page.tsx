@@ -121,8 +121,8 @@ function SignupForm() {
                         We sent a secure confirmation link to <strong className="text-white">{email}</strong>. 
                         Click the link inside to verify your identity and access your dashboard.
                     </p>
-                    <Link href="/login" className="text-sm text-[#7B61FF] hover:text-white transition">
-                        Ã¢â€ Â Back to Sign In
+                    <Link href="/login" className="text-sm text-[#7B61FF] hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B61FF] focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded">
+                        ← Back to Sign In
                     </Link>
                 </div>
             </div>
@@ -160,7 +160,7 @@ function SignupForm() {
                 </div>
                 
                 <div className="text-xs text-gray-600 font-mono flex items-center justify-between mt-10 shrink-0">
-                    <span>Ã‚Â© 2026 Velodesk</span>
+                    <span>© 2026 Velodesk</span>
                     <a href="mailto:support@velodesk.com" className="hover:text-gray-400">support@velodesk.com</a>
                 </div>
             </div>

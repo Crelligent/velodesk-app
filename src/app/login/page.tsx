@@ -75,7 +75,7 @@ export default function LoginPage() {
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full px-4 py-3 bg-white/[0.02] border border-white/10 rounded-xl focus:outline-none focus:border-[#7B61FF] text-white transition-colors"
+                                    className="w-full px-4 py-3 bg-white/[0.02] border border-white/10 rounded-xl focus:outline-none focus:border-[#7B61FF] focus-visible:ring-2 focus-visible:ring-[#7B61FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] text-white transition-colors"
                                     placeholder="you@company.com"
                                     required
                                 />
@@ -92,8 +92,8 @@ export default function LoginPage() {
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    className="w-full px-4 py-3 bg-white/[0.02] border border-white/10 rounded-xl focus:outline-none focus:border-[#7B61FF] text-white transition-colors tracking-widest"
-                                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                                    className="w-full px-4 py-3 bg-white/[0.02] border border-white/10 rounded-xl focus:outline-none focus:border-[#7B61FF] focus-visible:ring-2 focus-visible:ring-[#7B61FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505] text-white transition-colors tracking-widest"
+                                    placeholder="••••••••"
                                     required
                                 />
                             </div>
@@ -101,7 +101,7 @@ export default function LoginPage() {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full py-4 mt-2 bg-gradient-to-r from-[#7B61FF] via-[#5B8DEF] to-[#38BDF8] text-white font-medium rounded-xl hover:brightness-110 transition disabled:opacity-50 flex items-center justify-center gap-2 group"
+                                className="w-full py-4 mt-2 bg-gradient-to-r from-[#7B61FF] via-[#5B8DEF] to-[#38BDF8] text-white font-medium rounded-xl hover:brightness-110 transition disabled:opacity-50 flex items-center justify-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B61FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]"
                             >
                                 {loading ? 'Signing in...' : (
                                     <>Sign In <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" /></>
@@ -118,7 +118,7 @@ export default function LoginPage() {
                         <button
                             onClick={handleGoogleLogin}
                             disabled={loading}
-                            className="w-full py-3.5 border border-white/10 rounded-xl hover:bg-white/5 text-white transition flex items-center justify-center gap-3 disabled:opacity-50"
+                            className="w-full py-3.5 border border-white/10 rounded-xl hover:bg-white/5 text-white transition flex items-center justify-center gap-3 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B61FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]"
                         >
                             <svg className="w-5 h-5" viewBox="0 0 24 24">
                                 <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -139,7 +139,7 @@ export default function LoginPage() {
                 </div>
                 
                 <div className="text-xs text-gray-600 font-mono flex items-center justify-between">
-                    <span>Â© 2026 Velodesk</span>
+                    <span>© 2026 Velodesk</span>
                     <a href="mailto:support@velodesk.com" className="hover:text-gray-400">support@velodesk.com</a>
                 </div>
             </div>
@@ -163,7 +163,7 @@ export default function LoginPage() {
                             </div>
                             <div>
                                 <h3 className="text-white font-medium text-lg">Real-time Telemetry</h3>
-                                <p className="text-gray-400 text-sm">Monitor your PMF Scoreâ„¢ as it evolves.</p>
+                                <p className="text-gray-400 text-sm">Monitor your PMF Score™ as it evolves.</p>
                             </div>
                         </div>
 
