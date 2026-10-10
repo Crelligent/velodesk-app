@@ -1,0 +1,43 @@
+/* ============================================================
+   Velodesk Design System — tokens (Tailwind CSS v4)
+   Separate brand from Crelligent. Formalises velodesk-app's
+   existing look: near-black, green accent, Outfit + Inter.
+   Usage in src/app/globals.css:
+     @import "tailwindcss";
+     @import "./velodesk-tokens.css";
+   ============================================================ */
+
+@theme {
+  --font-display: var(--font-outfit), "Outfit", system-ui, sans-serif;
+  --font-sans: var(--font-inter), "Inter", system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Radius: Tailwind defaults (sm 4px, md 6px, lg 8px, xl 12px, 2xl 16px) — not overridden,
+     so existing rounded-* classes keep their size. Cards rounded-xl, inputs/buttons rounded-lg. */
+
+  --color-bg: #050505;
+  --color-surface: #0A0A0A;
+  --color-surface-2: #121212;
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-border-strong: rgba(255, 255, 255, 0.12);
+  --color-text: #FFFFFF;
+  --color-text-muted: #8A8A8A;      /* was #606060 (3.2:1, fails) → 5.9:1 */
+  --color-text-dim: #5C5C5C;        /* disabled / decorative only */
+  --color-accent: #22C55E;          /* 8.9:1 */
+  --color-accent-hover: #16A34A;
+  --color-on-accent: #050505;
+  --color-info: #3B82F6;
+  --color-warning: #F5A524;
+  --color-danger: #F04438;
+}
+
+@layer base {
+  html { background: var(--color-bg); color: var(--color-text); color-scheme: dark; }
+  body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+  h1, h2, h3 { font-family: var(--font-display); letter-spacing: -0.02em; text-wrap: balance; }
+  :focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

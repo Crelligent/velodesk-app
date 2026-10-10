@@ -3,6 +3,11 @@
 import React from 'react'
 import { useScrollReveal } from '@/hooks/useScrollAnimations'
 
+// Hidden until the owner confirms each company below has founders who actually use Velodesk
+// (and that we have permission to name them). Set to true only after confirming.
+const SHOW_UNVERIFIED_CLAIMS = false
+
+// UNVERIFIED: "Trusted by founders from" — none of these are confirmed customers.
 const companies = [
   'Nexus AI',
   'Reforge',
@@ -14,6 +19,8 @@ const companies = [
 
 export default function TrustedBy() {
   const { ref, isVisible } = useScrollReveal(0.2)
+
+  if (!SHOW_UNVERIFIED_CLAIMS) return null
 
   return (
     <section
@@ -27,7 +34,7 @@ export default function TrustedBy() {
             : 'opacity-0 translate-y-6'
         }`}
       >
-        <span className="text-xs font-mono tracking-widest uppercase text-white/30">
+        <span className="text-xs font-mono tracking-widest uppercase text-[#8A8A8A]">
           Trusted by founders from
         </span>
 
@@ -35,7 +42,7 @@ export default function TrustedBy() {
           {companies.map((name) => (
             <span
               key={name}
-              className="text-white/25 font-medium text-lg md:text-xl select-none"
+              className="text-[#8A8A8A] font-medium text-lg md:text-xl select-none"
             >
               {name}
             </span>

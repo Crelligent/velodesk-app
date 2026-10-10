@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { initializeTransaction, PAYSTACK_PLANS } from '@/lib/paystack'
+import { startPaystackCheckout } from '@/lib/billing'
 
 export async function POST(request: Request) {
     try {
@@ -13,29 +13,11 @@ export async function POST(request: Request) {
 
         const { planId, currency } = await request.json()
 
-        // Get plan code
-        const planCodeKey = `${planId}_${(currency || 'USD').toLowerCase()}` as keyof typeof PAYSTACK_PLANS
-        const planCode = PAYSTACK_PLANS[planCodeKey]
-        if (!planCode) {
-            return NextResponse.json({ error: 'Invalid plan' }, { status: 400 })
+        const result = await startPaystackCheckout(supabase, user, planId, currency)
+        if ('error' in result) {
+            return NextResponse.json({ error: result.error, code: result.code }, { status: result.status })
         }
-
-        // Initialize transaction
-        const response = await initializeTransaction({
-            email: user.email!,
-            planCode,
-            callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/api/paystack/callback`,
-            metadata: {
-                user_id: user.id,
-                plan_id: planId,
-            },
-        })
-
-        if (!response.status) {
-            return NextResponse.json({ error: response.message }, { status: 400 })
-        }
-
-        return NextResponse.json({ url: response.data.authorization_url })
+        return NextResponse.json({ url: result.url })
     } catch (error) {
         console.error('Paystack checkout error:', error)
         return NextResponse.json({ error: 'Failed to initialize transaction' }, { status: 500 })

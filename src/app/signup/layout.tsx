@@ -3,11 +3,11 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Sign Up",
   description:
-    "Create your free Velodesk account. No credit card required. Get your PMF Score in under 2 minutes with a 14-day free trial.",
+    "Start your 14-day Velodesk free trial. No credit card required. Connect Paystack or Stripe to get your PMF Score.",
   openGraph: {
     title: "Start Your Free Trial | Velodesk",
     description:
-      "Create your free account and prove product-market fit in minutes. No credit card required.",
+      "Start your 14-day free trial and measure product-market fit from your real data. No credit card required.",
   },
 };
 

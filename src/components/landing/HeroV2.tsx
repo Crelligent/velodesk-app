@@ -105,7 +105,7 @@ export default function HeroV2() {
           <img src="/velodesk%20(2).png" alt="Velodesk" className="h-8 w-auto" />
           <div className="flex flex-col justify-center">
             <span className="font-orbitron font-bold text-sm tracking-[0.15em] text-white leading-none">VELODESK</span>
-            <span className="font-mono text-[8px] text-white/30 tracking-widest mt-1 uppercase">By Crelligent</span>
+            <span className="font-mono text-[8px] text-[#8A8A8A] tracking-widest mt-1 uppercase">By Crelligent</span>
           </div>
         </Link>
         
@@ -133,12 +133,12 @@ export default function HeroV2() {
         <h1 className="animate-fade-up text-5xl md:text-7xl lg:text-[84px] font-medium tracking-tight leading-[0.95] mb-6 max-w-5xl">
           <span className="bg-gradient-to-b from-white via-white/90 to-white/40 bg-clip-text text-transparent">Your startup has</span>{' '}
           <span className="font-['Instrument_Serif'] italic font-normal bg-gradient-to-r from-[#7B61FF] via-[#5B8DEF] to-[#38BDF8] bg-clip-text text-transparent">a score.</span><br />
-          <span className="bg-gradient-to-b from-white/35 to-white/15 bg-clip-text text-transparent">You just can&apos;t see it yet.</span>
+          <span className="bg-gradient-to-b from-white/60 to-white/40 bg-clip-text text-transparent">You just can&apos;t see it yet.</span>
         </h1>
 
         {/* Subheadline */}
-        <p className="animate-fade-up delay-200 text-lg md:text-xl font-light text-white/50 max-w-2xl mb-10 leading-relaxed">
-          VeloDesk reads your Stripe, Mixpanel, and 17 other tools to calculate the single number investors actually care about: your <strong className="text-white font-medium">PMF Score™</strong>.
+        <p className="animate-fade-up delay-200 text-lg md:text-xl font-light text-white/60 max-w-2xl mb-10 leading-relaxed">
+          VeloDesk reads your Paystack or Stripe data to calculate the single number investors actually care about: your <strong className="text-white font-medium">PMF Score™</strong>.
         </p>
 
         {/* Call to Action */}
@@ -186,7 +186,7 @@ export default function HeroV2() {
 
       {/* INTEGRATION LOGO FADE-IN WAVE */}
       <section ref={intRef} className="relative z-10 pb-32 pt-10">
-        <p className="text-center text-xs font-mono tracking-widest uppercase text-white/30 mb-8">Seamlessly reads data from</p>
+        <p className="text-center text-xs font-mono tracking-widest uppercase text-[#8A8A8A] mb-8">Paystack &amp; Stripe live today. More integrations coming soon.</p>
         <div className="int-marquee-container max-w-7xl mx-auto px-8">
           <div className="int-marquee">
             <div className="flex items-center gap-16">

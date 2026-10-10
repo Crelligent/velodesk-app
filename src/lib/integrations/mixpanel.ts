@@ -1,66 +1,90 @@
-// Mixpanel Integration Engine
+/**
+ * Mixpanel: retention signal. Analytics source.
+ * Credentials: { projectId, username, secret, region? } (service account; region us|eu|in)
+ *
+ * Engagement (DAU/MAU) is NOT read: the Query API has no "any event" unique-user
+ * count without naming an event or a saved Insights report, so it stays null.
+ */
+import { basicAuth, describeError, requestJson, ymd, type RequestOptions } from './http'
+import type { Credentials, SignalSet, ValidationResult } from './signals'
 
-export interface MixpanelMetrics {
-    dau: number;
-    mau: number;
-    retentionRate: number; // Day 30 retention percentage (0-100)
-    engagementScore: number; // 0-100 score based on active frequency
+export const kind = 'analytics' as const
+
+const HOSTS: Record<string, string> = {
+    us: 'https://mixpanel.com',
+    eu: 'https://eu.mixpanel.com',
+    in: 'https://in.mixpanel.com',
 }
 
-interface MixpanelCredentials {
-    projectId: string;
-    username: string;
-    secret: string;
+type RetentionResponse = Record<string, { counts?: number[]; first?: number }>
+
+function base(c: Credentials) {
+    return HOSTS[(c.region || 'us').toLowerCase()] ?? HOSTS.us
 }
 
-export async function getMixpanelMetrics(accessTokenJson: string): Promise<MixpanelMetrics | null> {
+function opts(c: Credentials): RequestOptions {
+    // Query API allows 60 queries/hour and 5 concurrent: keep retries low
+    return { headers: { Authorization: basicAuth(c.username ?? '', c.secret ?? ''), Accept: 'application/json' }, retries: 2 }
+}
+
+/**
+ * GET https://{mixpanel.com|eu.mixpanel.com|in.mixpanel.com}/api/query/retention
+ *   ?project_id&from_date&to_date&retention_type=compounded&unit=month&interval_count
+ * (Query API "Retention"; compounded = users active in a month who are active again N months later)
+ */
+async function retention(c: Credentials, from: string, to: string, unit: 'day' | 'month', intervalCount: number) {
+    const params = new URLSearchParams({
+        project_id: c.projectId ?? '',
+        from_date: from,
+        to_date: to,
+        retention_type: 'compounded',
+        unit,
+        interval_count: String(intervalCount),
+    })
+    return requestJson<RetentionResponse>('Mixpanel', `${base(c)}/api/query/retention?${params}`, opts(c))
+}
+
+export async function validate(c: Credentials): Promise<ValidationResult> {
+    if (!/^\d+$/.test(c.projectId ?? '')) return { ok: false, error: 'Mixpanel project ID should be a number', input: true }
     try {
-        const creds: MixpanelCredentials = JSON.parse(accessTokenJson);
-        
-        if (!creds.projectId || !creds.username || !creds.secret) {
-            console.error('Invalid Mixpanel credentials format');
-            return null;
-        }
-
-        // For VeloDesk MVP, we simulate hitting the Mixpanel API using the provided credentials.
-        // In a full production environment, this would execute JQL or use the Insights API 
-        // to aggregate the real DAU/MAU counts and calculate N-day retention.
-        
-        // Simulating the Mixpanel API validation:
-        const auth = Buffer.from(`${creds.username}:${creds.secret}`).toString('base64');
-        
-        // We can do a quick check against the Mixpanel API to validate credentials
-        const validateRes = await fetch('https://eu.mixpanel.com/api/app/me', {
-             headers: {
-                 'Authorization': `Basic ${auth}`,
-                 'Accept': 'application/json'
-             }
-        }).catch(() => null);
-
-        // Fallback to US endpoint if EU fails
-        if (!validateRes || !validateRes.ok) {
-             const validateUs = await fetch('https://mixpanel.com/api/app/me', {
-                  headers: {
-                      'Authorization': `Basic ${auth}`,
-                      'Accept': 'application/json'
-                  }
-             }).catch(() => null);
-             
-             if (!validateUs || !validateUs.ok) {
-                 console.warn("Mixpanel API validation failed or returned non-200. Proceeding with demo data.");
-             }
-        }
-
-        // Return calculated product metrics
-        return {
-            dau: 1245,
-            mau: 4890,
-            retentionRate: 68, // 68% day-30 retention
-            engagementScore: 74 // 74/100 engagement
-        };
-
+        const day = ymd(new Date(Date.now() - 86_400_000))
+        await retention(c, day, day, 'day', 1)
+        return { ok: true }
     } catch (error) {
-        console.error('Error fetching Mixpanel metrics:', error);
-        return null;
+        return { ok: false, error: describeError(error) }
+    }
+}
+
+/** Weighted retention for interval k over cohorts whose k-th month has fully elapsed. */
+export function retentionAt(data: RetentionResponse, k: number, now = new Date()): number | null {
+    return retentionStats(data, k, now).pct
+}
+
+export function retentionStats(data: RetentionResponse, k: number, now = new Date()): { pct: number | null; cohort: number } {
+    let retained = 0
+    let cohort = 0
+    for (const [date, row] of Object.entries(data)) {
+        const start = new Date(`${date}T00:00:00Z`)
+        if (Number.isNaN(start.getTime())) continue
+        const complete = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + k + 1, 1))
+        if (complete > now || !row.counts || row.counts.length <= k || !row.first) continue
+        retained += row.counts[k]
+        cohort += row.first
+    }
+    return { pct: cohort > 0 ? Math.round((retained / cohort) * 1000) / 10 : null, cohort }
+}
+
+export async function sync(c: Credentials): Promise<SignalSet> {
+    const now = new Date()
+    const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 7, 1))
+    const data = await retention(c, ymd(from), ymd(now), 'month', 7)
+    return {
+        retention: {
+            month1: retentionAt(data, 1, now),
+            month3: retentionAt(data, 3, now),
+            month6: retentionAt(data, 6, now),
+            cohortSize: retentionStats(data, 1, now).cohort,
+        },
+        engagement: { dau: null, wau: null, mau: null, stickiness: null },
     }
 }

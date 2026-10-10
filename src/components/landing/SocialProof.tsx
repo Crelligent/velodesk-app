@@ -2,6 +2,22 @@
 
 import React from 'react'
 
+// Common founder problems Velodesk addresses — stated generally, not attributed to anyone.
+const painPoints = [
+  {
+    title: 'Data spread across tools',
+    text: 'Revenue in Paystack or Stripe, usage in Mixpanel, customers in a spreadsheet. Preparing a board update means stitching it together by hand.',
+  },
+  {
+    title: 'Investor questions without answers',
+    text: 'Investors ask for retention, churn and CAC. Without a single source of truth, those numbers take days to assemble and are hard to defend.',
+  },
+  {
+    title: 'Unsure if you have product-market fit',
+    text: 'You have users and some revenue, but no consistent way to tell whether they are the right users and whether they are staying.',
+  },
+]
+
 export default function SocialProof() {
   return (
     <section className="sp-section">
@@ -32,6 +48,9 @@ export default function SocialProof() {
         }
 
         .sp-grid {
+          list-style: none;
+          padding: 0;
+          margin: 0;
           display: grid;
           grid-template-columns: repeat(3, 1fr);
           gap: 32px;
@@ -90,8 +109,9 @@ export default function SocialProof() {
         }
 
         .sp-name {
-          font-size: 15px;
+          font-size: 18px;
           font-weight: 500;
+          color: #fff;
         }
 
         .sp-role {
@@ -106,57 +126,25 @@ export default function SocialProof() {
         `
       }} />
 
+      {/*
+        This section previously showed quotes attributed to "Tobi O.", "Sarah M." and "David K."
+        that could not be traced to real people, so they were removed. The pain points are kept
+        as unattributed statements. TODO(owner): add real, consented customer quotes here.
+      */}
       <div className="sp-container">
         
         <div className="sp-header">
           <h2 className="sp-title">You are not alone in the chaos.</h2>
         </div>
 
-        <div className="sp-grid">
-          
-          <div className="sp-card">
-            <div className="sp-quote-mark">"</div>
-            <p className="sp-text">
-              "We were generating revenue, but I honestly couldn't tell you if we had product-market fit. I had to pull data from Stripe, Amplitude, and our database just to prep for board meetings. It was a nightmare."
-            </p>
-            <div className="sp-author">
-              <div className="sp-avatar">TO</div>
-              <div className="sp-info">
-                <div className="sp-name">Tobi O.</div>
-                <div className="sp-role">Fintech Founder, Lagos</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="sp-card">
-            <div className="sp-quote-mark">"</div>
-            <p className="sp-text">
-              "Investors kept asking for our D30 retention and blended CAC. My co-founder and I would literally just look at each other. If I had a single dashboard that gave me the exact math, I would have raised our seed round 3 months faster."
-            </p>
-            <div className="sp-author">
-              <div className="sp-avatar">SM</div>
-              <div className="sp-info">
-                <div className="sp-name">Sarah M.</div>
-                <div className="sp-role">SaaS Founder, London</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="sp-card">
-            <div className="sp-quote-mark">"</div>
-            <p className="sp-text">
-              "The anxiety of not knowing if we were building something people actually wanted was killing me. We had active users, but were they the right users? I needed absolute mathematical certainty, not a guess."
-            </p>
-            <div className="sp-author">
-              <div className="sp-avatar">DK</div>
-              <div className="sp-info">
-                <div className="sp-name">David K.</div>
-                <div className="sp-role">Logistics Founder, Nairobi</div>
-              </div>
-            </div>
-          </div>
-
-        </div>
+        <ul className="sp-grid">
+          {painPoints.map((point) => (
+            <li key={point.title} className="sp-card">
+              <h3 className="sp-name">{point.title}</h3>
+              <p className="sp-text">{point.text}</p>
+            </li>
+          ))}
+        </ul>
 
       </div>
     </section>

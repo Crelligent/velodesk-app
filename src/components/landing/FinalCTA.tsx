@@ -1,6 +1,13 @@
 'use client'
 
 import React from 'react'
+import Link from 'next/link'
+
+// The former waitlist copy ("Limited Availability", "First 500 founders get prioritized
+// onboarding", "Spots are filling up fast") was invented scarcity and contradicted the open
+// 14-day trial; its email form also discarded submissions. Replaced with a direct trial CTA.
+// The 1-on-1 diagnostic session offer is hidden until the owner confirms it is real.
+const SHOW_UNVERIFIED_CLAIMS = false
 
 export default function FinalCTA() {
   return (
@@ -86,10 +93,33 @@ export default function FinalCTA() {
           background: #222;
         }
 
+        .cta-link {
+          display: inline-block;
+          background: #000;
+          color: #fff;
+          border-radius: 8px;
+          padding: 18px 40px;
+          font-weight: 500;
+          font-size: 16px;
+          text-decoration: none;
+          box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+          transition: transform 0.2s, background 0.2s;
+        }
+
+        .cta-link:hover {
+          transform: translateY(-2px);
+          background: #222;
+        }
+
+        .cta-link:focus-visible {
+          outline: 3px solid #000;
+          outline-offset: 4px;
+        }
+
         .cta-disclaimer {
           margin-top: 24px;
           font-size: 14px;
-          color: rgba(0,0,0,0.6);
+          color: rgba(0,0,0,0.8);
           font-weight: 500;
         }
 
@@ -132,18 +162,18 @@ export default function FinalCTA() {
       <div className="cta-shape-2"></div>
 
       <div className="cta-container">
-        <div className="cta-tag">Limited Availability</div>
-        <h2 className="cta-title">First 500 founders get prioritized onboarding.</h2>
+        <div className="cta-tag">14-day free trial</div>
+        <h2 className="cta-title">See your real PMF Score.</h2>
         <p className="cta-subtitle">
-          Join the waitlist today. When we launch, you'll receive a personalized 1-on-1 PMF diagnostic session with our data team.
+          Connect Paystack or Stripe and get a score calculated from your actual data.
+          {SHOW_UNVERIFIED_CLAIMS && (
+            <> You&apos;ll also get a personalized 1-on-1 PMF diagnostic session with our data team.</>
+          )}
         </p>
-        
-        <form className="cta-form" onSubmit={(e) => e.preventDefault()}>
-          <input type="email" placeholder="Enter your work email" className="cta-input" required />
-          <button type="submit" className="cta-btn">Join the Waitlist</button>
-        </form>
 
-        <div className="cta-disclaimer">Spots are filling up fast. Don't build in the dark.</div>
+        <Link href="/signup" className="cta-link">Start your free trial</Link>
+
+        <div className="cta-disclaimer">No credit card required.</div>
       </div>
     </section>
   )

@@ -64,14 +64,17 @@ export default function LoginPage() {
 
                         <form onSubmit={handleLogin} className="space-y-5">
                             {error && (
-                                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
+                                <div role="alert" className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
                                     {error}
                                 </div>
                             )}
 
                             <div>
-                                <label className="block text-xs font-mono uppercase tracking-wider text-gray-500 mb-2">Email Address</label>
+                                <label htmlFor="login-email" className="block text-xs font-mono uppercase tracking-wider text-[#8A8A8A] mb-2">Email Address</label>
                                 <input
+                                    id="login-email"
+                                    name="email"
+                                    autoComplete="email"
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
@@ -83,12 +86,15 @@ export default function LoginPage() {
 
                             <div>
                                 <div className="flex justify-between items-center mb-2">
-                                    <label className="block text-xs font-mono uppercase tracking-wider text-gray-500">Password</label>
-                                    <Link href="/forgot-password" className="text-xs text-[#7B61FF] hover:text-[#907aff] transition">
+                                    <label htmlFor="login-password" className="block text-xs font-mono uppercase tracking-wider text-[#8A8A8A]">Password</label>
+                                    <Link href="/forgot-password" className="text-xs text-[#7B61FF] hover:text-[#907aff] transition rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B61FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]">
                                         Forgot password?
                                     </Link>
                                 </div>
                                 <input
+                                    id="login-password"
+                                    name="password"
+                                    autoComplete="current-password"
                                     type="password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
@@ -111,11 +117,12 @@ export default function LoginPage() {
 
                         <div className="flex items-center gap-4 my-8">
                             <div className="flex-1 h-px bg-white/5" />
-                            <span className="text-xs font-mono text-gray-600 uppercase tracking-widest">or continue with</span>
+                            <span className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest">or continue with</span>
                             <div className="flex-1 h-px bg-white/5" />
                         </div>
 
                         <button
+                            type="button"
                             onClick={handleGoogleLogin}
                             disabled={loading}
                             className="w-full py-3.5 border border-white/10 rounded-xl hover:bg-white/5 text-white transition flex items-center justify-center gap-3 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B61FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]"
@@ -129,18 +136,18 @@ export default function LoginPage() {
                             Google
                         </button>
 
-                        <p className="text-center text-sm text-gray-500 mt-8">
+                        <p className="text-center text-sm text-[#8A8A8A] mt-8">
                             Don&apos;t have an account?{' '}
-                            <Link href="/signup" className="text-[#7B61FF] hover:text-white transition">
-                                Get Early Access
+                            <Link href="/signup" className="text-[#7B61FF] hover:text-white transition rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B61FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]">
+                                Start your free trial
                             </Link>
                         </p>
                     </motion.div>
                 </div>
                 
-                <div className="text-xs text-gray-600 font-mono flex items-center justify-between">
+                <div className="text-xs text-[#8A8A8A] font-mono flex items-center justify-between">
                     <span>© 2026 Velodesk</span>
-                    <a href="mailto:support@velodesk.com" className="hover:text-gray-400">support@velodesk.com</a>
+                    <a href="mailto:support@velodesk.com" className="hover:text-white rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B61FF]">support@velodesk.com</a>
                 </div>
             </div>
 
@@ -156,7 +163,8 @@ export default function LoginPage() {
                     transition={{ duration: 0.8, delay: 0.2 }}
                     className="relative z-10 w-full max-w-lg"
                 >
-                    <div className="bg-[#050505]/50 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl">
+                    <div className="bg-[#050505]/50 backdrop-blur-xl border border-white/10 rounded-2xl p-8 shadow-2xl" aria-label="Illustrative example of a PMF Score card" role="img">
+                        <div className="text-[10px] font-mono uppercase tracking-widest text-[#8A8A8A] mb-6">Illustrative example</div>
                         <div className="flex gap-4 mb-8">
                             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#7B61FF]/20 to-[#38BDF8]/20 flex items-center justify-center border border-white/5">
                                 <Activity className="w-6 h-6 text-[#7B61FF]" />
@@ -176,7 +184,7 @@ export default function LoginPage() {
                                     className="h-full bg-gradient-to-r from-[#7B61FF] to-[#38BDF8]"
                                 />
                             </div>
-                            <div className="flex justify-between text-xs font-mono text-gray-500">
+                            <div className="flex justify-between text-xs font-mono text-[#8A8A8A]">
                                 <span>Signal Strength</span>
                                 <span className="text-[#38BDF8]">78 / 100</span>
                             </div>
@@ -186,12 +194,12 @@ export default function LoginPage() {
                             <div className="p-4 bg-white/5 rounded-xl border border-white/5 flex flex-col gap-2">
                                 <TrendingUp className="w-5 h-5 text-emerald-400" />
                                 <span className="text-white text-xl font-medium">Top 5%</span>
-                                <span className="text-xs text-gray-500">Growth Velocity</span>
+                                <span className="text-xs text-[#8A8A8A]">Growth Velocity</span>
                             </div>
                             <div className="p-4 bg-white/5 rounded-xl border border-white/5 flex flex-col gap-2">
                                 <Shield className="w-5 h-5 text-[#7B61FF]" />
                                 <span className="text-white text-xl font-medium">Verified</span>
-                                <span className="text-xs text-gray-500">Board Ready Data</span>
+                                <span className="text-xs text-[#8A8A8A]">Board Ready Data</span>
                             </div>
                         </div>
                     </div>

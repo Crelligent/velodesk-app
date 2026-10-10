@@ -1,15 +1,22 @@
 import Stripe from 'stripe'
+import { TRIAL_DAYS } from '@/lib/plans'
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
-export const STRIPE_PRICES = {
-    pro_monthly: 'price_xxx', // Replace with your Stripe price ID
-    pro_yearly: 'price_xxx',
-    enterprise_monthly: 'price_xxx',
-    enterprise_yearly: 'price_xxx',
-    founder_monthly: 'price_founder_xxx',
-    startup_monthly: 'price_startup_xxx',
-    accelerator_monthly: 'price_accel_xxx'
+// Price ids come from env so placeholder ids never reach Stripe. Unset = plan unavailable.
+export const STRIPE_PRICES: Record<string, string | undefined> = {
+    founder_monthly: process.env.STRIPE_PRICE_FOUNDER_MONTHLY,
+    founder_yearly: process.env.STRIPE_PRICE_FOUNDER_YEARLY,
+    startup_monthly: process.env.STRIPE_PRICE_STARTUP_MONTHLY,
+    startup_yearly: process.env.STRIPE_PRICE_STARTUP_YEARLY,
+    accelerator_monthly: process.env.STRIPE_PRICE_ACCELERATOR_MONTHLY,
+}
+
+/** Reverse lookup: Stripe price id -> plan id (e.g. 'founder_monthly'). Unknown price -> null. */
+export function planIdFromStripePrice(priceId: string | null | undefined): string | null {
+    if (!priceId) return null
+    const match = Object.entries(STRIPE_PRICES).find(([, id]) => id && id === priceId)
+    return match ? match[0] : null
 }
 
 export async function createCheckoutSession({
@@ -19,6 +26,9 @@ export async function createCheckoutSession({
     cancelUrl,
     clientReferenceId,
     customerEmail,
+    trialDays = TRIAL_DAYS,
+    trialEnd,
+    metadata,
 }: {
     priceId: string
     customerId?: string
@@ -26,6 +36,9 @@ export async function createCheckoutSession({
     cancelUrl: string
     clientReferenceId?: string
     customerEmail?: string
+    trialDays?: number
+    trialEnd?: number // unix seconds; takes precedence over trialDays
+    metadata?: Record<string, string>
 }) {
     const session = await stripe.checkout.sessions.create({
         mode: 'subscription',
@@ -43,7 +56,11 @@ export async function createCheckoutSession({
         cancel_url: cancelUrl,
         allow_promotion_codes: true,
         subscription_data: {
-            trial_period_days: 14,
+            ...(trialEnd
+                ? { trial_end: trialEnd }
+                : trialDays > 0 ? { trial_period_days: trialDays } : {}),
+            // Lets the webhook map the subscription to the user/plan regardless of event order
+            metadata,
         },
     })
 

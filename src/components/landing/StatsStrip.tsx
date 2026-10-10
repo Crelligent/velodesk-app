@@ -1,23 +1,31 @@
 'use client'
 
 import React from 'react'
-import { useScrollReveal, useCountUp } from '@/hooks/useScrollAnimations'
+import { useScrollReveal } from '@/hooks/useScrollAnimations'
+import { INTEGRATIONS } from '@/lib/integrations'
 
-const stats = [
-  { target: 17, suffix: '+', label: 'Integrations' },
-  { target: 45, prefix: '<', suffix: 's', label: 'Time to Connect' },
-  { target: 84, suffix: '', label: 'Avg. PMF Score' },
-  { target: 0, suffix: '', label: 'Data Engineers Needed' },
+const SCORING_SOURCES = INTEGRATIONS.filter((i) => i.feedsScore).length
+
+// Stats that can't be verified yet are hidden. Set to true only once each one is backed by data.
+const SHOW_UNVERIFIED_CLAIMS = false
+
+type Stat = { value: string; label: string; unverified?: boolean }
+
+// Values render statically (no count-up), so they never show "0" before animating or without JS.
+const stats: Stat[] = [
+  // Derived from the integrations source of truth: only providers that feed the score count.
+  { value: `${SCORING_SOURCES}`, label: 'Live data sources (Paystack, Stripe)' },
+  { value: '14 days', label: 'Free trial' },
+  { value: '₦ or $', label: 'Naira or USD billing' },
+  { value: 'No code', label: 'Needed to connect' },
+  // UNVERIFIED: no measurement backs these.
+  { value: '<45s', label: 'Time to Connect', unverified: true },
+  { value: '84', label: 'Avg. PMF Score', unverified: true },
 ]
 
 export default function StatsStrip() {
   const { ref, isVisible } = useScrollReveal(0.2)
-
-  const count0 = useCountUp(stats[0].target, 2000, isVisible)
-  const count1 = useCountUp(stats[1].target, 2000, isVisible)
-  const count2 = useCountUp(stats[2].target, 2000, isVisible)
-  const count3 = useCountUp(stats[3].target, 2000, isVisible)
-  const counts = [count0, count1, count2, count3]
+  const visibleStats = stats.filter((s) => SHOW_UNVERIFIED_CLAIMS || !s.unverified)
 
   return (
     <section
@@ -25,26 +33,24 @@ export default function StatsStrip() {
       className="bg-[#04060D] py-20 border-t border-white/5"
     >
       <div className="max-w-6xl mx-auto px-6">
-        <div
+        <dl
           className={`grid grid-cols-2 md:grid-cols-4 gap-10 text-center transition-all duration-1000 ease-out ${
             isVisible
               ? 'opacity-100 translate-y-0'
               : 'opacity-0 translate-y-8'
           }`}
         >
-          {stats.map((stat, i) => (
-            <div key={stat.label} className="flex flex-col items-center gap-3">
-              <span className="text-5xl md:text-6xl font-light bg-gradient-to-r from-[#7B61FF] via-[#5B8DEF] to-[#38BDF8] bg-clip-text text-transparent">
-                {stat.prefix ?? ''}
-                {counts[i]}
-                {stat.suffix}
-              </span>
-              <span className="text-white/40 text-sm font-mono uppercase tracking-widest">
+          {visibleStats.map((stat) => (
+            <div key={stat.label} className="flex flex-col-reverse items-center gap-3">
+              <dt className="text-[#8A8A8A] text-sm font-mono uppercase tracking-widest">
                 {stat.label}
-              </span>
+              </dt>
+              <dd className="text-5xl md:text-6xl font-light bg-gradient-to-r from-[#7B61FF] via-[#5B8DEF] to-[#38BDF8] bg-clip-text text-transparent">
+                {stat.value}
+              </dd>
             </div>
           ))}
-        </div>
+        </dl>
       </div>
     </section>
   )

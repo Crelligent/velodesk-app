@@ -2,7 +2,15 @@
 
 import React from 'react'
 
+// The research claims in this section ("400+ post-seed startups", "2,000+ founders", 92%, 3.4x,
+// 11 mo) have no published source, and the email form discarded submissions. The whole
+// section is hidden until the owner confirms the report exists and wires the form to a real
+// list. Set to true only after both are done.
+const SHOW_UNVERIFIED_CLAIMS = false
+
 export default function ResearchAuthority() {
+  if (!SHOW_UNVERIFIED_CLAIMS) return null
+
   return (
     <section className="research-section" id="research">
       <style dangerouslySetInnerHTML={{
@@ -170,9 +178,11 @@ export default function ResearchAuthority() {
             We analyzed data from 400+ post-seed startups across global markets to understand exactly what separates the top 1% from the rest. The answers aren't what you think.
           </p>
           
+          {/* TODO(owner): this form does not submit anywhere yet. */}
           <form className="rs-form" onSubmit={(e) => e.preventDefault()}>
             <div className="rs-input-group">
-              <input type="email" placeholder="Enter your work email" className="rs-input" required />
+              <label htmlFor="research-email" className="sr-only">Work email</label>
+              <input id="research-email" type="email" autoComplete="email" placeholder="Enter your work email" className="rs-input" required />
               <button type="submit" className="rs-btn">Get the Full Report</button>
             </div>
             <div className="rs-disclaimer">Join 2,000+ founders reading our insights. No spam, ever.</div>

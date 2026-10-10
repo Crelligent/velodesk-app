@@ -3,11 +3,11 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Pricing",
   description:
-    "Simple, transparent pricing for Velodesk. Start free and upgrade when you need more. Plans from $0 to Enterprise with custom pricing.",
+    "Simple, transparent pricing for Velodesk. Founder plan US$15 (₦30,000) and Startup plan US$49 (₦50,000) per month, with a 14-day free trial and no credit card required. Custom Enterprise pricing.",
   openGraph: {
     title: "Pricing | Velodesk",
     description:
-      "Simple, transparent pricing. Start free, upgrade when you need more. PMF scoring, AI insights, and investor-ready reports.",
+      "Simple, transparent pricing with a 14-day free trial, no credit card required. PMF scoring, AI insights, and investor-ready reports.",
   },
 };
 

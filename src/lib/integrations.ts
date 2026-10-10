@@ -7,14 +7,40 @@ import { createClient } from '@/lib/supabase/client'
 
 // =================== TYPES ===================
 
+export type IntegrationCategory = 'analytics' | 'payments' | 'finance' | 'crm' | 'support' | 'sentiment'
+
+export interface CredentialField {
+    key: string
+    label: string
+    /** One line: where to find this value (from the provider's docs) */
+    help: string
+    secret?: boolean
+    /** Defaults to true */
+    required?: boolean
+    placeholder?: string
+    options?: { value: string; label: string }[]
+}
+
 export interface Integration {
     id: string
     name: string
     icon: string
+    logo?: string
     description: string
-    category: 'analytics' | 'payments' | 'crm' | 'support'
+    category: IntegrationCategory
+    /** How the customer connects: OAuth via /api/integrations/oauth-start, or credentials via /api/integrations/save */
     authType: 'oauth' | 'api_key'
     recommended?: boolean
+    /** Can be connected and synced today (src/lib/integrations/registry.ts has a module) */
+    syncSupported: boolean
+    /** Its real data feeds the PMF Score (POST /api/pmf/calculate) */
+    feedsScore: boolean
+    /** PMF signals it feeds, for display */
+    signals?: string[]
+    /** Fields the connect modal asks for (api_key providers). Stored as JSON server-side. */
+    credentialFields?: CredentialField[]
+    /** Why it can't be connected yet (syncSupported: false) */
+    unsupportedReason?: string
 }
 
 export interface IntegrationStatus {
@@ -34,41 +60,152 @@ export interface SyncResult {
 
 // =================== AVAILABLE INTEGRATIONS ===================
 
+/**
+ * SINGLE SOURCE OF TRUTH for integrations (UI list + connect modal, save/OAuth
+ * validation, sync, scoring). Server modules live in src/lib/integrations/registry.ts.
+ * syncSupported: real validate + sync exist. feedsScore: its data is used in the PMF Score.
+ */
 export const INTEGRATIONS: Integration[] = [
     // Analytics & Product Intelligence
-    { id: 'mixpanel', name: 'Mixpanel', icon: '📊', description: 'Product analytics and engagement tracking', category: 'analytics', authType: 'api_key', recommended: true },
-    { id: 'amplitude', name: 'Amplitude', icon: '📈', description: 'Product intelligence platform', category: 'analytics', authType: 'api_key' },
-    { id: 'google-analytics', name: 'Google Analytics', icon: '📉', description: 'Web analytics and insights', category: 'analytics', authType: 'oauth' },
-    { id: 'segment', name: 'Segment', icon: '🔀', description: 'Customer data platform', category: 'analytics', authType: 'api_key', recommended: true },
-    { id: 'hotjar', name: 'Hotjar', icon: '🔥', description: 'Behavior analytics and feedback', category: 'analytics', authType: 'api_key' },
-    { id: 'posthog', name: 'PostHog', icon: '🦔', description: 'Open-source product analytics', category: 'analytics', authType: 'api_key' },
-    { id: 'heap', name: 'Heap', icon: '📊', description: 'Digital insights platform', category: 'analytics', authType: 'api_key' },
-    { id: 'fullstory', name: 'FullStory', icon: '🎬', description: 'Digital experience analytics', category: 'analytics', authType: 'api_key' },
+    {
+        id: 'mixpanel', name: 'Mixpanel', description: 'Product analytics and user behavior tracking', category: 'analytics', icon: '◉', logo: '/mixpanel.svg', authType: 'api_key', recommended: true, syncSupported: true, feedsScore: true, signals: ['Retention'],
+        credentialFields: [
+            { key: 'projectId', label: 'Project ID', help: 'Project Settings → Overview → Project ID.', placeholder: '4031683' },
+            { key: 'username', label: 'Service account username', help: 'Organization Settings → Service Accounts; give it access to this project.' },
+            { key: 'secret', label: 'Service account secret', help: 'Shown once when you create the service account.', secret: true },
+            { key: 'region', label: 'Data residency', help: 'EU or India only if your project uses Mixpanel data residency.', options: [
+                { value: 'us', label: 'US (default)' },
+                { value: 'eu', label: 'EU' },
+                { value: 'in', label: 'India' },
+            ] },
+        ],
+    },
+    {
+        id: 'amplitude', name: 'Amplitude', description: 'Digital analytics and product intelligence', category: 'analytics', icon: '⚡', logo: '/amplitude-color_v1.png', authType: 'api_key', recommended: true, syncSupported: true, feedsScore: true, signals: ['Retention', 'Engagement'],
+        credentialFields: [
+            { key: 'apiKey', label: 'API key', help: 'Settings → Organization settings → Projects → your project → API Key.' },
+            { key: 'secretKey', label: 'Secret key', help: 'Same project page, under Secret Key.', secret: true },
+            { key: 'region', label: 'Data region', help: 'Choose EU if your Amplitude org is hosted in the EU.', options: [
+                { value: 'us', label: 'US (default)' },
+                { value: 'eu', label: 'EU data residency' },
+            ] },
+        ],
+    },
+    {
+        id: 'posthog', name: 'PostHog', description: 'Product analytics and feature flags', category: 'analytics', icon: '🏠', logo: '/logo-posthog-1.jpg', authType: 'api_key', syncSupported: true, feedsScore: true, signals: ['Retention', 'Engagement'],
+        credentialFields: [
+            { key: 'personalApiKey', label: 'Personal API key', help: 'Account settings → Personal API keys → create a key with the "Query Read" scope.', secret: true, placeholder: 'phx_...' },
+            { key: 'projectId', label: 'Project ID', help: 'Project settings → General → Project ID.' },
+            { key: 'host', label: 'PostHog Cloud region', help: 'The address you log in at: us.posthog.com or eu.posthog.com (self-hosted PostHog is not supported).', options: [
+                { value: 'https://us.posthog.com', label: 'US Cloud (us.posthog.com)' },
+                { value: 'https://eu.posthog.com', label: 'EU Cloud (eu.posthog.com)' },
+            ] },
+        ],
+    },
+    { id: 'google-analytics', name: 'Google Analytics', description: 'Traffic and acquisition data', category: 'analytics', icon: '📊', logo: '/google-analytics-4.svg', authType: 'oauth', syncSupported: false, feedsScore: false, unsupportedReason: 'Requires an OAuth app; coming soon' },
+    { id: 'segment', name: 'Segment', description: 'Customer data platform', category: 'analytics', icon: '⚙️', logo: '/segment-1.svg', authType: 'api_key', syncSupported: false, feedsScore: false, unsupportedReason: 'Segment routes events but its public API has no metrics to read; connect the analytics tool Segment sends to.' },
+    { id: 'hotjar', name: 'Hotjar', description: 'Heatmaps and session recordings', category: 'analytics', icon: '🔥', logo: '/hotjar-2.svg', authType: 'api_key', syncSupported: false, feedsScore: false, unsupportedReason: 'Hotjar\'s API exposes survey responses and user lookups, not usage metrics.' },
+    { id: 'heap', name: 'Heap', description: 'Auto-capture analytics', category: 'analytics', icon: '📈', logo: '/Heap_Logo_Horizontal-Color_RGB.webp', authType: 'api_key', syncSupported: false, feedsScore: false, unsupportedReason: 'Heap\'s public APIs only send data; reading metrics needs Heap Connect (a data warehouse), not an API key.' },
+    { id: 'fullstory', name: 'FullStory', description: 'Digital experience intelligence', category: 'analytics', icon: '🎥', logo: '/trakop-founded-by-ravi-garg-website-integrations-marketing-automation-fullstory-logo.png', authType: 'api_key', syncSupported: false, feedsScore: false, unsupportedReason: 'FullStory\'s Server API has no aggregate usage metrics, only per-user/session lookups and enterprise data export.' },
 
     // Payments & Revenue
-    { id: 'stripe', name: 'Stripe', icon: '💳', description: 'Payment processing and revenue data', category: 'payments', authType: 'oauth', recommended: true },
-    { id: 'paystack', name: 'Paystack', icon: '💰', description: 'African payment processing', category: 'payments', authType: 'api_key' },
-    { id: 'paddle', name: 'Paddle', icon: '🏓', description: 'SaaS billing and payments', category: 'payments', authType: 'api_key' },
-    { id: 'chargebee', name: 'Chargebee', icon: '🐝', description: 'Subscription billing platform', category: 'payments', authType: 'api_key' },
+    { id: 'stripe', name: 'Stripe', description: 'Payment processing and billing', category: 'payments', icon: '💳', authType: 'oauth', recommended: true, syncSupported: true, feedsScore: true, signals: ['Revenue', 'Retention (churn)'] },
+    {
+        id: 'paystack', name: 'Paystack', description: 'African payments infrastructure', category: 'payments', icon: '💰', logo: '/paystack-2.svg', authType: 'api_key', recommended: true, syncSupported: true, feedsScore: true, signals: ['Revenue', 'Retention (churn)'],
+        credentialFields: [
+            { key: 'secretKey', label: 'Secret key', help: 'Paystack Dashboard → Settings → API Keys & Webhooks → Secret Key (sk_live_...).', secret: true, placeholder: 'sk_live_...' },
+        ],
+    },
+    {
+        id: 'chargebee', name: 'Chargebee', description: 'Subscription management', category: 'payments', icon: '🐝', authType: 'api_key', syncSupported: true, feedsScore: true, signals: ['Revenue', 'Retention (churn)'],
+        credentialFields: [
+            { key: 'site', label: 'Site', help: 'The subdomain of your Chargebee URL: "acme" in acme.chargebee.com.', placeholder: 'acme' },
+            { key: 'apiKey', label: 'API key', help: 'Settings → Configure Chargebee → API Keys and Webhooks → create a read-only key.', secret: true },
+        ],
+    },
+    {
+        id: 'paddle', name: 'Paddle', description: 'SaaS billing and tax compliance', category: 'payments', icon: '🏓', authType: 'api_key', syncSupported: true, feedsScore: true, signals: ['Revenue', 'Retention (churn)'],
+        credentialFields: [
+            { key: 'apiKey', label: 'API key', help: 'Paddle → Developer tools → Authentication → API keys; grant subscription.read.', secret: true, placeholder: 'pdl_live_apikey_...' },
+            { key: 'environment', label: 'Environment', help: 'Live for real customers; Sandbox for test accounts.', options: [
+                { value: 'live', label: 'Live' },
+                { value: 'sandbox', label: 'Sandbox' },
+            ] },
+        ],
+    },
 
     // CRM & Sales
-    { id: 'hubspot', name: 'HubSpot', icon: '🧲', description: 'CRM and marketing automation', category: 'crm', authType: 'oauth', recommended: true },
-    { id: 'salesforce', name: 'Salesforce', icon: '☁️', description: 'Enterprise CRM platform', category: 'crm', authType: 'oauth' },
-    { id: 'pipedrive', name: 'Pipedrive', icon: '🎯', description: 'Sales pipeline management', category: 'crm', authType: 'api_key' },
-    { id: 'close', name: 'Close', icon: '📞', description: 'Sales communication platform', category: 'crm', authType: 'api_key' },
+    {
+        id: 'hubspot', name: 'HubSpot', description: 'CRM and marketing automation', category: 'crm', icon: '🟠', logo: '/hubspot.svg', authType: 'api_key', recommended: true, syncSupported: true, feedsScore: true, signals: ['Growth (deals won)'],
+        credentialFields: [
+            { key: 'accessToken', label: 'Private app access token', help: 'Settings → Integrations → Private Apps → create an app with crm.objects.deals.read and crm.objects.contacts.read.', secret: true, placeholder: 'pat-...' },
+        ],
+    },
+    {
+        id: 'pipedrive', name: 'Pipedrive', description: 'Sales pipeline management', category: 'crm', icon: '🎯', logo: '/pipedrive.svg', authType: 'api_key', syncSupported: true, feedsScore: true, signals: ['Growth (deals won)'],
+        credentialFields: [
+            { key: 'apiToken', label: 'API token', help: 'Profile menu → Personal preferences → API → Your personal API token.', secret: true },
+        ],
+    },
+    {
+        id: 'close', name: 'Close', description: 'Sales engagement CRM', category: 'crm', icon: '📞', logo: '/close.svg', authType: 'api_key', syncSupported: true, feedsScore: true, signals: ['Growth (opportunities won)'],
+        credentialFields: [
+            { key: 'apiKey', label: 'API key', help: 'Settings → Developer → API Keys → New API Key.', secret: true, placeholder: 'api_...' },
+        ],
+    },
+    { id: 'salesforce', name: 'Salesforce', description: 'Enterprise CRM platform', category: 'crm', icon: '☁️', logo: '/salesforce-2.svg', authType: 'oauth', syncSupported: false, feedsScore: false, unsupportedReason: 'Requires an OAuth app; coming soon' },
+
+    // Accounting & Spend Management
+    { id: 'quickbooks', name: 'QuickBooks', description: 'Cloud accounting and bookkeeping', category: 'finance', icon: 'Q', authType: 'oauth', syncSupported: false, feedsScore: false, unsupportedReason: 'Requires an OAuth app; coming soon' },
+    { id: 'xero', name: 'Xero', description: 'Online accounting software', category: 'finance', icon: 'X', authType: 'oauth', syncSupported: false, feedsScore: false, unsupportedReason: 'Requires an OAuth app; coming soon' },
+    { id: 'ramp', name: 'Ramp', description: 'Corporate cards and spend management', category: 'finance', icon: 'R', authType: 'oauth', syncSupported: false, feedsScore: false, unsupportedReason: 'Requires an OAuth app; coming soon' },
 
     // Support & Feedback
-    { id: 'intercom', name: 'Intercom', icon: '💬', description: 'Customer messaging platform', category: 'support', authType: 'oauth', recommended: true },
-    { id: 'zendesk', name: 'Zendesk', icon: '🎧', description: 'Customer service software', category: 'support', authType: 'oauth' },
-    { id: 'typeform', name: 'Typeform', icon: '📝', description: 'Surveys and forms', category: 'support', authType: 'oauth' },
-    { id: 'canny', name: 'Canny', icon: '💡', description: 'Product feedback management', category: 'support', authType: 'api_key' },
+    {
+        id: 'intercom', name: 'Intercom', description: 'Customer messaging platform', category: 'support', icon: '💬', logo: '/intercom-2.svg', authType: 'api_key', recommended: true, syncSupported: true, feedsScore: true, signals: ['Satisfaction (CSAT)'],
+        credentialFields: [
+            { key: 'accessToken', label: 'Access token', help: 'Developer Hub → your app → Configure → Authentication → Access token.', secret: true },
+            { key: 'region', label: 'Workspace region', help: 'Choose EU or Australia if your Intercom workspace is hosted there.', options: [
+                { value: 'us', label: 'US (default)' },
+                { value: 'eu', label: 'EU' },
+                { value: 'au', label: 'Australia' },
+            ] },
+        ],
+    },
+    {
+        id: 'zendesk', name: 'Zendesk', description: 'Customer service and support', category: 'support', icon: '🎧', logo: '/zendesk-1.svg', authType: 'api_key', syncSupported: true, feedsScore: true, signals: ['Satisfaction (CSAT)'],
+        credentialFields: [
+            { key: 'subdomain', label: 'Subdomain', help: '"acme" in acme.zendesk.com.', placeholder: 'acme' },
+            { key: 'email', label: 'Agent email', help: 'Email address of the admin or agent who owns the API token.' },
+            { key: 'apiToken', label: 'API token', help: 'Admin Center → Apps and integrations → APIs → Zendesk API → Settings → Add API token.', secret: true },
+        ],
+    },
+    {
+        id: 'typeform', name: 'Typeform', description: 'Forms and surveys', category: 'support', icon: '📝', logo: '/typeform.svg', authType: 'api_key', syncSupported: true, feedsScore: true, signals: ['Satisfaction (NPS)'],
+        credentialFields: [
+            { key: 'token', label: 'Personal access token', help: 'Account → Your settings → Personal tokens → generate with forms:read and responses:read.', secret: true, placeholder: 'tfp_...' },
+            { key: 'formId', label: 'Form ID', help: 'The code after /to/ in your form link (e.g. abc123 in form.typeform.com/to/abc123).' },
+            { key: 'fieldId', label: 'NPS question ID', help: 'Leave blank and click Connect: we will list the 0-10 questions on that form to choose from.', required: false },
+        ],
+    },
+    {
+        id: 'canny', name: 'Canny', description: 'Feature request tracking', category: 'support', icon: '📣', logo: '/Canny_logo.png', authType: 'api_key', syncSupported: true, feedsScore: false, signals: [],
+        credentialFields: [
+            { key: 'apiKey', label: 'API secret key', help: 'Settings → API & Webhooks → API Secret Key.', secret: true },
+        ],
+    },
+
+    // Customer Sentiment & Reviews
+    { id: 'trustpilot', name: 'Trustpilot', description: 'B2B reviews and qualitative sentiment data', category: 'sentiment', icon: '⭐', authType: 'api_key', syncSupported: false, feedsScore: false, unsupportedReason: 'Reading private review data needs an approved Trustpilot Business API (OAuth) app.' },
 ]
 
-export const CATEGORIES = [
+export const CATEGORIES: { id: IntegrationCategory; label: string }[] = [
     { id: 'analytics', label: 'Analytics & Product Intelligence' },
     { id: 'payments', label: 'Payments & Revenue' },
+    { id: 'finance', label: 'Accounting & Spend Management' },
     { id: 'crm', label: 'CRM & Sales' },
     { id: 'support', label: 'Support & Feedback' },
+    { id: 'sentiment', label: 'Customer Sentiment & Reviews' },
 ]
 
 // =================== CONNECTION FUNCTIONS ===================
@@ -118,22 +255,16 @@ export async function connectWithApiKey(
         return { success: false, error: 'Invalid API key' }
     }
 
-    const { error } = await supabase
-        .from('integration_tokens')
-        .upsert({
-            user_id: user.id,
-            provider,
-            access_token: apiKey,
-            status: 'connected',
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-        }, {
-            onConflict: 'user_id,provider'
-        })
+    // Secrets are written server-side (session-scoped, plan limits enforced)
+    const response = await fetch('/api/integrations/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider, accessToken: apiKey }),
+    })
+    const result = await response.json().catch(() => ({}))
 
-    if (error) {
-        console.error('Error saving integration:', error)
-        return { success: false, error: error.message }
+    if (!response.ok) {
+        return { success: false, error: result.error || 'Failed to save integration' }
     }
 
     return { success: true }
@@ -143,24 +274,8 @@ export async function connectWithApiKey(
  * Initiate OAuth flow for an integration
  */
 export function initiateOAuth(provider: string): void {
-    const redirectUri = `${window.location.origin}/api/integrations/callback`
-
-    const oauthUrls: Record<string, string> = {
-        'google-analytics': `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}&redirect_uri=${redirectUri}&response_type=code&scope=https://www.googleapis.com/auth/analytics.readonly&state=${provider}`,
-        'hubspot': `https://app.hubspot.com/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_HUBSPOT_CLIENT_ID}&redirect_uri=${redirectUri}&scope=contacts%20crm.objects.contacts.read&state=${provider}`,
-        'stripe': `https://connect.stripe.com/oauth/authorize?response_type=code&client_id=${process.env.NEXT_PUBLIC_STRIPE_CLIENT_ID}&scope=read_only&state=${provider}&redirect_uri=${redirectUri}`,
-        'intercom': `https://app.intercom.com/oauth?client_id=${process.env.NEXT_PUBLIC_INTERCOM_CLIENT_ID}&redirect_uri=${redirectUri}&state=${provider}`,
-        'salesforce': `https://login.salesforce.com/services/oauth2/authorize?response_type=code&client_id=${process.env.NEXT_PUBLIC_SALESFORCE_CLIENT_ID}&redirect_uri=${redirectUri}&state=${provider}`,
-        'zendesk': `https://${process.env.NEXT_PUBLIC_ZENDESK_SUBDOMAIN}.zendesk.com/oauth/authorizations/new?response_type=code&client_id=${process.env.NEXT_PUBLIC_ZENDESK_CLIENT_ID}&redirect_uri=${redirectUri}&scope=read&state=${provider}`,
-        'typeform': `https://api.typeform.com/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_TYPEFORM_CLIENT_ID}&redirect_uri=${redirectUri}&scope=responses:read&state=${provider}`,
-    }
-
-    const url = oauthUrls[provider]
-    if (url) {
-        window.location.href = url
-    } else {
-        console.error(`OAuth not configured for ${provider}`)
-    }
+    // The server builds the provider URL and sets the CSRF state cookie
+    window.location.href = `/api/integrations/oauth-start?provider=${encodeURIComponent(provider)}`
 }
 
 /**
@@ -200,10 +315,10 @@ export async function syncIntegration(provider: string): Promise<SyncResult> {
         return { provider, success: false, error: 'Not authenticated', syncedAt: new Date().toISOString() }
     }
 
-    // Get the integration token
+    // Check the integration exists (the token itself never leaves the server)
     const { data: token } = await supabase
         .from('integration_tokens')
-        .select('access_token')
+        .select('provider')
         .eq('user_id', user.id)
         .eq('provider', provider)
         .single()
@@ -217,7 +332,7 @@ export async function syncIntegration(provider: string): Promise<SyncResult> {
         const response = await fetch('/api/integrations/sync', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ provider, accessToken: token.access_token })
+            body: JSON.stringify({ provider })
         })
 
         const result = await response.json()

@@ -139,29 +139,17 @@ export async function detectRegion(): Promise<RegionInfo> {
 // =================== STRIPE CHECKOUT ===================
 
 /**
- * Create a Stripe Checkout session via API route
+ * Create a Stripe Checkout session via API route.
+ * planId matches the pricing page (e.g. 'founder_monthly'); Stripe is USD-only.
  */
 export async function createStripeCheckout(
-    priceId?: string,
-    successUrl?: string,
-    cancelUrl?: string
+    planId: string = 'founder_monthly'
 ): Promise<{ url?: string; error?: string }> {
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) return { error: 'Not authenticated' }
-
     try {
         const response = await fetch('/api/stripe/checkout', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                priceId: priceId || PRICING_TIERS.pro.stripePriceId,
-                successUrl: successUrl || `${window.location.origin}/dashboard?payment=success`,
-                cancelUrl: cancelUrl || `${window.location.origin}/pricing?payment=cancelled`,
-                customerEmail: user.email,
-                userId: user.id,
-            }),
+            body: JSON.stringify({ planId, currency: 'USD' }),
         })
 
         const data = await response.json()
@@ -189,7 +177,7 @@ export async function openCustomerPortal(): Promise<{ url?: string; error?: stri
         const response = await fetch('/api/stripe/portal', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId: user.id }),
+            // User is taken from the session server-side
         })
 
         const data = await response.json()
@@ -206,89 +194,23 @@ export async function openCustomerPortal(): Promise<{ url?: string; error?: stri
 
 // =================== PAYSTACK CHECKOUT ===================
 
-interface PaystackOptions {
-    email: string
-    amount: number
-    planCode?: string
-    onSuccess?: (response: { reference: string }) => void
-    onCancel?: () => void
-}
-
-declare global {
-    interface Window {
-        PaystackPop?: {
-            setup: (config: {
-                key: string
-                email: string
-                amount: number
-                plan?: string
-                currency: string
-                ref: string
-                callback: (response: { reference: string }) => void
-                onClose: () => void
-            }) => { openIframe: () => void }
-        }
-    }
-}
-
 /**
- * Initialize Paystack payment popup
+ * Create a Paystack (NGN) checkout via API route. The server verifies the
+ * payment in /api/paystack/callback and /api/paystack/webhook.
  */
-export function initPaystack(options: PaystackOptions): void {
-    if (typeof window === 'undefined' || !window.PaystackPop) {
-        console.error('Paystack not loaded. Add: <script src="https://js.paystack.co/v1/inline.js"></script>')
-        return
-    }
-
-    const publicKey = process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY
-    if (!publicKey) {
-        console.error('Paystack public key not configured')
-        return
-    }
-
-    const handler = window.PaystackPop.setup({
-        key: publicKey,
-        email: options.email,
-        amount: options.amount * 100, // Paystack uses kobo
-        plan: options.planCode || PRICING_TIERS.pro.paystackPlanCode,
-        currency: 'NGN',
-        ref: 'VD_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-        callback: (response) => {
-            console.log('Paystack success:', response)
-            if (options.onSuccess) options.onSuccess(response)
-        },
-        onClose: () => {
-            console.log('Paystack popup closed')
-            if (options.onCancel) options.onCancel()
-        }
-    })
-
-    handler.openIframe()
-}
-
-/**
- * Handle successful Paystack payment
- */
-export async function handlePaystackSuccess(
-    reference: string
-): Promise<{ success: boolean; error?: string }> {
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) return { success: false, error: 'Not authenticated' }
-
-    // Call API to verify payment and update subscription
+export async function createPaystackCheckout(
+    planId: string = 'founder_monthly'
+): Promise<{ url?: string; error?: string }> {
     try {
-        const response = await fetch('/api/paystack/callback', {
+        const response = await fetch('/api/paystack/checkout', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ reference, userId: user.id }),
+            body: JSON.stringify({ planId, currency: 'NGN' }),
         })
-
         const data = await response.json()
-        return { success: data.success, error: data.error }
+        return data.url ? { url: data.url } : { error: data.error || 'Failed to start checkout' }
     } catch (error) {
-        return { success: false, error: error instanceof Error ? error.message : 'Verification failed' }
+        return { error: error instanceof Error ? error.message : 'Checkout failed' }
     }
 }
 
@@ -322,33 +244,17 @@ export async function startStripeCheckout(): Promise<void> {
 }
 
 /**
- * Start Paystack checkout for Pro plan
+ * Start Paystack checkout (NGN)
  */
 export async function startPaystackCheckout(): Promise<void> {
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { url, error } = await createPaystackCheckout()
 
-    if (!user) {
-        window.location.href = '/login'
-        return
+    if (url) {
+        window.location.href = url
+    } else {
+        console.error('Paystack checkout failed:', error)
+        alert('Unable to start checkout. Please try again.')
     }
-
-    initPaystack({
-        email: user.email!,
-        amount: PRICING_TIERS.pro.priceNGN || 45000,
-        onSuccess: async (response) => {
-            const { success, error } = await handlePaystackSuccess(response.reference)
-            if (success) {
-                window.location.href = '/dashboard?payment=success'
-            } else {
-                console.error('Payment verification failed:', error)
-                alert('Payment verification failed. Please contact support.')
-            }
-        },
-        onCancel: () => {
-            console.log('Payment cancelled')
-        }
-    })
 }
 
 // =================== FORMATTING ===================

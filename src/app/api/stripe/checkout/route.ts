@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { createCheckoutSession, STRIPE_PRICES } from '@/lib/stripe'
+import { startStripeCheckout } from '@/lib/billing'
 
 export async function POST(request: Request) {
     try {
@@ -11,24 +11,18 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        const { planId } = await request.json()
-
-        // Get price ID from plan
-        const priceId = STRIPE_PRICES[planId as keyof typeof STRIPE_PRICES]
-        if (!priceId) {
-            return NextResponse.json({ error: 'Invalid plan' }, { status: 400 })
+        const { planId, currency } = await request.json()
+        
+        // Reuses the existing Stripe customer, refuses if already subscribed,
+        // carries over any remaining server-side trial
+        const result = await startStripeCheckout(supabase, user, planId, currency)
+        if ('error' in result) {
+            return NextResponse.json(
+                { error: result.error, code: result.code, ...(result.code === 'use_paystack' ? { gateway: 'paystack' } : {}) },
+                { status: result.status }
+            )
         }
-
-        // Create checkout session with 14-day trial
-        const session = await createCheckoutSession({
-            priceId,
-            successUrl: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?trial=started`,
-            cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?canceled=true`,
-            clientReferenceId: user.id,
-            customerEmail: user.email,
-        })
-
-        return NextResponse.json({ url: session.url })
+        return NextResponse.json({ url: result.url })
     } catch (error) {
         console.error('Stripe checkout error:', error)
         return NextResponse.json({ error: 'Failed to create checkout session' }, { status: 500 })

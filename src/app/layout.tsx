@@ -36,7 +36,7 @@ export const metadata: Metadata = {
     template: "%s | Velodesk",
   },
   description:
-    "Measure, validate, and optimize your path to product-market fit with real-time PMF scoring and AI insights. Connect Stripe, Mixpanel, HubSpot and 20+ tools.",
+    "Measure, validate, and optimize your path to product-market fit with PMF scoring and AI insights. Connect Paystack or Stripe to score your real payment data.",
   keywords: [
     "product-market fit",
     "PMF score",
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     siteName: "Velodesk",
     title: "Velodesk - AI-Powered Product-Market Fit Platform",
     description:
-      "Prove product-market fit in one link. Generate a verified PMF Score backed by your actual data from Stripe, Mixpanel, and more.",
+      "Prove product-market fit in one link. Generate a verified PMF Score backed by your actual payment data from Paystack or Stripe.",
     images: [
       {
         url: "/og-image.png",
@@ -117,34 +117,38 @@ const jsonLd = {
       operatingSystem: "Web",
       description:
         "Measure, validate, and optimize your path to product-market fit with real-time PMF scoring and AI insights.",
+      // Mirrors planData in src/app/pricing/page.tsx — update both together.
+      // No aggregateRating: only add one backed by real, published reviews.
       offers: [
         {
           "@type": "Offer",
-          name: "Free",
-          price: "0",
+          name: "Founder plan",
+          price: "15",
           priceCurrency: "USD",
+          description: "Billed monthly. 14-day free trial, no credit card required.",
         },
         {
           "@type": "Offer",
-          name: "Pro",
+          name: "Founder plan",
+          price: "30000",
+          priceCurrency: "NGN",
+          description: "Billed monthly. 14-day free trial, no credit card required.",
+        },
+        {
+          "@type": "Offer",
+          name: "Startup plan",
           price: "49",
           priceCurrency: "USD",
-          billingIncrement: "month",
+          description: "Billed monthly. 14-day free trial, no credit card required.",
         },
         {
           "@type": "Offer",
-          name: "Enterprise",
-          price: "0",
-          priceCurrency: "USD",
-          description: "Custom pricing",
+          name: "Startup plan",
+          price: "50000",
+          priceCurrency: "NGN",
+          description: "Billed monthly. 14-day free trial, no credit card required.",
         },
       ],
-      aggregateRating: {
-        "@type": "AggregateRating",
-        ratingValue: "4.8",
-        ratingCount: "500",
-        bestRating: "5",
-      },
     },
     {
       "@type": "WebSite",

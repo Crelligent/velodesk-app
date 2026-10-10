@@ -1,119 +1,128 @@
 @import "tailwindcss";
+@import "./velodesk-tokens.css";
 
-:root {
-  --bg: #050505;
-  --bg-secondary: #0a0a0a;
-  --text-main: #ffffff;
-  --text-muted: #606060;
-  --text-subtle: #404040;
-  --accent: #22c55e;
-  --accent-blue: #3b82f6;
-  --glass-border: rgba(255, 255, 255, 0.04);
-  --glass-border-hover: rgba(255, 255, 255, 0.08);
-  --glass-bg: rgba(255, 255, 255, 0.02);
-}
+/* ============================================================
+   Velodesk globals
+   Colours, fonts, radii and base element styles come from
+   velodesk-tokens.css. Use the semantic utilities in components
+   (bg-bg, bg-surface, text-text-muted, bg-accent, text-on-accent,
+   border-border, font-display ...). The classes below are kept
+   for backwards compatibility and now read from the tokens.
 
-* {
-  box-sizing: border-box;
-}
+   Removed: the old :root variables (--bg, --bg-secondary,
+   --text-main, --text-muted, --text-subtle, --accent,
+   --accent-blue, --glass-*). Nothing in src/ referenced them
+   outside this file. Token equivalents:
+     --bg               -> --color-bg
+     --bg-secondary     -> --color-surface
+     --text-main        -> --color-text
+     --text-muted       -> --color-text-muted (#8A8A8A, was #606060)
+     --text-subtle      -> --color-text-muted (was #404040, ~2:1)
+     --accent           -> --color-accent
+     --accent-blue      -> --color-info
+     --glass-border     -> --color-border
+     --glass-border-hover -> --color-border-strong
+     --glass-bg         -> --color-surface
+   The old body / h1-h3 rules were removed: the tokens' base
+   layer sets them, and unlayered copies here would override it.
+   ============================================================ */
 
-body {
-  background: var(--bg);
-  color: var(--text-main);
-  font-family: var(--font-inter), 'Inter', system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-}
-
-/* Premium Typography */
-h1,
-h2,
-h3 {
-  font-family: var(--font-outfit), 'Outfit', sans-serif;
-}
-
+/* Display font helper (also covers code still using font-outfit) */
 .font-outfit {
-  font-family: var(--font-outfit), 'Outfit', sans-serif;
+  font-family: var(--font-display);
 }
 
-/* Ultra Light Headings */
+/* Headings. Weight 100 was unreadable at these sizes. */
 .heading-xl {
-  font-family: var(--font-outfit), 'Outfit', sans-serif;
+  font-family: var(--font-display);
   font-size: 2.5rem;
-  font-weight: 100;
+  font-weight: 300;
   letter-spacing: -0.02em;
 }
 
 .heading-lg {
-  font-family: var(--font-outfit), 'Outfit', sans-serif;
+  font-family: var(--font-display);
   font-size: 1.5rem;
-  font-weight: 100;
+  font-weight: 300;
   letter-spacing: -0.01em;
 }
 
-/* Section Labels */
-.section-label {
-  font-size: 0.6rem;
-  text-transform: uppercase;
-  letter-spacing: 0.25em;
-  color: var(--text-subtle);
-}
-
-/* Nav Labels */
-.nav-label {
-  font-size: 0.55rem;
-  text-transform: uppercase;
-  color: var(--text-subtle);
-  font-weight: 500;
-  letter-spacing: 0.25em;
-}
-
-/* Premium Buttons */
-.btn-primary {
-  padding: 0.75rem 1.5rem;
-  background: var(--accent);
-  color: #000;
+/* Labels: 12px uppercase, tracking-wide, muted (passes 4.5:1).
+   Were 0.55-0.6rem in #404040. */
+.section-label,
+.nav-label,
+.metric-label {
   font-size: 0.75rem;
+  line-height: 1rem;
   font-weight: 500;
-  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  color: var(--color-text-muted);
+}
+
+/* Buttons */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.75rem 1.5rem;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  font-size: 0.875rem;
+  font-weight: 500;
   border: none;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 150ms ease-out;
 }
 
 .btn-primary:hover {
-  background: #16a34a;
+  background: var(--color-accent-hover);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 44px;
   padding: 0.5rem 1rem;
   background: transparent;
-  border: 1px solid var(--glass-border);
-  color: var(--text-muted);
-  font-size: 0.65rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: border-color 150ms ease-out, color 150ms ease-out;
 }
 
 .btn-ghost:hover {
-  border-color: var(--glass-border-hover);
-  color: #fff;
+  border-color: var(--color-text-dim);
+  color: var(--color-text);
 }
 
-/* Premium Cards */
+/* Cards */
 .premium-card {
-  background: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   padding: 2rem;
-  transition: all 0.3s ease;
+  transition: border-color 150ms ease-out;
 }
 
 .premium-card:hover {
-  border-color: var(--glass-border-hover);
+  border-color: var(--color-border-strong);
 }
 
-/* Custom scrollbar */
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 4px;
 }
@@ -123,48 +132,43 @@ h3 {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--glass-border);
+  background: var(--color-border-strong);
   border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--glass-border-hover);
+  background: var(--color-text-dim);
 }
 
 /* Selection */
 ::selection {
-  background: var(--accent);
-  color: #000;
+  background: var(--color-accent);
+  color: var(--color-on-accent);
 }
 
-/* Metric Values */
+/* Metric values and the PMF Score: tabular numbers so digits don't jump */
 .metric-value {
-  font-family: var(--font-outfit), 'Outfit', sans-serif;
+  font-family: var(--font-display);
   font-size: 2rem;
-  font-weight: 100;
+  font-weight: 300;
   letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
 }
 
-.metric-label {
-  font-size: 0.6rem;
-  color: var(--text-subtle);
-  text-transform: uppercase;
-  letter-spacing: 0.2em;
-}
-
-/* PMF Score Display */
 .pmf-score {
-  font-family: var(--font-outfit), 'Outfit', sans-serif;
+  font-family: var(--font-display);
   font-size: 5rem;
-  font-weight: 100;
+  font-weight: 300;
   line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Subtle Animations */
+/* Motion: state changes only, <= 250ms, ease-out */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(4px);
   }
 
   to {
@@ -174,9 +178,10 @@ h3 {
 }
 
 .animate-fade-in {
-  animation: fadeIn 0.4s ease forwards;
+  animation: fadeIn 200ms ease-out forwards;
 }
 
+/* Marketing pages only (logo strips). Never in the product app. */
 @keyframes marquee {
   0% {
     transform: translateX(0%);
@@ -188,4 +193,10 @@ h3 {
 
 .animate-marquee {
   animation: marquee 25s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+  }
 }

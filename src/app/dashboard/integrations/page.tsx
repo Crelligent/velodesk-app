@@ -1,79 +1,34 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Shield } from 'lucide-react'
+import { INTEGRATIONS, CATEGORIES, type Integration } from '@/lib/integrations'
 
-interface Integration {
-    id: string
-    name: string
-    description: string
-    category: string
-    icon: string
-    logo?: string
-    authType: 'oauth' | 'api_key'
-    recommended?: boolean
+// Provider list, auth types and sync support come from the single source of truth in
+// src/lib/integrations.ts, so API-key vs OAuth always matches the save / oauth-start routes.
+// The two sources a founder needs for a first PMF Score, shown together at the top.
+const PRIMARY_SOURCE_IDS = ['paystack', 'stripe'] as const
+
+const PAYSTACK_KEY_HELP =
+    'In your Paystack Dashboard, go to Settings → API Keys & Webhooks and copy your live Secret Key (starts with sk_live_). Velodesk only reads your transaction and customer data; it never creates charges, transfers or refunds.'
+
+// OAuth always starts on the server: /api/integrations/oauth-start sets a CSRF state cookie
+// and redirects to the provider. No provider URLs are built in the browser.
+function oauthStartUrl(providerId: string) {
+    return `/api/integrations/oauth-start?provider=${encodeURIComponent(providerId)}`
 }
 
-const integrations: Integration[] = [
-    // Analytics & Product
-    { id: 'mixpanel', name: 'Mixpanel', description: 'Product analytics and user behavior tracking', category: 'analytics', icon: '◉', logo: '/mixpanel.svg', authType: 'api_key', recommended: true },
-    { id: 'amplitude', name: 'Amplitude', description: 'Digital analytics and product intelligence', category: 'analytics', icon: '⚡', logo: '/amplitude-color_v1.png', authType: 'api_key', recommended: true },
-    { id: 'google-analytics', name: 'Google Analytics', description: 'Traffic and acquisition data', category: 'analytics', icon: '📊', logo: '/google-analytics-4.svg', authType: 'oauth' },
-    { id: 'segment', name: 'Segment', description: 'Customer data platform', category: 'analytics', icon: '⚙️', logo: '/segment-1.svg', authType: 'api_key' },
-    { id: 'hotjar', name: 'Hotjar', description: 'Heatmaps and session recordings', category: 'analytics', icon: '🔥', logo: '/hotjar-2.svg', authType: 'api_key' },
-    { id: 'posthog', name: 'PostHog', description: 'Product analytics and feature flags', category: 'analytics', icon: '🏠', logo: '/logo-posthog-1.jpg', authType: 'api_key' },
-    { id: 'heap', name: 'Heap', description: 'Auto-capture analytics', category: 'analytics', icon: '📈', logo: '/Heap_Logo_Horizontal-Color_RGB.webp', authType: 'api_key' },
-    { id: 'fullstory', name: 'FullStory', description: 'Digital experience intelligence', category: 'analytics', icon: '🎥', logo: '/trakop-founded-by-ravi-garg-website-integrations-marketing-automation-fullstory-logo.png', authType: 'api_key' },
+function initialCredentials(integration: Integration): Record<string, string> {
+    return Object.fromEntries(
+        (integration.credentialFields ?? []).map(f => [f.key, f.options?.[0]?.value ?? ''])
+    )
+}
 
-    // Payments & Revenue
-    { id: 'stripe', name: 'Stripe', description: 'Payment processing and billing', category: 'payments', icon: '💳', authType: 'oauth', recommended: true },
-    { id: 'paystack', name: 'Paystack', description: 'African payments infrastructure', category: 'payments', icon: '💰', logo: '/paystack-2.svg', authType: 'api_key' },
-    { id: 'paddle', name: 'Paddle', description: 'SaaS billing and tax compliance', category: 'payments', icon: '🏓', authType: 'api_key' },
-    { id: 'chargebee', name: 'Chargebee', description: 'Subscription management', category: 'payments', icon: '🐝', authType: 'api_key' },
-
-    // CRM & Sales
-    { id: 'hubspot', name: 'HubSpot', description: 'CRM and marketing automation', category: 'crm', icon: '🟠', logo: '/hubspot.svg', authType: 'api_key', recommended: true },
-    { id: 'salesforce', name: 'Salesforce', description: 'Enterprise CRM platform', category: 'crm', icon: '☁️', logo: '/salesforce-2.svg', authType: 'oauth' },
-    { id: 'pipedrive', name: 'Pipedrive', description: 'Sales pipeline management', category: 'crm', icon: '🎯', logo: '/pipedrive.svg', authType: 'api_key' },
-    { id: 'close', name: 'Close', description: 'Sales engagement CRM', category: 'crm', icon: '📞', logo: '/close.svg', authType: 'api_key' },
-
-
-    // Finance & Spend
-    { id: 'quickbooks', name: 'QuickBooks', description: 'Cloud accounting and bookkeeping', category: 'finance', icon: 'Q', authType: 'oauth', recommended: true },
-    { id: 'xero', name: 'Xero', description: 'Online accounting software', category: 'finance', icon: 'X', authType: 'oauth' },
-    { id: 'ramp', name: 'Ramp', description: 'Corporate cards and spend management', category: 'finance', icon: 'R', authType: 'api_key' },
-
-    // Support & Feedback
-    { id: 'intercom', name: 'Intercom', description: 'Customer messaging platform', category: 'support', icon: '💬', logo: '/intercom-2.svg', authType: 'oauth', recommended: true },
-    { id: 'zendesk', name: 'Zendesk', description: 'Customer service and support', category: 'support', icon: '🎧', logo: '/zendesk-1.svg', authType: 'oauth' },
-    { id: 'typeform', name: 'Typeform', description: 'Forms and surveys', category: 'support', icon: '📝', logo: '/typeform.svg', authType: 'oauth' },
-    { id: 'canny', name: 'Canny', description: 'Feature request tracking', category: 'support', icon: '📣', logo: '/Canny_logo.png', authType: 'api_key' },
-
-    // Sentiment & Reviews
-    { id: 'trustpilot', name: 'Trustpilot', description: 'B2B reviews and qualitative sentiment data', category: 'sentiment', icon: '⭐', authType: 'api_key', recommended: true },
-]
-
-const categories = [
-    { id: 'analytics', label: 'Analytics & Product Intelligence' },
-    { id: 'payments', label: 'Payments & Revenue' },
-    { id: 'finance', label: 'Accounting & Spend Management' },
-    { id: 'crm', label: 'CRM & Sales' },
-    { id: 'support', label: 'Support & Feedback' },
-    { id: 'sentiment', label: 'Customer Sentiment & Reviews' },
-]
-
-// OAuth URLs for each provider
-const oauthUrls: Record<string, string> = {
-    'google-analytics': `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(typeof window !== 'undefined' ? window.location.origin : '')}/api/integrations/callback&response_type=code&scope=https://www.googleapis.com/auth/analytics.readonly&state=google-analytics`,
-    'hubspot': `https://app.hubspot.com/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_HUBSPOT_CLIENT_ID}&redirect_uri=${encodeURIComponent(typeof window !== 'undefined' ? window.location.origin : '')}/api/integrations/callback&scope=contacts%20crm.objects.contacts.read&state=hubspot`,
-    'stripe': `https://connect.stripe.com/oauth/authorize?response_type=code&client_id=${process.env.NEXT_PUBLIC_STRIPE_CLIENT_ID}&scope=read_only&state=stripe`,
-    'intercom': `https://app.intercom.com/oauth?client_id=${process.env.NEXT_PUBLIC_INTERCOM_CLIENT_ID}&redirect_uri=${encodeURIComponent(typeof window !== 'undefined' ? window.location.origin : '')}/api/integrations/callback&state=intercom`,
-    'salesforce': `https://login.salesforce.com/services/oauth2/authorize?response_type=code&client_id=${process.env.NEXT_PUBLIC_SALESFORCE_CLIENT_ID}&redirect_uri=${encodeURIComponent(typeof window !== 'undefined' ? window.location.origin : '')}/api/integrations/callback&state=salesforce`,
-    'zendesk': `https://${process.env.NEXT_PUBLIC_ZENDESK_SUBDOMAIN || 'your-subdomain'}.zendesk.com/oauth/authorizations/new?response_type=code&client_id=${process.env.NEXT_PUBLIC_ZENDESK_CLIENT_ID}&redirect_uri=${encodeURIComponent(typeof window !== 'undefined' ? window.location.origin : '')}/api/integrations/callback&scope=read&state=zendesk`,
-    'typeform': `https://api.typeform.com/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_TYPEFORM_CLIENT_ID}&redirect_uri=${encodeURIComponent(typeof window !== 'undefined' ? window.location.origin : '')}/api/integrations/callback&scope=responses:read&state=typeform`,
+function missingRequired(integration: Integration, values: Record<string, string>): boolean {
+    return (integration.credentialFields ?? []).some(f => f.required !== false && !values[f.key]?.trim())
 }
 
 export default function IntegrationsPage() {
@@ -81,15 +36,48 @@ export default function IntegrationsPage() {
     const [connectedIds, setConnectedIds] = useState<string[]>([])
     const [connecting, setConnecting] = useState<string | null>(null)
     const [apiKeyModal, setApiKeyModal] = useState<Integration | null>(null)
-    const [apiKeyInput, setApiKeyInput] = useState('')
-    const [mixpanelCreds, setMixpanelCreds] = useState({ projectId: '', username: '', secret: '' })
-    const [amplitudeCreds, setAmplitudeCreds] = useState({ apiKey: '', secretKey: '' })
+    // Credential form values for the open modal, keyed by CredentialField.key
+    const [credValues, setCredValues] = useState<Record<string, string>>({})
+    const [modalError, setModalError] = useState<string | null>(null)
     const [notification, setNotification] = useState<{ type: 'success' | 'error', message: string } | null>(null)
+    // Stripe OAuth confirmation: we show a clear button instead of redirecting automatically.
+    const [stripePrompt, setStripePrompt] = useState(false)
+    const [preferNgn, setPreferNgn] = useState(false)
+    const connectParamHandled = useRef(false)
 
     // Load connected integrations on mount
     useEffect(() => {
         loadConnectedIntegrations()
     }, [])
+
+    // Handle ?connect=paystack|stripe (sent from onboarding)
+    useEffect(() => {
+        if (connectParamHandled.current) return
+        const connect = searchParams.get('connect')
+        if (connect !== 'paystack' && connect !== 'stripe') return
+        connectParamHandled.current = true
+
+        if (connect === 'paystack') {
+            const paystack = INTEGRATIONS.find(i => i.id === 'paystack')
+            if (paystack) openKeyModal(paystack)
+        } else {
+            setStripePrompt(true)
+        }
+        window.history.replaceState({}, '', '/dashboard/integrations')
+    }, [searchParams])
+
+    // Close dialogs with Escape
+    useEffect(() => {
+        if (!apiKeyModal && !stripePrompt) return
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                setApiKeyModal(null)
+                setStripePrompt(false)
+            }
+        }
+        window.addEventListener('keydown', onKey)
+        return () => window.removeEventListener('keydown', onKey)
+    }, [apiKeyModal, stripePrompt])
 
     // Check for OAuth callback success/error
     useEffect(() => {
@@ -121,6 +109,9 @@ export default function IntegrationsPage() {
 
         if (!user) return
 
+        // Order the primary sources by the currency chosen at signup (NGN -> Paystack first)
+        setPreferNgn(user.user_metadata?.selected_currency === 'NGN')
+
         const { data } = await supabase
             .from('integration_tokens')
             .select('provider')
@@ -133,19 +124,21 @@ export default function IntegrationsPage() {
     }
 
     const handleConnect = async (integration: Integration) => {
-        if (integration.authType === 'oauth') {
-            // Redirect to OAuth flow
-            const url = oauthUrls[integration.id]
-            if (url) {
-                window.location.href = url
-            } else {
-                setNotification({ type: 'error', message: `OAuth not configured for ${integration.name}` })
-            }
+        if (!integration.syncSupported) return // "Coming soon" providers can't be connected
+        if (integration.id === 'stripe') {
+            // Confirm before leaving the site
+            setStripePrompt(true)
+        } else if (integration.authType === 'oauth') {
+            window.location.href = oauthStartUrl(integration.id)
         } else {
-            // Show API key modal
-            setApiKeyModal(integration)
-            setApiKeyInput('')
+            openKeyModal(integration)
         }
+    }
+
+    function openKeyModal(integration: Integration) {
+        setApiKeyModal(integration)
+        setCredValues(initialCredentials(integration))
+        setModalError(null)
     }
 
     const handleDisconnect = async (integrationId: string) => {
@@ -176,61 +169,152 @@ export default function IntegrationsPage() {
     }
 
     const handleApiKeySubmit = async () => {
-        if (!apiKeyModal) return
-
-        let tokenToSave = apiKeyInput;
-
-        if (apiKeyModal.id === 'mixpanel') {
-            if (!mixpanelCreds.projectId || !mixpanelCreds.username || !mixpanelCreds.secret) return;
-            tokenToSave = JSON.stringify(mixpanelCreds);
-        } else if (apiKeyModal.id === 'amplitude') {
-            if (!amplitudeCreds.apiKey || !amplitudeCreds.secretKey) return;
-            tokenToSave = JSON.stringify(amplitudeCreds);
-        } else {
-            if (!apiKeyInput.trim()) return;
-        }
+        if (!apiKeyModal || missingRequired(apiKeyModal, credValues)) return
 
         setConnecting(apiKeyModal.id)
+        setModalError(null)
 
-        const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
-
-        if (!user) {
-            setConnecting(null)
-            return
-        }
-
-        // Save API key via backend API to bypass RLS
+        // Credentials are validated against the provider and stored server-side
         try {
             const res = await fetch('/api/integrations/save', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    userId: user.id,
-                    provider: apiKeyModal.id,
-                    accessToken: tokenToSave
-                })
+                body: JSON.stringify({ provider: apiKeyModal.id, credentials: credValues }),
             })
 
-            const data = await res.json()
+            const data = await res.json().catch(() => ({}))
 
             if (!res.ok) {
-                console.error("Failed to save API key:", data.error)
-                setNotification({ type: 'error', message: `Failed to save API key: ${data.error || 'Unknown error'}` })
-            } else {
-                setConnectedIds([...connectedIds, apiKeyModal.id])
-                setNotification({ type: 'success', message: `Connected to ${apiKeyModal.name}!` })
+                // Keep the modal open so the founder can fix the field (e.g. pick the Typeform NPS question)
+                setModalError(data.error || 'Could not connect. Check the values and try again.')
+                setConnecting(null)
+                return
             }
-        } catch (err: any) {
-            console.error("Network error saving API key:", err)
-            setNotification({ type: 'error', message: `Network error: ${err.message}` })
+
+            setConnectedIds(ids => ids.includes(apiKeyModal.id) ? ids : [...ids, apiKeyModal.id])
+            setNotification({
+                type: 'success',
+                message: apiKeyModal.feedsScore
+                    ? `Connected to ${apiKeyModal.name}. Your PMF Score will update in a minute.`
+                    : `Connected to ${apiKeyModal.name}!`,
+            })
+        } catch {
+            setModalError('Network error. Please try again.')
+            setConnecting(null)
+            return
         }
 
         setApiKeyModal(null)
-        setApiKeyInput('')
-        setMixpanelCreds({ projectId: '', username: '', secret: '' })
-        setAmplitudeCreds({ apiKey: '', secretKey: '' })
+        setCredValues({})
         setConnecting(null)
+    }
+
+    const primarySources = (preferNgn ? ['paystack', 'stripe'] : ['stripe', 'paystack'])
+        .map(id => INTEGRATIONS.find(i => i.id === id))
+        .filter((i): i is Integration => Boolean(i))
+
+    const isPrimaryId = (id: string) => (PRIMARY_SOURCE_IDS as readonly string[]).includes(id)
+    const otherAvailable = INTEGRATIONS.filter(i => i.syncSupported && !isPrimaryId(i.id))
+    const comingSoonList = INTEGRATIONS.filter(i => !i.syncSupported && !isPrimaryId(i.id))
+
+    const renderCard = (integration: Integration) => {
+        const isConnected = connectedIds.includes(integration.id)
+        const isConnecting = connecting === integration.id
+        const isPrimary = (PRIMARY_SOURCE_IDS as readonly string[]).includes(integration.id)
+        const comingSoon = !integration.syncSupported
+
+        return (
+            <div
+                key={integration.id}
+                className={`p-6 md:p-8 border transition-all relative ${isConnected
+                    ? 'border-green-500/30 bg-green-500/5'
+                    : 'border-[rgba(255,255,255,0.08)] hover:border-[rgba(255,255,255,0.16)] hover:bg-[rgba(255,255,255,0.02)]'
+                    }`}
+            >
+                {comingSoon && !isConnected && (
+                    <span className="absolute top-4 right-4 text-[0.6rem] text-[#8A8A8A] uppercase tracking-[0.1em] px-2 py-1 border border-[rgba(255,255,255,0.12)]">
+                        Coming soon
+                    </span>
+                )}
+
+                {!comingSoon && (integration.recommended || isPrimary) && !isConnected && (
+                    <span className="absolute top-4 right-4 text-[0.6rem] text-[#8A8A8A] uppercase tracking-[0.1em] px-2 py-1 border border-[rgba(255,255,255,0.12)]">
+                        Recommended
+                    </span>
+                )}
+
+                {isConnected && (
+                    <span className="absolute top-4 right-4 text-[0.6rem] text-green-400 uppercase tracking-[0.1em] px-2 py-1 border border-green-500/30 bg-green-500/10">
+                        ✓ Connected
+                    </span>
+                )}
+
+                <div className="h-8 mb-6 flex items-center">
+                    {integration.logo ? (
+                        <img
+                            src={integration.logo}
+                            alt=""
+                            className="h-8 w-auto object-contain transition-transform duration-300 hover:scale-105"
+                        />
+                    ) : (
+                        <span className="text-2xl opacity-80" aria-hidden="true">{integration.icon}</span>
+                    )}
+                </div>
+
+                <h3 className="font-outfit text-[1.1rem] font-light tracking-wide mb-3">
+                    {integration.name}
+                </h3>
+
+                <p className="text-[0.8rem] text-[#8A8A8A] font-light leading-relaxed mb-3">
+                    {integration.description}
+                </p>
+
+                {!comingSoon && (
+                    <p className="text-[0.75rem] text-gray-300 mb-6">
+                        {integration.feedsScore
+                            ? `Feeds your PMF Score${integration.signals?.length ? `: ${integration.signals.join(', ')}` : ''}.`
+                            : 'Syncs data; not used in your PMF Score yet.'}
+                    </p>
+                )}
+                {comingSoon && (
+                    <p className="text-[0.75rem] text-[#8A8A8A] mb-6">{integration.unsupportedReason}</p>
+                )}
+
+                <div className="flex items-center gap-2">
+                    {isConnected ? (
+                        <button
+                            type="button"
+                            onClick={() => handleDisconnect(integration.id)}
+                            disabled={isConnecting}
+                            aria-label={`Disconnect ${integration.name}`}
+                            className="text-[0.7rem] uppercase tracking-[0.15em] text-red-400 hover:text-red-300 transition rounded px-1 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+                        >
+                            {isConnecting ? 'Disconnecting...' : 'Disconnect'}
+                        </button>
+                    ) : comingSoon ? (
+                        <span className="text-[0.7rem] uppercase tracking-[0.15em] text-[#8A8A8A]">
+                            Not available yet
+                        </span>
+                    ) : (
+                        <button
+                            type="button"
+                            onClick={() => handleConnect(integration)}
+                            disabled={isConnecting}
+                            aria-label={`Connect ${integration.name}`}
+                            className={isPrimary
+                                ? 'px-4 py-2 bg-white text-black text-[0.75rem] font-medium uppercase tracking-[0.1em] rounded-lg hover:bg-gray-100 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]'
+                                : 'text-[0.7rem] uppercase tracking-[0.15em] text-white hover:text-green-400 transition rounded px-1 py-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white'}
+                        >
+                            {isConnecting
+                                ? 'Connecting...'
+                                : isPrimary
+                                    ? `Connect ${integration.name}`
+                                    : integration.authType === 'oauth' ? 'Connect with OAuth' : 'Connect with API Key'}
+                        </button>
+                    )}
+                </div>
+            </div>
+        )
     }
 
     return (
@@ -247,68 +331,68 @@ export default function IntegrationsPage() {
 
             {/* API Key Modal */}
             {apiKeyModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80">
-                    <div className="bg-[#0a0a0a] border border-[rgba(255,255,255,0.1)] rounded-xl p-8 max-w-md w-full mx-4">
-                        <h3 className="font-outfit text-xl font-light mb-2">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 overflow-y-auto">
+                    <div role="dialog" aria-modal="true" aria-labelledby="api-key-modal-title" className="bg-[#0a0a0a] border border-[rgba(255,255,255,0.1)] rounded-xl p-6 sm:p-8 max-w-md w-full my-auto">
+                        <h2 id="api-key-modal-title" className="font-outfit text-xl font-light mb-2">
                             Connect {apiKeyModal.name}
-                        </h3>
-                        <p className="text-[#606060] text-sm mb-6">
-                            Enter your API key to connect {apiKeyModal.name} to Velodesk.
+                        </h2>
+                        <p className="text-[#8A8A8A] text-sm mb-6">
+                            {apiKeyModal.id === 'paystack'
+                                ? PAYSTACK_KEY_HELP
+                                : `Velodesk only reads data from ${apiKeyModal.name}; read-only keys are enough.`}
                         </p>
 
-                        {apiKeyModal.id === 'mixpanel' ? (
-                            <div className="space-y-4 mb-6">
-                                <input
-                                    type="text"
-                                    value={mixpanelCreds.projectId}
-                                    onChange={(e) => setMixpanelCreds({ ...mixpanelCreds, projectId: e.target.value })}
-                                    placeholder="Project ID (e.g. 4031683)"
-                                    className="w-full px-4 py-3 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] rounded-lg text-white placeholder-[#606060] focus:outline-none focus:border-[rgba(255,255,255,0.2)]"
-                                />
-                                <input
-                                    type="text"
-                                    value={mixpanelCreds.username}
-                                    onChange={(e) => setMixpanelCreds({ ...mixpanelCreds, username: e.target.value })}
-                                    placeholder="Service Account Username"
-                                    className="w-full px-4 py-3 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] rounded-lg text-white placeholder-[#606060] focus:outline-none focus:border-[rgba(255,255,255,0.2)]"
-                                />
-                                <input
-                                    type="password"
-                                    value={mixpanelCreds.secret}
-                                    onChange={(e) => setMixpanelCreds({ ...mixpanelCreds, secret: e.target.value })}
-                                    placeholder="Service Account Secret"
-                                    className="w-full px-4 py-3 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] rounded-lg text-white placeholder-[#606060] focus:outline-none focus:border-[rgba(255,255,255,0.2)]"
-                                />
-                            </div>
-                        ) : apiKeyModal.id === 'amplitude' ? (
-                            <div className="space-y-4 mb-6">
-                                <input
-                                    type="text"
-                                    value={amplitudeCreds.apiKey}
-                                    onChange={(e) => setAmplitudeCreds({ ...amplitudeCreds, apiKey: e.target.value })}
-                                    placeholder="Amplitude API Key"
-                                    className="w-full px-4 py-3 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] rounded-lg text-white placeholder-[#606060] focus:outline-none focus:border-[rgba(255,255,255,0.2)]"
-                                />
-                                <input
-                                    type="password"
-                                    value={amplitudeCreds.secretKey}
-                                    onChange={(e) => setAmplitudeCreds({ ...amplitudeCreds, secretKey: e.target.value })}
-                                    placeholder="Amplitude Secret Key"
-                                    className="w-full px-4 py-3 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] rounded-lg text-white placeholder-[#606060] focus:outline-none focus:border-[rgba(255,255,255,0.2)]"
-                                />
-                            </div>
-                        ) : (
-                            <input
-                                type="password"
-                                value={apiKeyInput}
-                                onChange={(e) => setApiKeyInput(e.target.value)}
-                                placeholder="Enter API key..."
-                                className="w-full px-4 py-3 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] rounded-lg text-white placeholder-[#606060] focus:outline-none focus:border-[rgba(255,255,255,0.2)] mb-6"
-                                aria-label={`API key for ${apiKeyModal.name}`}
-                            />
+                        <form
+                            onSubmit={(e) => { e.preventDefault(); handleApiKeySubmit() }}
+                            className="space-y-4 mb-6"
+                            id="credentials-form"
+                        >
+                            {(apiKeyModal.credentialFields ?? []).map((field, index) => {
+                                const inputId = `cred-${apiKeyModal.id}-${field.key}`
+                                const helpId = `${inputId}-help`
+                                const inputClass = 'w-full px-4 py-3 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.1)] rounded-lg text-white placeholder-[#8A8A8A] focus:outline-none focus:border-[rgba(255,255,255,0.4)] focus-visible:ring-2 focus-visible:ring-white/60'
+                                return (
+                                    <div key={field.key}>
+                                        <label htmlFor={inputId} className="block text-xs text-white/80 mb-1">
+                                            {field.label}{field.required === false ? ' (optional)' : ''}
+                                        </label>
+                                        {field.options ? (
+                                            <select
+                                                id={inputId}
+                                                aria-describedby={helpId}
+                                                value={credValues[field.key] ?? ''}
+                                                onChange={(e) => setCredValues(v => ({ ...v, [field.key]: e.target.value }))}
+                                                className={inputClass}
+                                            >
+                                                {field.options.map(o => (
+                                                    <option key={o.value} value={o.value} className="bg-[#0a0a0a]">{o.label}</option>
+                                                ))}
+                                            </select>
+                                        ) : (
+                                            <input
+                                                id={inputId}
+                                                type={field.secret ? 'password' : 'text'}
+                                                autoFocus={index === 0}
+                                                autoComplete="off"
+                                                spellCheck={false}
+                                                aria-describedby={helpId}
+                                                value={credValues[field.key] ?? ''}
+                                                onChange={(e) => setCredValues(v => ({ ...v, [field.key]: e.target.value }))}
+                                                placeholder={field.placeholder}
+                                                className={inputClass}
+                                            />
+                                        )}
+                                        <p id={helpId} className="mt-1 text-[11px] text-[#8A8A8A] leading-snug">{field.help}</p>
+                                    </div>
+                                )
+                            })}
+                        </form>
+
+                        {modalError && (
+                            <p role="alert" className="mb-6 text-sm text-red-400 break-words">{modalError}</p>
                         )}
 
-                        <div className="bg-[#050505] border border-[rgba(255,255,255,0.05)] rounded p-4 mb-6 text-[11px] text-[#808080] leading-relaxed">
+                        <div className="bg-[#050505] border border-[rgba(255,255,255,0.05)] rounded p-4 mb-6 text-[11px] text-[#8A8A8A] leading-relaxed">
                             <span className="text-white/90 font-medium block mb-1">You're in control.</span>
                             VeloDesk always respects your data preferences, and is limited to the specific read-only permissions you've explicitly granted during integration.<br/><br/>
                             <span className="text-white/90 font-medium block mb-1">Data shared during integration.</span>
@@ -317,22 +401,17 @@ export default function IntegrationsPage() {
 
                         <div className="flex gap-4">
                             <button
-                                onClick={() => setApiKeyModal(null)}
-                                className="flex-1 px-4 py-3 border border-[rgba(255,255,255,0.1)] text-[#606060] hover:text-white hover:border-[rgba(255,255,255,0.2)] transition rounded-lg"
+                                type="button"
+                                onClick={() => { setApiKeyModal(null); setModalError(null) }}
+                                className="flex-1 px-4 py-3 border border-[rgba(255,255,255,0.1)] text-[#8A8A8A] hover:text-white hover:border-[rgba(255,255,255,0.2)] transition rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                             >
                                 Cancel
                             </button>
                             <button
-                                onClick={handleApiKeySubmit}
-                                disabled={
-                                    connecting === apiKeyModal.id || 
-                                    (apiKeyModal.id === 'mixpanel' 
-                                        ? (!mixpanelCreds.projectId || !mixpanelCreds.username || !mixpanelCreds.secret)
-                                        : apiKeyModal.id === 'amplitude'
-                                        ? (!amplitudeCreds.apiKey || !amplitudeCreds.secretKey)
-                                        : !apiKeyInput.trim())
-                                }
-                                className="flex-1 px-4 py-3 bg-white text-black font-medium hover:bg-gray-100 transition rounded-lg disabled:opacity-50"
+                                type="submit"
+                                form="credentials-form"
+                                disabled={connecting === apiKeyModal.id || missingRequired(apiKeyModal, credValues)}
+                                className="flex-1 px-4 py-3 bg-white text-black font-medium hover:bg-gray-100 transition rounded-lg disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]"
                             >
                                 {connecting === apiKeyModal.id ? 'Connecting...' : 'Connect'}
                             </button>
@@ -341,13 +420,44 @@ export default function IntegrationsPage() {
                 </div>
             )}
 
-            <div className="flex justify-between items-start mb-12">
+            {/* Stripe OAuth confirmation */}
+            {stripePrompt && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+                    <div role="dialog" aria-modal="true" aria-labelledby="stripe-modal-title" className="bg-[#0a0a0a] border border-[rgba(255,255,255,0.1)] rounded-xl p-6 sm:p-8 max-w-md w-full">
+                        <h2 id="stripe-modal-title" className="font-outfit text-xl font-light mb-2">
+                            Connect Stripe
+                        </h2>
+                        <p className="text-[#8A8A8A] text-sm mb-6 leading-relaxed">
+                            You&apos;ll leave Velodesk and go to Stripe to approve read-only access to your
+                            account. Stripe will send you back here when you&apos;re done.
+                        </p>
+                        <div className="flex flex-col-reverse sm:flex-row gap-4">
+                            <button
+                                type="button"
+                                onClick={() => setStripePrompt(false)}
+                                className="flex-1 px-4 py-3 border border-[rgba(255,255,255,0.1)] text-[#8A8A8A] hover:text-white hover:border-[rgba(255,255,255,0.2)] transition rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+                            >
+                                Cancel
+                            </button>
+                            <a
+                                href={oauthStartUrl('stripe')}
+                                autoFocus
+                                className="flex-1 px-4 py-3 bg-white text-black text-center font-medium hover:bg-gray-100 transition rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0a0a0a]"
+                            >
+                                Continue to Stripe
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="flex flex-col md:flex-row justify-between items-start gap-6 mb-12">
                 <div>
-                    <div className="text-[0.65rem] text-[#404040] uppercase tracking-[0.3em] mb-4">Data Sources</div>
+                    <div className="text-[0.65rem] text-[#8A8A8A] uppercase tracking-[0.3em] mb-4">Data Sources</div>
                     <h1 className="font-outfit text-[2.5rem] font-extralight tracking-tight mb-4">
                         Connect your integrations
                     </h1>
-                    <p className="text-[#606060] text-[1.1rem] font-light leading-relaxed max-w-xl mb-6">
+                    <p className="text-[#8A8A8A] text-[1.1rem] font-light leading-relaxed max-w-xl mb-6">
                         Link your existing tools to feed real-time signals into our validation engine.
                     </p>
                     
@@ -358,103 +468,68 @@ export default function IntegrationsPage() {
                         </div>
                         <div>
                             <div className="text-sm text-white/90 font-medium mb-1">Strict Data Integrity Enforced</div>
-                            <div className="text-xs text-[#606060] leading-relaxed">
+                            <div className="text-xs text-[#8A8A8A] leading-relaxed">
                                 Incoming data streams are secured via OAuth 2.0 and processed using cryptographic idempotency keys. Duplicate webhooks are automatically rejected at the database level to mathematically guarantee zero double-counting. <strong>VeloDesk guarantees that your data is strictly used for calculating your PMF score and is never shared, trained on, or monetized.</strong>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 text-[0.7rem] text-[#404040] uppercase tracking-[0.15em]">
+                <div className="flex items-center gap-2 px-3 py-1.5 text-[0.7rem] text-[#8A8A8A] uppercase tracking-[0.15em]">
                     <span className={`w-[6px] h-[6px] rounded-full ${connectedIds.length > 0 ? 'bg-green-500' : 'bg-[#404040]'}`} />
                     {connectedIds.length} connected
                 </div>
             </div>
 
-            {/* Categories */}
-            {categories.map((category) => {
-                const categoryIntegrations = integrations.filter(i => i.category === category.id)
+            {/* Recommended: the two sources needed for a first PMF Score */}
+            <section aria-labelledby="primary-sources-heading" className="mb-12">
+                <h2 id="primary-sources-heading" className="text-[0.6rem] text-[#8A8A8A] uppercase tracking-[0.25em] pb-6 mb-6 border-b border-[rgba(255,255,255,0.08)]">
+                    Start here: connect your payments
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+                    {primarySources.map(renderCard)}
+                </div>
+            </section>
 
-                return (
-                    <div key={category.id} className="mb-12">
-                        <div className="text-[0.6rem] text-[#404040] uppercase tracking-[0.25em] pb-6 mb-6 border-b border-[rgba(255,255,255,0.04)]">
-                            {category.label}
-                        </div>
-
-                        <div className="grid grid-cols-4 gap-6">
-                            {categoryIntegrations.map((integration) => {
-                                const isConnected = connectedIds.includes(integration.id)
-                                const isConnecting = connecting === integration.id
-
-                                return (
-                                    <div
-                                        key={integration.id}
-                                        className={`p-8 border transition-all relative ${isConnected
-                                            ? 'border-green-500/30 bg-green-500/5'
-                                            : 'border-[rgba(255,255,255,0.04)] hover:border-[rgba(255,255,255,0.08)] hover:bg-[rgba(255,255,255,0.02)]'
-                                            }`}
-                                    >
-                                        {integration.recommended && !isConnected && (
-                                            <span className="absolute top-4 right-4 text-[0.5rem] text-[#606060] uppercase tracking-[0.1em] px-2 py-1 border border-[rgba(255,255,255,0.04)]">
-                                                Recommended
-                                            </span>
-                                        )}
-
-                                        {isConnected && (
-                                            <span className="absolute top-4 right-4 text-[0.5rem] text-green-400 uppercase tracking-[0.1em] px-2 py-1 border border-green-500/30 bg-green-500/10">
-                                                ✓ Connected
-                                            </span>
-                                        )}
-
-                                        <div className="h-8 mb-6 flex items-center">
-                                            {integration.logo ? (
-                                                <img 
-                                                    src={integration.logo} 
-                                                    alt={integration.name} 
-                                                    className="h-8 w-auto object-contain transition-transform duration-300 hover:scale-105"
-                                                />
-                                            ) : (
-                                                <span className="text-2xl opacity-80">{integration.icon}</span>
-                                            )}
-                                        </div>
-
-                                        <h3 className="font-outfit text-[1.1rem] font-light tracking-wide mb-3">
-                                            {integration.name}
-                                        </h3>
-
-                                        <p className="text-[0.8rem] text-[#606060] font-light leading-relaxed mb-6">
-                                            {integration.description}
-                                        </p>
-
-                                        <div className="flex items-center gap-2">
-                                            {isConnected ? (
-                                                <button
-                                                    onClick={() => handleDisconnect(integration.id)}
-                                                    disabled={isConnecting}
-                                                    className="text-[0.55rem] uppercase tracking-[0.15em] text-red-400 hover:text-red-300 transition"
-                                                >
-                                                    {isConnecting ? 'Disconnecting...' : 'Disconnect'}
-                                                </button>
-                                            ) : (
-                                                <button
-                                                    onClick={() => handleConnect(integration)}
-                                                    disabled={isConnecting}
-                                                    className="text-[0.55rem] uppercase tracking-[0.15em] text-white hover:text-green-400 transition"
-                                                >
-                                                    {isConnecting ? 'Connecting...' : integration.authType === 'oauth' ? 'Connect with OAuth' : 'Connect with API Key'}
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-                                )
-                            })}
-                        </div>
+            {/* Other available sources (sync supported) */}
+            {otherAvailable.length > 0 && (
+                <section aria-labelledby="other-sources-heading" className="mb-12">
+                    <h2 id="other-sources-heading" className="text-[0.6rem] text-[#8A8A8A] uppercase tracking-[0.25em] pb-6 mb-6 border-b border-[rgba(255,255,255,0.08)]">
+                        Other data sources
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+                        {otherAvailable.map(renderCard)}
                     </div>
-                )
-            })}
+                </section>
+            )}
+
+            {/* Coming soon: listed for visibility, cannot be connected */}
+            <section aria-labelledby="coming-soon-heading" className="mb-12">
+                <h2 id="coming-soon-heading" className="text-[0.6rem] text-[#8A8A8A] uppercase tracking-[0.25em] pb-6 mb-2 border-b border-[rgba(255,255,255,0.08)]">
+                    Coming soon
+                </h2>
+                <p className="text-[0.8rem] text-[#8A8A8A] mb-6">
+                    These integrations aren&apos;t available yet and don&apos;t affect your PMF Score.
+                </p>
+                {CATEGORIES.map((category) => {
+                    const categoryIntegrations = comingSoonList.filter(i => i.category === category.id)
+                    if (categoryIntegrations.length === 0) return null
+
+                    return (
+                        <div key={category.id} className="mb-10">
+                            <h3 className="text-[0.6rem] text-[#8A8A8A] uppercase tracking-[0.2em] mb-4">
+                                {category.label}
+                            </h3>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+                                {categoryIntegrations.map(renderCard)}
+                            </div>
+                        </div>
+                    )
+                })}
+            </section>
 
             {/* Footer */}
-            <div className="flex justify-between items-center py-12 border-t border-[rgba(255,255,255,0.04)] mt-8">
-                <div className="text-[0.8rem] text-[#404040]">
+            <div className="flex flex-col sm:flex-row gap-6 justify-between items-start sm:items-center py-12 border-t border-[rgba(255,255,255,0.04)] mt-8">
+                <div className="text-[0.8rem] text-[#8A8A8A]">
                     {connectedIds.length === 0
                         ? 'No integrations connected yet'
                         : `${connectedIds.length} integration${connectedIds.length > 1 ? 's' : ''} connected`
@@ -462,7 +537,7 @@ export default function IntegrationsPage() {
                 </div>
                 <Link
                     href="/dashboard"
-                    className="inline-flex items-center gap-4 px-10 py-5 bg-white text-black font-outfit font-medium text-[0.8rem] uppercase tracking-[0.1em] hover:-translate-y-0.5 hover:shadow-[0_10px_40px_rgba(255,255,255,0.1)] transition-all"
+                    className="inline-flex items-center gap-4 px-10 py-5 bg-white text-black font-outfit font-medium text-[0.8rem] uppercase tracking-[0.1em] hover:-translate-y-0.5 hover:shadow-[0_10px_40px_rgba(255,255,255,0.1)] transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]"
                 >
                     Go to Dashboard
                 </Link>

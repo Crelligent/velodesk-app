@@ -1,4 +1,31 @@
 import { NextResponse } from 'next/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { INTEGRATIONS } from '@/lib/integrations'
+import { refreshPmfScore } from '@/lib/pmf-score'
+
+// Daily recalculation can take a while (provider APIs are paginated)
+export const maxDuration = 300
+
+const SCORED_PROVIDERS = INTEGRATIONS.filter(i => i.feedsScore).map(i => i.id)
+const RECALC_CONCURRENCY = 5
+
+/** Recalculate the PMF Score for every user with a connected scored source. */
+async function recalculateScores(): Promise<number> {
+    const admin = createAdminClient()
+    const { data: rows, error } = await admin
+        .from('integration_tokens')
+        .select('user_id')
+        .eq('status', 'connected')
+        .in('provider', SCORED_PROVIDERS)
+    if (error) throw error
+
+    const userIds = [...new Set((rows || []).map(r => r.user_id as string))]
+    for (let i = 0; i < userIds.length; i += RECALC_CONCURRENCY) {
+        // refreshPmfScore never throws; failures are logged per user
+        await Promise.all(userIds.slice(i, i + RECALC_CONCURRENCY).map(id => refreshPmfScore(admin, id, { force: true })))
+    }
+    return userIds.length
+}
 
 // Templates for pre-AI Phase 1
 const templates: Record<string, { down: { signal: string, suggests: string, action: string } }> = {
@@ -55,12 +82,15 @@ const templates: Record<string, { down: { signal: string, suggests: string, acti
 
 export async function GET(request: Request) {
     const authHeader = request.headers.get('authorization')
-    if (process.env.CRON_SECRET && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    // Fail closed: if CRON_SECRET is unset the endpoint must not be publicly callable
+    if (!process.env.CRON_SECRET || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
         return new NextResponse('Unauthorized', { status: 401 })
     }
 
     try {
-        // TODO: Initialize Supabase Admin client
+        // 1. Fresh PMF Scores from connected sources (the dashboard reads the latest row)
+        const recalculated = await recalculateScores()
+
         // TODO: Fetch active users and their PMF history
         // TODO: For each user, find max drop and generate message
         // TODO: Send via WhatsApp / Resend
@@ -69,7 +99,7 @@ export async function GET(request: Request) {
         // Mock response for now
         console.log("Velodesk Signal Feed Triggered")
 
-        return NextResponse.json({ success: true, processed: 0 })
+        return NextResponse.json({ success: true, recalculated, processed: 0 })
     } catch (error) {
         console.error('Error generating signal feed:', error)
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })

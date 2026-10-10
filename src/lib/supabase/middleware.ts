@@ -52,6 +52,14 @@ export async function updateSession(request: NextRequest) {
         return NextResponse.redirect(url)
     }
 
+    // Signed-in user picked a plan on /pricing (e.g. after the trial ended):
+    // go straight to checkout instead of /dashboard, which would bounce back to /pricing.
+    if (user && request.nextUrl.pathname === '/signup' && request.nextUrl.searchParams.has('plan')) {
+        const url = request.nextUrl.clone()
+        url.pathname = '/api/billing/start'
+        return NextResponse.redirect(url)
+    }
+
     // Redirect authenticated users from login/signup to dashboard
     // (but only if they're NOT coming from OAuth - check for redirected param)
     if (

@@ -1,28 +1,27 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { NextResponse } from 'next/server'
+import { createClient } from '@/lib/supabase/server'
 
-const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-)
-
-export async function POST(request: NextRequest) {
+export async function POST() {
     try {
-        const { userId } = await request.json()
+        // User comes from the session, never from the request body: a body userId
+        // let anyone open (and cancel) another customer's billing portal.
+        const supabase = await createClient()
+        const { data: { user } } = await supabase.auth.getUser()
 
-        if (!userId) {
-            return NextResponse.json({ error: 'User ID required' }, { status: 400 })
+        if (!user) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
         }
 
-        // Get user's Stripe customer ID
+        // Get user's Stripe customer ID (RLS: users can read their own row)
         const { data: subscription, error } = await supabase
             .from('subscriptions')
-            .select('provider_customer_id')
-            .eq('user_id', userId)
+            .select('provider_customer_id, stripe_customer_id')
+            .eq('user_id', user.id)
             .eq('provider', 'stripe')
-            .single()
+            .maybeSingle()
 
-        if (error || !subscription?.provider_customer_id) {
+        const customerId = subscription?.stripe_customer_id || subscription?.provider_customer_id
+        if (error || !customerId) {
             return NextResponse.json(
                 { error: 'No Stripe subscription found' },
                 { status: 404 }
@@ -35,7 +34,7 @@ export async function POST(request: NextRequest) {
 
         // Create portal session
         const session = await stripe.billingPortal.sessions.create({
-            customer: subscription.provider_customer_id,
+            customer: customerId,
             return_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/settings`,
         })
 

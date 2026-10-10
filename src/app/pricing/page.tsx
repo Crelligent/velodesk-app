@@ -4,6 +4,11 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { Check } from 'lucide-react'
 
+// Unverified enterprise claims (SLA, compliance) are hidden until the owner confirms them.
+const SHOW_UNVERIFIED_CLAIMS = false
+
+// Source of truth for displayed prices. The JSON-LD offers in app/layout.tsx mirror these —
+// update both together.
 const planData = {
     founder: {
         id: 'founder_monthly',
@@ -39,8 +44,10 @@ const planData = {
 export default function PricingPage() {
     const [loading, setLoading] = useState<string | null>(null)
     const [currency, setCurrency] = useState<'USD' | 'NGN'>('USD')
-    const [gateway, setGateway] = useState<'stripe' | 'paystack'>('stripe')
-    const [billingPeriod, setBillingPeriod] = useState<'Monthly' | 'Yearly'>('Monthly')
+    // Gateway is derived from currency so it can never drift: NGN is always billed via Paystack.
+    const gateway: 'stripe' | 'paystack' = currency === 'NGN' ? 'paystack' : 'stripe'
+    // TODO(pricing): add a Monthly/Yearly toggle back once yearly prices exist in planData
+    // and in the Stripe/Paystack plan configs. It was removed because it changed nothing.
 
     useEffect(() => {
         console.log('[Analytics] pricing_viewed')
@@ -49,12 +56,13 @@ export default function PricingPage() {
     const handleCheckout = async (planId: string) => {
         console.log(`[Analytics] plan_selected: plan=${planId}`)
         setLoading(planId)
-        window.location.href = `/signup?plan=${planId}&gateway=${gateway}&currency=${currency}`
+        // No checkout here: the 14-day trial starts without a card. Signup stores plan + currency.
+        window.location.href = `/signup?plan=${planId}&currency=${currency}`
     }
 
     const founderPrice = currency === 'USD' ? planData.founder.usd : planData.founder.ngn
     const startupPrice = currency === 'USD' ? planData.startup.usd : planData.startup.ngn
-    const symbol = currency === 'USD' ? 'US $' : '&#8358;'
+    const symbol = currency === 'USD' ? 'US $' : '\u20A6'
 
     return (
         <div className="min-h-screen bg-[#0A0A0A] text-white selection:bg-[#7B61FF]/30 font-inter font-light">
@@ -64,7 +72,7 @@ export default function PricingPage() {
                     <img src="/velodesk%20(2).png" alt="Velodesk" className="h-8 w-auto" />
                     <div className="flex flex-col justify-center">
                         <span className="font-orbitron font-bold text-sm tracking-[0.15em] text-white leading-none">VELODESK</span>
-                        <span className="font-mono text-[8px] text-white/30 tracking-widest mt-1 uppercase">By Crelligent</span>
+                        <span className="font-mono text-[8px] text-[#8A8A8A] tracking-widest mt-1 uppercase">By Crelligent</span>
                     </div>
                 </Link>
                 <div className="hidden md:flex items-center gap-10">
@@ -96,32 +104,16 @@ export default function PricingPage() {
 
                 {/* Toggles */}
                 <div className="flex flex-col items-center gap-6 mb-16">
-                    {/* Monthly/Yearly */}
-                    <div className="inline-flex items-center p-1 bg-[#111] rounded-full border border-white/5">
-                        <button
-                            onClick={() => setBillingPeriod('Monthly')}
-                            className={`px-6 py-2 text-sm rounded-full transition-all ${billingPeriod === 'Monthly' ? 'bg-white/10 text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
-                        >
-                            Monthly
-                        </button>
-                        <button
-                            onClick={() => setBillingPeriod('Yearly')}
-                            className={`px-6 py-2 text-sm rounded-full transition-all flex items-center gap-2 ${billingPeriod === 'Yearly' ? 'bg-white/10 text-white shadow-sm' : 'text-gray-500 hover:text-gray-300'}`}
-                        >
-                            Yearly
-                        </button>
-                    </div>
-
                     {/* Currency Toggle Switch */}
                     <div className="flex items-center gap-3 mt-4">
-                        <span className={`text-sm font-medium transition-colors ${currency === 'USD' ? 'text-white' : 'text-gray-500'}`}>USD ($)</span>
+                        <span id="currency-usd" className={`text-sm font-medium transition-colors ${currency === 'USD' ? 'text-white' : 'text-[#8A8A8A]'}`}>USD ($)</span>
                         <button
-                            onClick={() => {
-                                const newCurr = currency === 'USD' ? 'NGN' : 'USD'
-                                setCurrency(newCurr)
-                                setGateway(newCurr === 'USD' ? 'stripe' : 'paystack')
-                            }}
-                            className={`w-12 h-6 rounded-full relative transition-colors duration-300 focus:outline-none border border-white/10 ${
+                            type="button"
+                            role="switch"
+                            aria-checked={currency === 'NGN'}
+                            aria-label="Show prices in Nigerian Naira (NGN)"
+                            onClick={() => setCurrency(currency === 'USD' ? 'NGN' : 'USD')}
+                            className={`w-12 h-6 rounded-full relative transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A] border border-white/10 ${
                                 currency === 'NGN' ? 'bg-[#7B61FF]' : 'bg-white/10'
                             }`}
                         >
@@ -131,8 +123,11 @@ export default function PricingPage() {
                                 }`}
                             />
                         </button>
-                        <span className={`text-sm font-medium transition-colors ${currency === 'NGN' ? 'text-white' : 'text-gray-500'}`}>NGN (&#8358;)</span>
+                        <span className={`text-sm font-medium transition-colors ${currency === 'NGN' ? 'text-white' : 'text-[#8A8A8A]'}`}>NGN (&#8358;)</span>
                     </div>
+                    <p className="text-xs text-[#8A8A8A]">
+                        {currency} billing is processed by {gateway === 'paystack' ? 'Paystack' : 'Stripe'}.
+                    </p>
                 </div>
 
                 {/* Grid */}
@@ -143,14 +138,15 @@ export default function PricingPage() {
                         <p className="text-sm text-gray-400 mb-8 min-h-[40px]">{planData.founder.desc}</p>
                         
                         <div className="flex items-baseline gap-2 mb-8">
-                            <span className="text-sm text-gray-400 font-medium" dangerouslySetInnerHTML={{__html: symbol}}></span>
+                            <span className="text-sm text-gray-400 font-medium">{symbol}</span>
                             <span className="text-5xl font-bold text-white tracking-tight">{founderPrice}</span>
-                            <span className="text-sm text-gray-500">per month</span>
+                            <span className="text-sm text-[#8A8A8A]">per month</span>
                         </div>
                         
                         <button 
                             onClick={() => handleCheckout(planData.founder.id)}
-                            className="w-48 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-medium transition-all mb-10 border border-white/5"
+                            type="button"
+                            className="w-48 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-medium transition-all mb-10 border border-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A]"
                         >
                             {loading === planData.founder.id ? 'Processing...' : 'Start 14-Day Free Trial'}
                         </button>
@@ -179,14 +175,15 @@ export default function PricingPage() {
                         <p className="text-sm text-gray-400 mb-8 min-h-[40px]">{planData.startup.desc}</p>
                         
                         <div className="flex items-baseline gap-2 mb-8">
-                            <span className="text-sm text-gray-400 font-medium" dangerouslySetInnerHTML={{__html: symbol}}></span>
+                            <span className="text-sm text-gray-400 font-medium">{symbol}</span>
                             <span className="text-5xl font-bold text-white tracking-tight">{startupPrice}</span>
-                            <span className="text-sm text-gray-500">per month</span>
+                            <span className="text-sm text-[#8A8A8A]">per month</span>
                         </div>
                         
                         <button 
                             onClick={() => handleCheckout(planData.startup.id)}
-                            className="w-48 py-2.5 bg-[#7B61FF] hover:bg-[#8A73FF] text-white rounded-lg text-sm font-medium transition-all mb-10"
+                            type="button"
+                            className="w-48 py-2.5 bg-[#7B61FF] hover:bg-[#8A73FF] text-white rounded-lg text-sm font-medium transition-all mb-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A]"
                         >
                             {loading === planData.startup.id ? 'Processing...' : 'Start 14-Day Free Trial'}
                         </button>
@@ -244,7 +241,7 @@ export default function PricingPage() {
                             <div className="p-6 md:p-8 relative">
                                 <div className="text-sm font-medium text-white mb-6 flex items-center justify-between">
                                     <span>Enterprise AI Add-on</span>
-                                    <span className="text-xs text-gray-500">Custom</span>
+                                    <span className="text-xs text-[#8A8A8A]">Custom</span>
                                 </div>
                                 <ul className="space-y-4">
                                     <li className="flex items-start gap-3 text-sm text-gray-400"><Check className="w-4 h-4 text-white/40 shrink-0 mt-0.5" /><span>Custom trained PMF models</span></li>
@@ -288,12 +285,16 @@ export default function PricingPage() {
                             <div className="p-6 md:p-8 relative">
                                 <div className="text-sm font-medium text-white mb-6 flex items-center justify-between">
                                     <span>Infrastructure Add-on</span>
-                                    <span className="text-xs text-gray-500">Custom</span>
+                                    <span className="text-xs text-[#8A8A8A]">Custom</span>
                                 </div>
                                 <ul className="space-y-4">
                                     <li className="flex items-start gap-3 text-sm text-gray-400"><Check className="w-4 h-4 text-white/40 shrink-0 mt-0.5" /><span>Dedicated isolated database</span></li>
-                                    <li className="flex items-start gap-3 text-sm text-gray-400"><Check className="w-4 h-4 text-white/40 shrink-0 mt-0.5" /><span>SLA uptime guarantees</span></li>
-                                    <li className="flex items-start gap-3 text-sm text-gray-400"><Check className="w-4 h-4 text-white/40 shrink-0 mt-0.5" /><span>Enterprise data compliance</span></li>
+                                    {SHOW_UNVERIFIED_CLAIMS && (
+                                        <>
+                                            <li className="flex items-start gap-3 text-sm text-gray-400"><Check className="w-4 h-4 text-white/40 shrink-0 mt-0.5" /><span>SLA uptime guarantees</span></li>
+                                            <li className="flex items-start gap-3 text-sm text-gray-400"><Check className="w-4 h-4 text-white/40 shrink-0 mt-0.5" /><span>Enterprise data compliance</span></li>
+                                        </>
+                                    )}
                                 </ul>
                             </div>
                         </div>
@@ -311,7 +312,7 @@ export default function PricingPage() {
                                 Need more support and compliance features or pricing doesn't work for your business?
                             </h4>
                         </div>
-                        <Link href="/contact" className="inline-flex w-fit px-6 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-lg text-sm font-medium transition border border-white/10 mt-6">
+                        <Link href="/contact" className="inline-flex w-fit px-6 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-lg text-sm font-medium transition border border-white/10 mt-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A]">
                             Contact sales
                         </Link>
                     </div>
@@ -323,7 +324,7 @@ export default function PricingPage() {
                                 Pre-negotiated portfolio discounts and global dashboard available for your entire batch.
                             </h4>
                         </div>
-                        <Link href="/investors" className="inline-flex w-fit px-6 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-lg text-sm font-medium transition border border-white/10 mt-6">
+                        <Link href="/investors" className="inline-flex w-fit px-6 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-lg text-sm font-medium transition border border-white/10 mt-6 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A]">
                             Apply now
                         </Link>
                     </div>

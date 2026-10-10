@@ -1,16 +1,36 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { after, NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { checkIntegrationLimit } from '@/lib/plans'
+import { getIntegrationByProvider } from '@/lib/integrations'
+import { refreshPmfScore } from '@/lib/pmf-score'
+import { OAUTH_STATE_COOKIE, oauthStateCookieOptions, verifyOAuthState } from '@/lib/oauth-state'
 
 export async function GET(request: NextRequest) {
+    // CSRF: state must equal the httpOnly cookie set by /api/integrations/oauth-start
+    const verified = verifyOAuthState(
+        request.nextUrl.searchParams.get('state'),
+        request.cookies.get(OAUTH_STATE_COOKIE)?.value
+    )
+    const response = verified
+        ? await handleCallback(request, verified.provider)
+        : NextResponse.redirect(new URL('/dashboard/integrations?error=invalid_state', request.url))
+
+    // One-time use: always clear the state cookie
+    response.cookies.set(OAUTH_STATE_COOKIE, '', { ...oauthStateCookieOptions, maxAge: 0 })
+    return response
+}
+
+async function handleCallback(request: NextRequest, state: string) {
     const searchParams = request.nextUrl.searchParams
     const code = searchParams.get('code')
-    const state = searchParams.get('state') // provider name
     const error = searchParams.get('error')
 
     if (error) {
-        console.error('OAuth error:', error)
+        // `error` comes from the provider redirect: log only a short, sanitised code
+        console.error(`OAuth error from ${state}:`, error.replace(/[^a-z0-9_.-]/gi, '').slice(0, 64))
         return NextResponse.redirect(
-            new URL(`/dashboard/integrations?error=${error}`, request.url)
+            new URL(`/dashboard/integrations?error=${encodeURIComponent(error)}`, request.url)
         )
     }
 
@@ -28,7 +48,20 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        let tokenData: { access_token: string; refresh_token?: string; expires_at?: string } | null = null
+        let tokenData: {
+            access_token: string
+            refresh_token?: string
+            expires_at?: string
+            config?: Record<string, unknown>
+        } | null = null
+
+        const admin = createAdminClient()
+        const limitError = await checkIntegrationLimit(admin, user.id, state)
+        if (limitError) {
+            return NextResponse.redirect(
+                new URL('/dashboard/integrations?error=plan_limit', request.url)
+            )
+        }
 
         // Handle different OAuth providers
         switch (state) {
@@ -64,29 +97,36 @@ export async function GET(request: NextRequest) {
             throw new Error('Failed to exchange code for token')
         }
 
-        // Store the token
-        const { error: dbError } = await supabase.from('integration_tokens').upsert(
+        // Store the token (service role: authenticated users cannot read/write secrets directly)
+        const { error: dbError } = await admin.from('integration_tokens').upsert(
             {
                 user_id: user.id,
                 provider: state,
                 access_token: tokenData.access_token,
                 refresh_token: tokenData.refresh_token,
                 expires_at: tokenData.expires_at,
+                config: tokenData.config ?? {},
+                status: 'connected',
                 created_at: new Date().toISOString(),
             },
             { onConflict: 'user_id,provider' }
         )
 
         if (dbError) {
-            console.error('Error saving token:', dbError)
+            console.error(`Error saving ${state} token:`, dbError.code ?? 'db_error')
             throw dbError
+        }
+
+        // Pull the new data and write a fresh PMF Score after the redirect is sent
+        if (getIntegrationByProvider(state)?.feedsScore) {
+            after(() => refreshPmfScore(admin, user.id))
         }
 
         return NextResponse.redirect(
             new URL(`/dashboard/integrations?success=${state}`, request.url)
         )
     } catch (err) {
-        console.error('OAuth callback error:', err)
+        console.error(`OAuth callback error for ${state}:`, err instanceof Error ? err.name : 'unknown')
         return NextResponse.redirect(
             new URL(`/dashboard/integrations?error=oauth_failed`, request.url)
         )
@@ -109,8 +149,8 @@ async function exchangeHubSpotCode(code: string) {
     })
 
     if (!response.ok) {
-        const error = await response.text()
-        console.error('HubSpot token exchange failed:', error)
+        // provider + status only: error bodies can echo codes or client details
+        console.error('HubSpot token exchange failed: HTTP', response.status)
         return null
     }
 
@@ -136,8 +176,8 @@ async function exchangeGoogleCode(code: string) {
     })
 
     if (!response.ok) {
-        const error = await response.text()
-        console.error('Google token exchange failed:', error)
+        // provider + status only: error bodies can echo codes or client details
+        console.error('Google token exchange failed: HTTP', response.status)
         return null
     }
 
@@ -161,15 +201,18 @@ async function exchangeStripeConnectCode(code: string) {
     })
 
     if (!response.ok) {
-        const error = await response.text()
-        console.error('Stripe Connect token exchange failed:', error)
+        // provider + status only: error bodies can echo codes or client details
+        console.error('Stripe Connect token exchange failed: HTTP', response.status)
         return null
     }
 
     const data = await response.json()
+    // stripe_user_id is the connected account id (acct_...). Sync uses it with the
+    // platform key + Stripe-Account header to read the CUSTOMER's data.
     return {
         access_token: data.access_token,
         refresh_token: data.refresh_token,
+        config: { stripe_user_id: data.stripe_user_id, livemode: data.livemode },
     }
 }
 
@@ -185,8 +228,8 @@ async function exchangeIntercomCode(code: string) {
     })
 
     if (!response.ok) {
-        const error = await response.text()
-        console.error('Intercom token exchange failed:', error)
+        // provider + status only: error bodies can echo codes or client details
+        console.error('Intercom token exchange failed: HTTP', response.status)
         return null
     }
 
@@ -208,8 +251,8 @@ async function exchangeSalesforceCode(code: string) {
     })
 
     if (!response.ok) {
-        const error = await response.text()
-        console.error('Salesforce token exchange failed:', error)
+        // provider + status only: error bodies can echo codes or client details
+        console.error('Salesforce token exchange failed: HTTP', response.status)
         return null
     }
 
@@ -236,8 +279,8 @@ async function exchangeZendeskCode(code: string) {
     })
 
     if (!response.ok) {
-        const error = await response.text()
-        console.error('Zendesk token exchange failed:', error)
+        // provider + status only: error bodies can echo codes or client details
+        console.error('Zendesk token exchange failed: HTTP', response.status)
         return null
     }
 

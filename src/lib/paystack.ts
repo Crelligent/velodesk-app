@@ -1,18 +1,24 @@
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY!
 const PAYSTACK_BASE_URL = 'https://api.paystack.co'
 
-export const PAYSTACK_PLANS = {
-    founder_monthly_ngn: 'PLN_xxx', // Replace with actual Paystack plan code
-    founder_yearly_ngn: 'PLN_xxx',
-    startup_monthly_ngn: 'PLN_xxx',
-    startup_yearly_ngn: 'PLN_xxx',
-    enterprise_monthly_ngn: 'PLN_xxx',
-    
-    founder_monthly_usd: 'PLN_xxx',
-    founder_yearly_usd: 'PLN_xxx',
-    startup_monthly_usd: 'PLN_xxx',
-    startup_yearly_usd: 'PLN_xxx',
-    enterprise_monthly_usd: 'PLN_xxx',
+// Plan codes come from env so placeholder codes never reach Paystack. Unset = plan unavailable.
+export const PAYSTACK_PLANS: Record<string, string | undefined> = {
+    founder_monthly_ngn: process.env.PAYSTACK_PLAN_FOUNDER_MONTHLY_NGN,
+    founder_yearly_ngn: process.env.PAYSTACK_PLAN_FOUNDER_YEARLY_NGN,
+    startup_monthly_ngn: process.env.PAYSTACK_PLAN_STARTUP_MONTHLY_NGN,
+    startup_yearly_ngn: process.env.PAYSTACK_PLAN_STARTUP_YEARLY_NGN,
+
+    founder_monthly_usd: process.env.PAYSTACK_PLAN_FOUNDER_MONTHLY_USD,
+    founder_yearly_usd: process.env.PAYSTACK_PLAN_FOUNDER_YEARLY_USD,
+    startup_monthly_usd: process.env.PAYSTACK_PLAN_STARTUP_MONTHLY_USD,
+    startup_yearly_usd: process.env.PAYSTACK_PLAN_STARTUP_YEARLY_USD,
+}
+
+/** Reverse lookup: Paystack plan code -> plan id (e.g. 'founder_monthly'). Unknown code -> null. */
+export function planIdFromPaystackCode(planCode: string | null | undefined): string | null {
+    if (!planCode) return null
+    const match = Object.entries(PAYSTACK_PLANS).find(([, code]) => code && code === planCode)
+    return match ? match[0].replace(/_(ngn|usd)$/, '') : null
 }
 
 interface InitializeTransactionResponse {
@@ -32,9 +38,14 @@ interface VerifyTransactionResponse {
         status: 'success' | 'failed' | 'abandoned'
         reference: string
         amount: number
+        currency: string
+        paid_at?: string
         customer: {
             email: string
+            customer_code: string
         }
+        plan?: string | null
+        plan_object?: { plan_code?: string; interval?: string } | null
         metadata?: Record<string, unknown>
     }
 }

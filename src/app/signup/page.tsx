@@ -8,38 +8,41 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { Database, LineChart, Sparkles } from 'lucide-react'
 
+const PLAN_NAMES: Record<string, string> = {
+    founder_monthly: 'Founder plan',
+    startup_monthly: 'Startup plan',
+}
+
 const signupSchema: FormSchema = {
     id: 'velodesk-signup-form-v1',
-    title: 'Get Early Access',
-    description: 'Start your 14-day free trial. Connect your data in minutes.',
+    title: 'Start your 14-day free trial',
+    description: 'No credit card required. Your company details come next.',
+    submitLabel: 'Create account',
     fields: [
         {
             id: 'fullName',
             type: 'text',
             label: 'Full Name',
             placeholder: 'John Doe',
-            required: true
-        },
-        {
-            id: 'companyName',
-            type: 'text',
-            label: 'Company',
-            placeholder: 'Acme Inc.',
-            required: false
+            required: true,
+            autoComplete: 'name'
         },
         {
             id: 'email',
             type: 'email',
             label: 'Work Email',
             placeholder: 'you@company.com',
-            required: true
+            required: true,
+            autoComplete: 'email'
         },
         {
             id: 'password',
             type: 'password',
             label: 'Password',
             placeholder: 'Min. 8 characters',
-            required: true
+            required: true,
+            autoComplete: 'new-password',
+            hint: 'At least 8 characters.'
         },
         {
             id: 'terms',
@@ -57,9 +60,10 @@ function SignupForm() {
     const [email, setEmail] = useState('')
     const router = useRouter()
     const searchParams = useSearchParams()
-    const planId = searchParams.get('plan')
-    const gateway = searchParams.get('gateway') || 'stripe'
-    const currency = searchParams.get('currency') || 'USD'
+    const planParam = searchParams.get('plan')
+    // Only accept plans we actually sell; anything else is ignored.
+    const planId = planParam && PLAN_NAMES[planParam] ? planParam : null
+    const currency = searchParams.get('currency') === 'NGN' ? 'NGN' : 'USD'
 
     useEffect(() => {
         if (planId) {
@@ -67,39 +71,26 @@ function SignupForm() {
         }
     }, [planId])
 
-    // removed
-
     useEffect(() => {
         setSessionId(Math.random().toString(36).substring(2, 15))
     }, [])
 
     const handleFormSubmit = async (answers: Record<string, any>) => {
-        const { email, password, fullName, companyName } = answers
+        const { email, password, fullName } = answers
         setEmail(email)
 
-        const { data, error } = await signUpUser(email, password, fullName, companyName, window.location.origin)
+        // The chosen plan + currency are saved to the user's metadata (survives email
+        // confirmation). No checkout at signup — the trial starts without a card.
+        // Company name is collected in onboarding.
+        const { data, error } = await signUpUser(email, password, fullName, window.location.origin, planId, currency)
 
         if (error) {
             throw new Error(error)
         }
+        if (data?.user) {
+            console.log(`[Analytics] user_signed_up${planId ? `: plan=${planId}` : ''}`)
+        }
         if (data?.user && data.session) {
-            if (planId) {
-                console.log(`[Analytics] user_signed_up, redirecting to checkout`)
-                try {
-                    const res = await fetch(`/api/${gateway}/checkout`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ planId, currency }),
-                    })
-                    const checkoutData = await res.json()
-                    if (checkoutData.url) {
-                        window.location.href = checkoutData.url
-                        return
-                    }
-                } catch (e) {
-                    console.error('Checkout error', e)
-                }
-            }
             router.push('/onboarding')
         } else if (data?.user && !data.session) {
             setShowConfirmation(true)
@@ -118,8 +109,9 @@ function SignupForm() {
                     </div>
                     <h1 className="text-2xl font-['Outfit'] text-white mb-4">Check your email</h1>
                     <p className="text-gray-400 mb-8 leading-relaxed">
-                        We sent a secure confirmation link to <strong className="text-white">{email}</strong>. 
-                        Click the link inside to verify your identity and access your dashboard.
+                        We sent a confirmation link to <strong className="text-white">{email}</strong>.
+                        Click it to verify your email and finish setting up your account.
+                        {planId && <> Your {PLAN_NAMES[planId]} selection is saved.</>}
                     </p>
                     <Link href="/login" className="text-sm text-[#7B61FF] hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B61FF] focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded">
                         ← Back to Sign In
@@ -142,6 +134,15 @@ function SignupForm() {
 
                 <div className="w-full max-w-md mx-auto my-auto">
                     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                        {planId && (
+                            <p className="mb-6 text-center text-sm text-gray-300">
+                                Selected: <span className="text-white font-medium">{PLAN_NAMES[planId]}</span>
+                                {' '}<span className="text-[#8A8A8A]">({currency}) · no card needed to start</span>{' '}
+                                <Link href="/pricing" className="text-[#7B61FF] hover:text-white underline underline-offset-2 transition rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B61FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]">
+                                    Change
+                                </Link>
+                            </p>
+                        )}
                         {sessionId && (
                             <FormEngine 
                                 schema={signupSchema}
@@ -150,18 +151,18 @@ function SignupForm() {
                             />
                         )}
 
-                        <p className="text-center text-sm text-gray-500 mt-8">
+                        <p className="text-center text-sm text-[#8A8A8A] mt-8">
                             Already have an account?{' '}
-                            <Link href="/login" className="text-[#7B61FF] hover:text-white transition">
+                            <Link href="/login" className="text-[#7B61FF] hover:text-white transition rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B61FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]">
                                 Sign In
                             </Link>
                         </p>
                     </motion.div>
                 </div>
                 
-                <div className="text-xs text-gray-600 font-mono flex items-center justify-between mt-10 shrink-0">
+                <div className="text-xs text-[#8A8A8A] font-mono flex items-center justify-between mt-10 shrink-0">
                     <span>© 2026 Velodesk</span>
-                    <a href="mailto:support@velodesk.com" className="hover:text-gray-400">support@velodesk.com</a>
+                    <a href="mailto:support@velodesk.com" className="hover:text-white rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B61FF]">support@velodesk.com</a>
                 </div>
             </div>
 
@@ -193,7 +194,7 @@ function SignupForm() {
                             </div>
                             <div>
                                 <h4 className="text-white font-medium mb-1">Instant Integration</h4>
-                                <p className="text-sm text-gray-500">Connect Stripe, Mixpanel, and 17+ tools in under 5 minutes without writing any code.</p>
+                                <p className="text-sm text-[#8A8A8A]">Connect Paystack or Stripe to calculate your score from real payment data. No code required.</p>
                             </div>
                         </div>
 
@@ -203,21 +204,29 @@ function SignupForm() {
                             </div>
                             <div>
                                 <h4 className="text-white font-medium mb-1">Board-Ready Reports</h4>
-                                <p className="text-sm text-gray-500">Export beautiful, certified PMF reports directly into your slide decks and dataroom.</p>
+                                <p className="text-sm text-[#8A8A8A]">Export your PMF report as a PDF or share it through your data room.</p>
                             </div>
                         </div>
                     </div>
 
+                    {/* What happens next — factual replacement for the former testimonial */}
                     <div className="mt-16 p-6 rounded-2xl bg-gradient-to-br from-white/5 to-transparent border border-white/10 backdrop-blur-md">
-                        <div className="flex gap-4 items-start">
-                            <img src="/avatar-placeholder.png" alt="Founder" className="w-10 h-10 rounded-full bg-white/10" onError={(e) => { e.currentTarget.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40"><rect width="40" height="40" fill="%23333"/><text x="50%" y="50%" fill="%23fff" font-size="14" dy=".3em" text-anchor="middle">F</text></svg>' }} />
-                            <div>
-                                <p className="text-sm text-gray-300 italic mb-3">
-                                    "Velodesk entirely changed how we communicate with our board. The PMF Score cut our reporting time by 90%."
-                                </p>
-                                <p className="text-xs text-gray-500 uppercase tracking-widest">Sarah J. - Series A Founder</p>
-                            </div>
-                        </div>
+                        <h3 className="text-xs text-gray-300 uppercase tracking-widest mb-5">What happens after you sign up</h3>
+                        <ol className="space-y-4">
+                            {[
+                                'Tell us your company name and stage.',
+                                'Connect your first data source: Paystack or Stripe.',
+                                'Velodesk syncs your data and calculates your PMF Score.',
+                                'Share the score with investors when you are ready.',
+                            ].map((step, i) => (
+                                <li key={step} className="flex gap-4 items-start">
+                                    <span className="w-6 h-6 shrink-0 rounded-full border border-white/20 text-xs text-white flex items-center justify-center font-mono">
+                                        {i + 1}
+                                    </span>
+                                    <span className="text-sm text-gray-300 leading-relaxed">{step}</span>
+                                </li>
+                            ))}
+                        </ol>
                     </div>
                 </motion.div>
             </div>

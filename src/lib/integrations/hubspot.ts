@@ -1,43 +1,66 @@
-// HubSpot Integration Engine
+/**
+ * HubSpot: deals won + contacts created per month (growth signal). CRM source.
+ * Credentials: { accessToken } (private app token; scopes crm.objects.deals.read, crm.objects.contacts.read)
+ * Search API is limited to ~5 requests/second per account, so calls run sequentially.
+ */
+import { daysAgo, describeError, pctChange, requestJson, type RequestOptions } from './http'
+import type { Credentials, SignalSet, ValidationResult } from './signals'
 
-export interface HubSpotMetrics {
-    totalContacts: number;
-    activeDeals: number;
-    pipelineValue: number;
-    leadConversionRate: number; // Percentage (0-100)
-    customerAcquisitionCost: number; // Approximate CAC based on marketing spend vs closed deals
+export const kind = 'crm' as const
+
+const BASE = 'https://api.hubapi.com'
+
+const opts = (c: Credentials): RequestOptions => ({
+    headers: { Authorization: `Bearer ${c.accessToken ?? ''}`, 'Content-Type': 'application/json' },
+})
+
+/**
+ * POST https://api.hubapi.com/crm/v3/objects/{deals|contacts}/search with limit=1;
+ * the response `total` is the number of matching records.
+ */
+async function count(c: Credentials, object: 'deals' | 'contacts', filters: Array<Record<string, string>>): Promise<number> {
+    const res = await requestJson<{ total?: number }>('HubSpot', `${BASE}/crm/v3/objects/${object}/search`, {
+        ...opts(c),
+        method: 'POST',
+        body: JSON.stringify({ filterGroups: [{ filters }], limit: 1, properties: ['hs_object_id'] }),
+    })
+    return res.total ?? 0
 }
 
-export async function getHubSpotMetrics(accessToken: string): Promise<HubSpotMetrics | null> {
+const range = (property: string, from: Date, to: Date) => [
+    { propertyName: property, operator: 'GTE', value: String(from.getTime()) },
+    { propertyName: property, operator: 'LT', value: String(to.getTime()) },
+]
+
+/** GET /crm/v3/objects/contacts?limit=1 and /crm/v3/objects/deals?limit=1 (scope check) */
+export async function validate(c: Credentials): Promise<ValidationResult> {
     try {
-        if (!accessToken) {
-            console.error('Invalid or missing HubSpot access token');
-            return null;
-        }
-
-        // We can do a quick check against the HubSpot API to validate credentials
-        const validateRes = await fetch('https://api.hubapi.com/crm/v3/objects/contacts?limit=1', {
-             headers: {
-                 'Authorization': `Bearer ${accessToken}`,
-                 'Content-Type': 'application/json'
-             }
-        }).catch(() => null);
-
-        if (!validateRes || !validateRes.ok) {
-             console.warn("HubSpot API validation failed or returned non-200. Proceeding with demo data.");
-        }
-
-        // For MVP, returning calculated CRM metrics indicating strong PMF signals
-        return {
-            totalContacts: 14500,
-            activeDeals: 342,
-            pipelineValue: 1250000,
-            leadConversionRate: 12.5, // 12.5% conversion rate from lead to paying customer
-            customerAcquisitionCost: 450 // $450 CAC
-        };
-
+        await requestJson('HubSpot', `${BASE}/crm/v3/objects/contacts?limit=1`, { ...opts(c), retries: 1 })
+        await requestJson('HubSpot', `${BASE}/crm/v3/objects/deals?limit=1`, { ...opts(c), retries: 1 })
+        return { ok: true }
     } catch (error) {
-        console.error('Error fetching HubSpot metrics:', error);
-        return null;
+        return {
+            ok: false,
+            error: `${describeError(error)}. The private app needs crm.objects.contacts.read and crm.objects.deals.read.`,
+        }
+    }
+}
+
+export async function sync(c: Credentials): Promise<SignalSet> {
+    const now = new Date()
+    const d30 = daysAgo(30, now.getTime())
+    const d60 = daysAgo(60, now.getTime())
+    const won = [{ propertyName: 'hs_is_closed_won', operator: 'EQ', value: 'true' }]
+
+    const wonLast30 = await count(c, 'deals', [...won, ...range('closedate', d30, now)])
+    const wonPrev30 = await count(c, 'deals', [...won, ...range('closedate', d60, d30)])
+    const contactsLast30 = await count(c, 'contacts', range('createdate', d30, now))
+
+    return {
+        growth: {
+            newCustomersPerMonth: wonLast30,
+            pipelineGrowth: pctChange(wonLast30, wonPrev30),
+            newLeadsPerMonth: contactsLast30,
+        },
     }
 }

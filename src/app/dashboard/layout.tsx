@@ -1,4 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { ensureTrial, getEntitlement } from '@/lib/plans'
 import { redirect } from 'next/navigation'
 import DashboardClientLayout from '@/components/dashboard/DashboardClientLayout'
 
@@ -16,15 +18,29 @@ export default async function DashboardLayout({
     }
 
     // Enforce subscription requirement
-    const { data: subscription } = await supabase
+    const loadSubscription = () => supabase
         .from('subscriptions')
-        .select('status')
+        .select('plan, status, provider, trial_ends_at, current_period_end')
         .eq('user_id', user.id)
         .maybeSingle()
 
-    // If no subscription at all, or incomplete, force them to pick a plan
-    if (!subscription || subscription.status === 'incomplete') {
-        redirect('/pricing?error=subscription_required')
+    let { data: subscription } = await loadSubscription()
+
+    // First visit: start the server-side 14-day trial (once per user, never re-granted)
+    if (!subscription) {
+        try {
+            await ensureTrial(createAdminClient(), user)
+            subscription = (await loadSubscription()).data
+        } catch (error) {
+            console.error('Failed to start trial:', error)
+        }
+    }
+
+    // Expired trial / ended subscription -> pricing, with a reason the page can show
+    // (?error=trial_ended -> "Your trial has ended"). 'paused' stays read-only below.
+    const { entitled, reason } = getEntitlement(subscription)
+    if (!subscription || (!entitled && reason !== 'paused')) {
+        redirect(`/pricing?error=${reason ?? 'subscription_required'}`)
     }
 
     // If past_due, we could show a banner in the client layout, but we still render children
