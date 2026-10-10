@@ -56,8 +56,8 @@ export default async function DashboardLayout({
             {/* Inject a banner if past_due or paused? Let's just render children for now */}
             {subscription.status === 'past_due' && (
                 <div className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-lg mb-6 flex items-center justify-between">
-                    <span>Your payment method failed. Please update your billing details to avoid interruption.</span>
-                    <a href="/dashboard/settings" className="px-4 py-2 bg-red-500/20 rounded hover:bg-red-500/30 transition text-sm">Update Card</a>
+                    <span>Your last payment was declined. Update your card to avoid interruption.</span>
+                    <a href="/billing" className="px-4 py-2 bg-red-500/20 rounded hover:bg-red-500/30 transition text-sm">Update card</a>
                 </div>
             )}
             {subscription.status === 'paused' && (

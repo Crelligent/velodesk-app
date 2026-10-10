@@ -2,6 +2,8 @@ import { createHmac, timingSafeEqual } from 'crypto'
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { recordPaystackPayment } from '@/lib/paystack-billing'
+import { cardLabel } from '@/lib/invoices/model'
+import { notifyPaymentFailed } from '@/lib/invoices/issue'
 
 /**
  * Paystack billing webhook for VELODESK's own subscriptions.
@@ -69,15 +71,32 @@ export async function POST(request: Request) {
                     paidAt: data.paid_at ?? data.paidAt ?? null,
                     amount: data.amount,
                     currency: data.currency,
+                    cardBrand: data.authorization?.brand ?? null,
+                    cardLast4: data.authorization?.last4 ?? null,
                 })
                 if (result.status === 'rejected') {
                     console.error(`Paystack webhook: ${result.reason} for ${data.reference}`)
                 }
                 break
             }
-            case 'invoice.payment_failed':
-                await updateByCustomer({ status: 'past_due' })
+            case 'invoice.payment_failed': {
+                const { data: row, error } = await supabaseAdmin.from('subscriptions')
+                    .select('user_id, past_due_since')
+                    .eq('provider', 'paystack')
+                    .eq('provider_customer_id', customerCode)
+                    .maybeSingle()
+                if (error) throw error
+                await updateByCustomer({ status: 'past_due', past_due_since: row?.past_due_since ?? new Date().toISOString() })
+                // "Payment declined" email, once per failure episode (never throws)
+                if (row?.user_id) {
+                    await notifyPaymentFailed(supabaseAdmin, row.user_id, {
+                        amountMinor: typeof data.amount === 'number' ? data.amount : null,
+                        currency: data.currency ?? null,
+                        paymentMethod: cardLabel(data.authorization?.brand, data.authorization?.last4),
+                    })
+                }
                 break
+            }
             case 'subscription.not_renew':
                 // Access continues until current_period_end, then subscription.disable fires
                 await updateByCustomer({ status: 'non_renewing' })

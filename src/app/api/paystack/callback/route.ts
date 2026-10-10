@@ -44,6 +44,8 @@ export async function GET(request: Request) {
             paidAt: verification.data.paid_at ?? null,
             amount: verification.data.amount,
             currency: verification.data.currency,
+            cardBrand: verification.data.authorization?.brand ?? null,
+            cardLast4: verification.data.authorization?.last4 ?? null,
         })
 
         if (result.status === 'rejected') {
@@ -53,11 +55,11 @@ export async function GET(request: Request) {
         if (result.status === 'duplicate') {
             // Already processed (e.g. by the webhook, or a page refresh): never re-grant
             return result.userId === user.id
-                ? NextResponse.redirect(`${appUrl}/dashboard/settings?payment=already_processed`)
+                ? NextResponse.redirect(`${appUrl}/billing`)
                 : NextResponse.redirect(`${appUrl}/pricing?error=verification_failed`)
         }
 
-        return NextResponse.redirect(`${appUrl}/dashboard/settings?success=true`)
+        return NextResponse.redirect(`${appUrl}/billing?success=true`)
     } catch (error) {
         console.error('Paystack callback error:', error)
         return NextResponse.redirect(`${appUrl}/pricing?error=verification_failed`)

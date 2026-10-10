@@ -8,6 +8,8 @@ export default function SettingsPage() {
     const [profile, setProfile] = useState({
         full_name: '',
         company_name: '',
+        billing_address: '',
+        tax_id: '',
     })
     const [loading, setLoading] = useState(false)
     const [saved, setSaved] = useState(false)
@@ -29,6 +31,8 @@ export default function SettingsPage() {
                     setProfile({
                         full_name: data.full_name || '',
                         company_name: data.company_name || '',
+                        billing_address: data.billing_address || '',
+                        tax_id: data.tax_id || '',
                     })
                 }
             }
@@ -48,6 +52,8 @@ export default function SettingsPage() {
             .update({
                 full_name: profile.full_name,
                 company_name: profile.company_name,
+                billing_address: profile.billing_address.trim() || null,
+                tax_id: profile.tax_id.trim() || null,
             })
             .eq('id', (user as { id: string }).id)
 
@@ -102,6 +108,31 @@ export default function SettingsPage() {
                             />
                         </div>
 
+                        <div id="billing" className="pt-2">
+                            <p className="text-sm font-medium mb-1">Billing details</p>
+                            <p className="text-xs text-gray-500 mb-4">Shown on your invoices and receipts. Company above is used as the &quot;Billed to&quot; name.</p>
+                            <label htmlFor="billing_address" className="block text-sm text-gray-400 mb-2">Billing address</label>
+                            <textarea
+                                id="billing_address"
+                                rows={3}
+                                value={profile.billing_address}
+                                onChange={(e) => setProfile({ ...profile, billing_address: e.target.value })}
+                                placeholder={'14 Admiralty Way\nLekki Phase 1, Lagos'}
+                                className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded focus:outline-none focus:border-[#22c55e] transition"
+                            />
+                        </div>
+
+                        <div>
+                            <label htmlFor="tax_id" className="block text-sm text-gray-400 mb-2">Tax ID (TIN / VAT number, optional)</label>
+                            <input
+                                id="tax_id"
+                                type="text"
+                                value={profile.tax_id}
+                                onChange={(e) => setProfile({ ...profile, tax_id: e.target.value })}
+                                className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded focus:outline-none focus:border-[#22c55e] transition"
+                            />
+                        </div>
+
                         <div className="flex items-center gap-4">
                             <button
                                 onClick={handleSave}
@@ -117,23 +148,15 @@ export default function SettingsPage() {
                     </div>
                 </div>
 
-                {/* Subscription Section */}
+                {/* Billing */}
                 <div className="p-6 bg-white/[0.02] border border-white/10 rounded-lg mb-6">
-                    <h2 className="text-lg font-medium mb-6">Subscription</h2>
-
-                    <div className="flex justify-between items-center p-4 bg-white/[0.02] border border-white/10 rounded-lg mb-4">
-                        <div>
-                            <div className="font-medium">Free Plan</div>
-                            <div className="text-sm text-gray-500">1 PMF Score per month</div>
-                        </div>
-                        <span className="px-3 py-1 bg-white/10 text-sm rounded">Active</span>
-                    </div>
-
+                    <h2 className="text-lg font-medium mb-2">Plan &amp; billing</h2>
+                    <p className="text-sm text-gray-500 mb-5">Your plan, payment card, invoices and receipts.</p>
                     <a
-                        href="/pricing"
+                        href="/billing"
                         className="inline-block px-4 py-2 bg-[#22c55e] text-black font-medium rounded hover:bg-[#16a34a] transition"
                     >
-                        Upgrade to Pro
+                        Manage billing
                     </a>
                 </div>
 

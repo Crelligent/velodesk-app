@@ -9,6 +9,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { planIdFromPaystackCode } from '@/lib/paystack'
 import { planTierFromPlanId } from '@/lib/plans'
+import { cardLabel } from '@/lib/invoices/model'
+import { issueAndEmailInvoice } from '@/lib/invoices/issue'
 
 // Billing period length per Paystack plan interval (days)
 const INTERVAL_DAYS: Record<string, number> = {
@@ -28,6 +30,8 @@ export interface PaystackPayment {
     paidAt?: string | null
     amount: number // kobo
     currency: string
+    cardBrand?: string | null // for the receipt ("Visa •••• 4081")
+    cardLast4?: string | null
 }
 
 export type RecordResult =
@@ -75,6 +79,8 @@ export async function recordPaystackPayment(
                 .eq('provider', 'paystack')
                 .eq('reference', payment.reference)
                 .maybeSingle()
+            // Idempotent per reference: completes an invoice an earlier attempt failed to issue
+            if (existing?.user_id) await issuePaystackInvoice(admin, payment, existing.user_id, plan, planId)
             return { status: 'duplicate', userId: existing?.user_id ?? null }
         }
         throw claimError
@@ -95,6 +101,10 @@ export async function recordPaystackPayment(
             status: 'active',
             current_period_start: paidAt.toISOString(),
             current_period_end: new Date(paidAt.getTime() + days * 24 * 60 * 60 * 1000).toISOString(),
+            currency: payment.currency?.toUpperCase() ?? null,
+            plan_amount: payment.amount,
+            past_due_since: null,
+            payment_failed_notified_at: null, // the next failure gets a fresh "payment declined" email
         },
         { onConflict: 'user_id' }
     )
@@ -111,5 +121,33 @@ export async function recordPaystackPayment(
         }
         throw error
     }
+    // Invoice + receipt email. A DB error propagates (webhook 500 -> Paystack retries ->
+    // duplicate path above issues it); an email failure never does.
+    await issuePaystackInvoice(admin, payment, userId, plan, planId)
     return { status: 'recorded', userId }
+}
+
+async function issuePaystackInvoice(
+    admin: SupabaseClient,
+    payment: PaystackPayment,
+    userId: string,
+    plan: string,
+    planId: string | null
+) {
+    const interval = payment.interval ?? (planId?.includes('yearly') ? 'annually' : 'monthly')
+    const days = INTERVAL_DAYS[interval] ?? 30
+    const paidAt = payment.paidAt ? new Date(payment.paidAt) : new Date()
+    await issueAndEmailInvoice(admin, {
+        userId,
+        provider: 'paystack',
+        reference: payment.reference,
+        amountMinor: payment.amount,
+        currency: payment.currency || 'NGN',
+        paidAt: paidAt.toISOString(),
+        plan,
+        interval,
+        periodStart: paidAt.toISOString(),
+        periodEnd: new Date(paidAt.getTime() + days * 24 * 60 * 60 * 1000).toISOString(),
+        paymentMethod: cardLabel(payment.cardBrand, payment.cardLast4),
+    })
 }

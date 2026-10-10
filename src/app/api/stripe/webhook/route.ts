@@ -5,6 +5,8 @@ import Stripe from 'stripe'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { planTierFromPlanId } from '@/lib/plans'
+import { cardLabel } from '@/lib/invoices/model'
+import { issueAndEmailInvoice, notifyPaymentFailed } from '@/lib/invoices/issue'
 
 const toIso = (unix: number | null | undefined) =>
     unix ? new Date(unix * 1000).toISOString() : null
@@ -75,6 +77,9 @@ async function syncSubscription(
             price_id: item?.price.id ?? null,
             current_period_end: toIso(periodEnd),
             trial_ends_at: toIso(subscription.trial_end),
+            ...(subscription.status === 'active' ? { past_due_since: null, payment_failed_notified_at: null } : {}),
+            // for the "renews in 3 days" heads-up email
+            ...(item?.price.unit_amount != null ? { plan_amount: item.price.unit_amount, currency: item.price.currency.toUpperCase() } : {}),
         },
         { onConflict: 'user_id' }
     )
@@ -89,6 +94,41 @@ function invoiceSubscriptionId(invoice: Stripe.Invoice): string | null {
     const sub = legacy ?? parent
     if (!sub) return null
     return typeof sub === 'string' ? sub : sub.id
+}
+
+/** Issues the Velodesk invoice/receipt for a paid Stripe invoice (idempotent per invoice id). */
+async function issueStripeInvoice(supabaseAdmin: SupabaseClient, invoice: Stripe.Invoice, subscription: Stripe.Subscription) {
+    const { data: row, error } = await supabaseAdmin.from('subscriptions')
+        .select('user_id, plan')
+        .eq('stripe_subscription_id', subscription.id)
+        .maybeSingle()
+    if (error) throw error
+    if (!row?.user_id) return
+
+    const line = invoice.lines?.data?.[0]
+    let paymentMethod: string | null = null
+    const pm = subscription.default_payment_method
+    if (pm) {
+        try {
+            const method = typeof pm === 'string' ? await stripe.paymentMethods.retrieve(pm) : pm
+            paymentMethod = cardLabel(method.card?.brand, method.card?.last4)
+        } catch {
+            paymentMethod = null
+        }
+    }
+    await issueAndEmailInvoice(supabaseAdmin, {
+        userId: row.user_id,
+        provider: 'stripe',
+        reference: invoice.id!,
+        amountMinor: invoice.amount_paid,
+        currency: invoice.currency,
+        paidAt: toIso(invoice.status_transitions?.paid_at ?? invoice.created) ?? new Date().toISOString(),
+        plan: row.plan ?? null,
+        interval: subscription.items.data[0]?.price.recurring?.interval === 'year' ? 'annually' : 'monthly',
+        periodStart: toIso(line?.period?.start),
+        periodEnd: toIso(line?.period?.end),
+        paymentMethod,
+    })
 }
 
 export async function POST(req: Request) {
@@ -154,24 +194,37 @@ export async function POST(req: Request) {
             case 'invoice.payment_succeeded': {
                 // Re-read the subscription instead of forcing 'active': the $0 trial
                 // invoice also fires this event and the user must stay 'trialing'.
-                const subscriptionId = invoiceSubscriptionId(event.data.object as Stripe.Invoice)
+                const invoice = event.data.object as Stripe.Invoice
+                const subscriptionId = invoiceSubscriptionId(invoice)
                 if (subscriptionId) {
                     const subscription = await stripe.subscriptions.retrieve(subscriptionId)
                     await syncSubscription(supabaseAdmin, subscription)
+                    // Velodesk invoice + receipt for real charges (not the $0 trial invoice)
+                    if (invoice.amount_paid > 0 && invoice.id) {
+                        await issueStripeInvoice(supabaseAdmin, invoice, subscription)
+                    }
                 }
-                // TODO: Send receipt/welcome email
                 break
             }
             case 'invoice.payment_failed': {
                 const subscriptionId = invoiceSubscriptionId(event.data.object as Stripe.Invoice)
                 if (subscriptionId) {
+                    const { data: row, error: rowError } = await supabaseAdmin.from('subscriptions')
+                        .select('user_id, past_due_since')
+                        .eq('stripe_subscription_id', subscriptionId)
+                        .maybeSingle()
+                    if (rowError) throw rowError
                     const { error } = await supabaseAdmin.from('subscriptions')
-                        .update({ status: 'past_due' })
+                        .update({ status: 'past_due', past_due_since: row?.past_due_since ?? new Date().toISOString() })
                         .eq('stripe_subscription_id', subscriptionId)
                     if (error) throw error
-
-                    // TODO: Trigger dunning email sequence
-                    console.log(`Payment failed, entering dunning for subscription: ${subscriptionId}`)
+                    if (row?.user_id) {
+                        const failed = event.data.object as Stripe.Invoice
+                        await notifyPaymentFailed(supabaseAdmin, row.user_id, {
+                            amountMinor: failed.amount_due,
+                            currency: failed.currency,
+                        })
+                    }
                 }
                 break
             }

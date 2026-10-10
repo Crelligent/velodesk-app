@@ -47,6 +47,7 @@ interface VerifyTransactionResponse {
         plan?: string | null
         plan_object?: { plan_code?: string; interval?: string } | null
         metadata?: Record<string, unknown>
+        authorization?: { brand?: string; last4?: string; reusable?: boolean }
     }
 }
 
@@ -112,4 +113,20 @@ export async function createSubscription({
     })
 
     return response.json()
+}
+
+/**
+ * GET /subscription/:code/manage/link: Paystack-hosted page where the customer can
+ * update the card on their subscription or cancel it. Links expire; generate on demand.
+ */
+export async function subscriptionManageLink(subscriptionCode: string): Promise<{ status: boolean; message: string; data?: { link: string } }> {
+    try {
+        const response = await fetch(`${PAYSTACK_BASE_URL}/subscription/${encodeURIComponent(subscriptionCode)}/manage/link`, {
+            headers: { Authorization: `Bearer ${PAYSTACK_SECRET_KEY}` },
+            cache: 'no-store',
+        })
+        return await response.json()
+    } catch {
+        return { status: false, message: 'Paystack unreachable' }
+    }
 }
