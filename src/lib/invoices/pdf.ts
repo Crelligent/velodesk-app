@@ -125,7 +125,10 @@ export async function renderInvoicePdf(inv: Invoice, kind: DocumentKind): Promis
     }
     const money = (minor: number) => formatMoney(minor, inv.currency, { code: true })
 
-    const logo = await doc.embedJpg(Buffer.from(CRELLIGENT_LOGO_JPG_BASE64, 'base64'))
+    // Copy into a standalone Uint8Array: pdf-lib's JPEG reader ignores byteOffset, and a Buffer
+// from base64 can sit at an offset inside Node's shared pool (on Vercel it does), which
+// made it fail with "SOI not found in JPEG".
+    const logo = await doc.embedJpg(Uint8Array.from(Buffer.from(CRELLIGENT_LOGO_JPG_BASE64, 'base64')))
 
     // ---- Watermark: large, faint Crelligent logo behind everything ------------------
     const wmW = 400
