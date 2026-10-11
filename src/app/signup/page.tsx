@@ -6,7 +6,7 @@ import { signUpUser } from '@/app/actions'
 import { FormEngine, FormSchema } from '@/components/forms/FormEngine'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { Database, LineChart, Sparkles } from 'lucide-react'
+import { Database, LineChart } from 'lucide-react'
 
 const PLAN_NAMES: Record<string, string> = {
     founder_monthly: 'Founder plan',
@@ -104,8 +104,8 @@ function SignupForm() {
             <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6">
                 <div className="w-full max-w-md p-10 bg-white/[0.02] border border-white/10 rounded-2xl text-center relative overflow-hidden">
                     <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-[#7B61FF] to-transparent" />
-                    <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <Sparkles className="w-8 h-8 text-[#38BDF8]" />
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#7B61FF] to-[#38BDF8] flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(123,97,255,0.35)]">
+                        <img src="/velodesk (2).png" alt="Velodesk" className="w-10 h-10 object-contain" />
                     </div>
                     <h1 className="text-2xl font-['Outfit'] text-white mb-4">Check your email</h1>
                     <p className="text-gray-400 mb-8 leading-relaxed">
