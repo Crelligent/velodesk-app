@@ -1,7 +1,10 @@
 /**
- * Velodesk AI Module
- * AI-powered insights using Google Gemini or OpenAI
+ * Velodesk AI: structured PMF insights (summary, risks, next steps) from a score.
+ * Uses Claude via the Anthropic API when ANTHROPIC_API_KEY is set, otherwise a
+ * rule-based fallback. The chat assistant lives in src/lib/velodesk-ai/.
  */
+import Anthropic from '@anthropic-ai/sdk'
+import { DEFAULT_MODEL, isAIConfigured } from '@/lib/velodesk-ai/agent'
 
 // Types
 export interface AIInsightRequest {
@@ -28,106 +31,38 @@ export interface AIInsightResponse {
     nextSteps: string[]
 }
 
-export interface AICopilotMessage {
-    role: 'user' | 'assistant' | 'system'
-    content: string
-}
-
-// Provider detection
-export function getAIProvider(): 'gemini' | 'openai' | null {
-    if (process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
-        return 'gemini'
-    }
-    if (process.env.OPENAI_API_KEY) {
-        return 'openai'
-    }
-    return null
-}
 
 // Generate PMF insights using AI
 export async function generatePMFInsights(
     request: AIInsightRequest
 ): Promise<AIInsightResponse> {
-    const provider = getAIProvider()
-
-    if (!provider) {
+    if (!isAIConfigured()) {
         return generateFallbackInsights(request)
     }
 
     const prompt = buildInsightPrompt(request)
 
     try {
-        if (provider === 'gemini') {
-            return await callGemini(prompt)
-        } else {
-            return await callOpenAI(prompt)
-        }
+        return await callClaude(prompt)
     } catch (error) {
         console.error('AI insight generation failed:', error)
         return generateFallbackInsights(request)
     }
 }
 
-// Gemini API call
-async function callGemini(prompt: string): Promise<AIInsightResponse> {
-    const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY
-
-    const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-        {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: {
-                    temperature: 0.7,
-                    maxOutputTokens: 1024,
-                },
-            }),
-        }
-    )
-
-    if (!response.ok) {
-        throw new Error(`Gemini API error: ${response.status}`)
-    }
-
-    const data = await response.json()
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || ''
-
-    return parseAIResponse(text)
-}
-
-// OpenAI API call
-async function callOpenAI(prompt: string): Promise<AIInsightResponse> {
-    const apiKey = process.env.OPENAI_API_KEY
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-            model: 'gpt-4o-mini',
-            messages: [
-                {
-                    role: 'system',
-                    content: 'You are a startup advisor specializing in product-market fit analysis. Provide actionable, data-driven insights.',
-                },
-                { role: 'user', content: prompt },
-            ],
-            temperature: 0.7,
-            max_tokens: 1024,
-        }),
+// Claude (Anthropic API) call
+async function callClaude(prompt: string): Promise<AIInsightResponse> {
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+    const res = await client.messages.create({
+        model: process.env.ANTHROPIC_MODEL?.trim() || DEFAULT_MODEL,
+        max_tokens: 1024,
+        system: 'You are Velodesk AI, a product-market fit analyst for startups. Base every point only on the metrics given; treat "no data" as unknown and never estimate it. Reply with JSON only.',
+        messages: [{ role: 'user', content: prompt }],
     })
-
-    if (!response.ok) {
-        throw new Error(`OpenAI API error: ${response.status}`)
-    }
-
-    const data = await response.json()
-    const text = data.choices?.[0]?.message?.content || ''
-
+    const text = res.content
+        .filter((b): b is Anthropic.TextBlock => b.type === 'text')
+        .map((b) => b.text)
+        .join('\n')
     return parseAIResponse(text)
 }
 
@@ -142,13 +77,13 @@ Industry: ${industry || 'Technology'}
 Overall PMF Score: ${pmfScore}/100
 
 Metric Breakdown:
-- Retention Rate: ${breakdown.retention || 'N/A'}/100
-- Revenue Growth: ${breakdown.revenueGrowth || 'N/A'}/100
-- NPS Score: ${breakdown.nps || 'N/A'}/100
-- Engagement: ${breakdown.engagement || 'N/A'}/100
-- Time-to-Value: ${breakdown.timeToValue || 'N/A'}/100
-- Expansion Revenue: ${breakdown.expansion || 'N/A'}/100
-- Referral Rate: ${breakdown.referral || 'N/A'}/100
+- Retention Rate: ${breakdown.retention ?? 'no data'}${breakdown.retention != null ? '/100' : ''}
+- Revenue Growth: ${breakdown.revenueGrowth ?? 'no data'}${breakdown.revenueGrowth != null ? '/100' : ''}
+- NPS Score: ${breakdown.nps ?? 'no data'}${breakdown.nps != null ? '/100' : ''}
+- Engagement: ${breakdown.engagement ?? 'no data'}${breakdown.engagement != null ? '/100' : ''}
+- Time-to-Value: ${breakdown.timeToValue ?? 'no data'}${breakdown.timeToValue != null ? '/100' : ''}
+- Expansion Revenue: ${breakdown.expansion ?? 'no data'}${breakdown.expansion != null ? '/100' : ''}
+- Referral Rate: ${breakdown.referral ?? 'no data'}${breakdown.referral != null ? '/100' : ''}
 
 Please provide your analysis in the following JSON format:
 {
@@ -241,64 +176,3 @@ function generateFallbackInsights(request: AIInsightRequest): AIInsightResponse 
     }
 }
 
-// AI Copilot for chat-based assistance
-export async function chatWithCopilot(
-    messages: AICopilotMessage[],
-    context?: { pmfScore?: number; companyName?: string }
-): Promise<string> {
-    const provider = getAIProvider()
-
-    if (!provider) {
-        return "AI Copilot is not configured. Please add GEMINI_API_KEY or OPENAI_API_KEY to your environment variables."
-    }
-
-    const systemMessage = `You are Velodesk AI Copilot, an expert startup advisor helping founders achieve product-market fit. 
-${context?.companyName ? `You're advising ${context.companyName}.` : ''}
-${context?.pmfScore ? `Their current PMF score is ${context.pmfScore}/100.` : ''}
-Be concise, actionable, and data-driven in your responses.`
-
-    try {
-        if (provider === 'gemini') {
-            const prompt = `${systemMessage}\n\nConversation:\n${messages.map(m => `${m.role}: ${m.content}`).join('\n')}`
-            const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY
-
-            const response = await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-                {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: prompt }] }],
-                        generationConfig: { temperature: 0.8, maxOutputTokens: 512 },
-                    }),
-                }
-            )
-
-            const data = await response.json()
-            return data.candidates?.[0]?.content?.parts?.[0]?.text || 'I apologize, I could not generate a response.'
-        } else {
-            const response = await fetch('https://api.openai.com/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-                },
-                body: JSON.stringify({
-                    model: 'gpt-4o-mini',
-                    messages: [
-                        { role: 'system', content: systemMessage },
-                        ...messages,
-                    ],
-                    temperature: 0.8,
-                    max_tokens: 512,
-                }),
-            })
-
-            const data = await response.json()
-            return data.choices?.[0]?.message?.content || 'I apologize, I could not generate a response.'
-        }
-    } catch (error) {
-        console.error('Copilot error:', error)
-        return 'I encountered an error. Please try again.'
-    }
-}
