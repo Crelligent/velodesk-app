@@ -147,7 +147,7 @@ export default function LoginPage() {
                 
                 <div className="text-xs text-[#8A8A8A] font-mono flex items-center justify-between">
                     <span>© 2026 Velodesk</span>
-                    <a href="mailto:support@velodesk.com" className="hover:text-white rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B61FF]">support@velodesk.com</a>
+                    <a href="mailto:support@crelligent.com" className="hover:text-white rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B61FF]">support@crelligent.com</a>
                 </div>
             </div>
 

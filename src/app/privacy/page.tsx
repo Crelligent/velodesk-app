@@ -90,10 +90,10 @@ export default function PrivacyPage() {
               data at any time. You can export your data or request account
               deletion by contacting us at{" "}
               <a
-                href="mailto:support@velodesk.io"
+                href="mailto:support@crelligent.com"
                 className="text-[#22c55e] hover:underline"
               >
-                support@velodesk.io
+                support@crelligent.com
               </a>
               .
             </p>
@@ -106,10 +106,10 @@ export default function PrivacyPage() {
             <p>
               If you have questions about this privacy policy, contact us at{" "}
               <a
-                href="mailto:support@velodesk.io"
+                href="mailto:support@crelligent.com"
                 className="text-[#22c55e] hover:underline"
               >
-                support@velodesk.io
+                support@crelligent.com
               </a>
               .
             </p>

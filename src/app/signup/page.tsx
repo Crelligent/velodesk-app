@@ -2,11 +2,67 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { signUpUser } from '@/app/actions'
+import { resendSignupEmail, signUpUser } from '@/app/actions'
 import { FormEngine, FormSchema } from '@/components/forms/FormEngine'
 import { motion } from 'framer-motion'
+import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { Database, LineChart } from 'lucide-react'
+
+const RESEND_WAIT_SECONDS = 50
+
+/** "Didn't get the email? Resend" with a countdown so people can't hammer the button. */
+function ResendConfirmation({ email }: { email: string }) {
+    const [secondsLeft, setSecondsLeft] = useState(RESEND_WAIT_SECONDS)
+    const [sending, setSending] = useState(false)
+    const [note, setNote] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null)
+
+    useEffect(() => {
+        if (secondsLeft <= 0) return
+        const t = setTimeout(() => setSecondsLeft((s) => s - 1), 1000)
+        return () => clearTimeout(t)
+    }, [secondsLeft])
+
+    const resend = async () => {
+        setSending(true)
+        setNote(null)
+        const res = await resendSignupEmail(email, window.location.origin)
+        setSending(false)
+        if ('ok' in res && res.ok) {
+            setNote({ tone: 'ok', text: 'Sent. Check your inbox and spam folder.' })
+            setSecondsLeft(RESEND_WAIT_SECONDS)
+        } else {
+            setNote({ tone: 'error', text: res.error ?? 'Something went wrong. Please try again.' })
+            if ('retryAfter' in res && res.retryAfter) setSecondsLeft(res.retryAfter)
+        }
+    }
+
+    return (
+        <div className="mb-8 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 text-sm">
+            <span className="whitespace-nowrap text-gray-400">Didn&apos;t get the email? </span>
+            {secondsLeft > 0 ? (
+                <span className="whitespace-nowrap text-gray-500 tabular-nums" aria-live="polite">
+                    Resend in 0:{String(secondsLeft).padStart(2, '0')}
+                </span>
+            ) : (
+                <button
+                    type="button"
+                    onClick={resend}
+                    disabled={sending}
+                    className="font-medium text-[#7B61FF] hover:text-white transition disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B61FF] rounded"
+                >
+                    {sending ? 'Sending…' : 'Resend email'}
+                </button>
+            )}
+            {note && (
+                <p role="status" className={`mt-2 text-xs ${note.tone === 'ok' ? 'text-emerald-300' : 'text-amber-300'}`}>
+                    {note.text}
+                </p>
+            )}
+            <p className="mt-2 text-xs text-gray-500">Check your spam or promotions folder too.</p>
+        </div>
+    )
+}
 
 const PLAN_NAMES: Record<string, string> = {
     founder_monthly: 'Founder plan',
@@ -30,7 +86,7 @@ const signupSchema: FormSchema = {
         {
             id: 'email',
             type: 'email',
-            label: 'Work Email',
+            label: 'Email',
             placeholder: 'you@company.com',
             required: true,
             autoComplete: 'email'
@@ -75,6 +131,23 @@ function SignupForm() {
         setSessionId(Math.random().toString(36).substring(2, 15))
     }, [])
 
+    const [googleError, setGoogleError] = useState<string | null>(null)
+    const [googleLoading, setGoogleLoading] = useState(false)
+
+    const handleGoogleSignup = async () => {
+        setGoogleError(null)
+        setGoogleLoading(true)
+        // New Google users land on onboarding (see /auth/callback)
+        const { error } = await createClient().auth.signInWithOAuth({
+            provider: 'google',
+            options: { redirectTo: `${window.location.origin}/auth/callback?next=/onboarding` },
+        })
+        if (error) {
+            setGoogleError(error.message)
+            setGoogleLoading(false)
+        }
+    }
+
     const handleFormSubmit = async (answers: Record<string, any>) => {
         const { email, password, fullName } = answers
         setEmail(email)
@@ -108,11 +181,12 @@ function SignupForm() {
                         <img src="/velodesk (2).png" alt="Velodesk" className="w-10 h-10 object-contain" />
                     </div>
                     <h1 className="text-2xl font-['Outfit'] text-white mb-4">Check your email</h1>
-                    <p className="text-gray-400 mb-8 leading-relaxed">
+                    <p className="text-gray-400 mb-6 leading-relaxed">
                         We sent a confirmation link to <strong className="text-white">{email}</strong>.
                         Click it to verify your email and finish setting up your account.
                         {planId && <> Your {PLAN_NAMES[planId]} selection is saved.</>}
                     </p>
+                    <ResendConfirmation email={email} />
                     <Link href="/login" className="text-sm text-[#7B61FF] hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B61FF] focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded">
                         ← Back to Sign In
                     </Link>
@@ -151,6 +225,28 @@ function SignupForm() {
                             />
                         )}
 
+                        <div className="flex items-center gap-4 my-6">
+                            <div className="flex-1 h-px bg-white/5" />
+                            <span className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest">or</span>
+                            <div className="flex-1 h-px bg-white/5" />
+                        </div>
+
+                        <button
+                            type="button"
+                            onClick={handleGoogleSignup}
+                            disabled={googleLoading}
+                            className="w-full py-3.5 border border-white/10 rounded-xl hover:bg-white/5 text-white transition flex items-center justify-center gap-3 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B61FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]"
+                        >
+                            <svg className="w-5 h-5" viewBox="0 0 24 24">
+                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                            </svg>
+                            {googleLoading ? 'Opening Google…' : 'Sign up with Google'}
+                        </button>
+                        {googleError && <p role="alert" className="mt-3 text-center text-sm text-red-400">{googleError}</p>}
+
                         <p className="text-center text-sm text-[#8A8A8A] mt-8">
                             Already have an account?{' '}
                             <Link href="/login" className="text-[#7B61FF] hover:text-white transition rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B61FF] focus-visible:ring-offset-2 focus-visible:ring-offset-[#050505]">
@@ -162,7 +258,7 @@ function SignupForm() {
                 
                 <div className="text-xs text-[#8A8A8A] font-mono flex items-center justify-between mt-10 shrink-0">
                     <span>© 2026 Velodesk</span>
-                    <a href="mailto:support@velodesk.com" className="hover:text-white rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B61FF]">support@velodesk.com</a>
+                    <a href="mailto:support@crelligent.com" className="hover:text-white rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B61FF]">support@crelligent.com</a>
                 </div>
             </div>
 

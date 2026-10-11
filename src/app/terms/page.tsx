@@ -121,10 +121,10 @@ export default function TermsPage() {
             <p>
               For questions about these terms, contact us at{" "}
               <a
-                href="mailto:support@velodesk.io"
+                href="mailto:support@crelligent.com"
                 className="text-[#22c55e] hover:underline"
               >
-                support@velodesk.io
+                support@crelligent.com
               </a>
               .
             </p>

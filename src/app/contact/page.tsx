@@ -45,10 +45,10 @@ export default function ContactPage() {
             </div>
             <h2 className="font-medium mb-2">Email</h2>
             <a
-              href="mailto:support@velodesk.io"
+              href="mailto:support@crelligent.com"
               className="text-sm text-[#22c55e] hover:underline"
             >
-              support@velodesk.io
+              support@crelligent.com
             </a>
           </div>
 
