@@ -22,6 +22,19 @@ function authorized(request: Request) {
 
 export async function POST(request: Request) {
     if (!authorized(request)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // Secret-protected diagnostics: report which step failed instead of a bare 500
+    let stage = 'start'
+    try {
+        return await handle(request, s => { stage = s })
+    } catch (error) {
+        const e = error instanceof Error ? error : new Error(String(error))
+        console.error(`Billing test email failed at ${stage}:`, e)
+        return NextResponse.json({ error: 'failed', stage, name: e.name, message: e.message.slice(0, 300) }, { status: 500 })
+    }
+}
+
+async function handle(request: Request, setStage: (s: string) => void) {
+    setStage('read_body')
     const body = await request.json().catch(() => ({}))
     const to = typeof body.to === 'string' ? body.to.trim() : ''
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) return NextResponse.json({ error: 'Valid "to" required' }, { status: 400 })
@@ -37,6 +50,7 @@ export async function POST(request: Request) {
             chargeDate: new Date(Date.now() + 3 * 86_400_000).toISOString(),
             trialEnding: body.type === 'trial',
         })
+        setStage('send_email')
         const result = await sendMail({ to, ...content, subject: `[TEST] ${content.subject}` })
         return NextResponse.json(result, { status: result.sent ? 200 : 502 })
     }
@@ -80,7 +94,11 @@ export async function POST(request: Request) {
         customer: { name: 'Test Founder', email: to, company: 'Test Startup Ltd', address: 'Lagos, Nigeria', taxId: null },
         seller,
     }
+    setStage('render_email')
     const content = receiptEmail(sample)
-    const result = await sendMail({ to, ...content, subject: `[TEST] ${content.subject}`, attachments: await invoiceAttachments(sample) })
+    setStage('render_pdf')
+    const attachments = await invoiceAttachments(sample)
+    setStage('send_email')
+    const result = await sendMail({ to, ...content, subject: `[TEST] ${content.subject}`, attachments })
     return NextResponse.json(result, { status: result.sent ? 200 : 502 })
 }

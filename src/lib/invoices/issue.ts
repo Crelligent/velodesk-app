@@ -22,7 +22,6 @@ import {
     type Party,
 } from './model'
 import { paymentFailedEmail, receiptEmail } from './emails'
-import { pdfFilename, renderInvoicePdf } from './pdf'
 
 export interface ChargeInput {
     userId: string
@@ -125,6 +124,7 @@ export async function issueInvoice(admin: SupabaseClient, charge: ChargeInput): 
 
 /** Renders both PDFs. */
 export async function invoiceAttachments(inv: Invoice) {
+    const { pdfFilename, renderInvoicePdf } = await import('./pdf')
     const [receipt, invoice] = await Promise.all([renderInvoicePdf(inv, 'receipt'), renderInvoicePdf(inv, 'invoice')])
     return [
         { filename: pdfFilename(inv, 'receipt'), content: receipt, contentType: 'application/pdf' },

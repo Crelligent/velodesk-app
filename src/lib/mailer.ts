@@ -4,7 +4,7 @@
  * optional BILLING_FROM (default billing@crelligent.com) and BILLING_FROM_NAME.
  * Never throws when SMTP isn't configured: returns { sent: false }.
  */
-import nodemailer, { type Transporter } from 'nodemailer'
+import type { Transporter } from 'nodemailer'
 
 // Trim env values: a stray space or quote pasted into Vercel breaks SMTP login (535).
 const env = (name: string) => (process.env[name] || '').trim().replace(/^["']|["']$/g, '')
@@ -25,9 +25,13 @@ export function __setTransporterForTests(t: Pick<Transporter, 'sendMail'> | null
     transporter = t as Transporter | null
 }
 
-function getTransporter(): Transporter {
+// Loaded on first send (not at import), so a bundling problem shows up as a send error
+// with a message instead of crashing every route that imports this module.
+async function getTransporter(): Promise<Transporter> {
+    if (transporter) return transporter
+    const nodemailer = (await import('nodemailer')).default
     const port = parseInt(env('SMTP_PORT') || '587', 10)
-    transporter ??= nodemailer.createTransport({
+    transporter = nodemailer.createTransport({
         host: env('SMTP_HOST'),
         port,
         secure: port === 465,
@@ -53,7 +57,7 @@ export async function sendMail(msg: {
     try {
         const address = billingFromAddress()
         const from = `"${env('BILLING_FROM_NAME') || 'Velodesk by Crelligent'}" <${address}>`
-        const info = await getTransporter().sendMail({
+        const info = await (await getTransporter()).sendMail({
             from,
             replyTo: env('BILLING_SUPPORT_EMAIL') || address,
             to: msg.to,
@@ -70,6 +74,7 @@ export async function sendMail(msg: {
     } catch (error) {
         // SMTP errors can echo credentials or addresses: keep only a short code
         const code = (error as { code?: string; responseCode?: number })?.responseCode ?? (error as { code?: string })?.code
+        console.error('SMTP send failed:', code ?? '', error instanceof Error ? error.message.slice(0, 200) : '')
         return { sent: false, error: `smtp_error${code ? `_${code}` : ''}` }
     }
 }
