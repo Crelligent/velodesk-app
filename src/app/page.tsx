@@ -2,11 +2,11 @@ import HeroV2 from '@/components/landing/HeroV2'
 import StatsStrip from '@/components/landing/StatsStrip'
 import HowItWorks from '@/components/landing/HowItWorks'
 import TheContrast from '@/components/landing/TheContrast'
+import DashboardFeature from '@/components/landing/DashboardFeature'
+import VelodeskAI from '@/components/landing/VelodeskAI'
 import ScoreDimensions from '@/components/landing/ScoreDimensions'
-import BenchmarksFeature from '@/components/landing/BenchmarksFeature'
 import DataroomFeature from '@/components/landing/DataroomFeature'
 import PersonaTabs from '@/components/landing/PersonaTabs'
-import ChangelogTeaser from '@/components/landing/ChangelogTeaser'
 import Footer from '@/components/landing/Footer'
 
 export default function LandingPage() {
@@ -16,11 +16,11 @@ export default function LandingPage() {
       <StatsStrip />
       <HowItWorks />
       <TheContrast />
-      <BenchmarksFeature />
+      <DashboardFeature />
+      <VelodeskAI />
       <ScoreDimensions />
       <PersonaTabs />
-            <DataroomFeature />
-      <ChangelogTeaser />
+      <DataroomFeature />
       <Footer />
     </main>
   )

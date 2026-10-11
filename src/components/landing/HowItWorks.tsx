@@ -3,7 +3,9 @@
 import { Database, GitMerge, LineChart } from 'lucide-react'
 import { useScrollReveal } from '@/hooks/useScrollAnimations'
 import WavyBackground from './WavyBackground'
-import RawTelemetryVisual from './RawTelemetryVisual'
+import ConnectToolsVisual from './ConnectToolsVisual'
+import SignalWeightsVisual from './SignalWeightsVisual'
+import ScoreGaugeVisual from './ScoreGaugeVisual'
 
 export default function HowItWorks() {
   const { ref: sectionRef, isVisible: sectionVisible } = useScrollReveal(0.1)
@@ -33,21 +35,21 @@ export default function HowItWorks() {
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h2 className="text-4xl md:text-6xl font-medium tracking-tight leading-[1.1] mb-6">
-            <span className="bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">We don&apos;t just count users.</span><br />
-            <span className="font-['Instrument_Serif'] italic bg-gradient-to-r from-[#7B61FF] via-[#5B8DEF] to-[#38BDF8] bg-clip-text text-transparent">We weigh intent.</span>
+            <span className="text-white">We don&apos;t just count users.</span><br />
+            <span className="font-instrument italic font-normal bg-gradient-to-r from-[#7B61FF] via-[#5B8DEF] to-[#38BDF8] bg-clip-text text-transparent">We weigh seven signals.</span>
           </h2>
-          <p className="text-lg text-white/40 font-light leading-relaxed">
-            Most dashboards give you raw data and expect you to do the math. VeloDesk&apos;s proprietary engine continuously pulls from your entire stack, aggressively filters out noise, and weighs true signal to calculate your exact product-market fit.
+          <p className="text-lg text-white/70 font-light leading-relaxed">
+            Most dashboards give you raw data and leave the maths to you. Velodesk scores seven signals, from retention to referrals, using only data you&apos;ve connected.
           </p>
         </div>
 
         {/* Bento Grid Layout */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
-          {/* Row 1 — Card 1: Raw Telemetry (1 col) */}
+          {/* Row 1 — Card 1: Connect (1 col) */}
           <div
             ref={card1Ref}
-            className="p-8 rounded-3xl bg-[#090A10] border border-white/10 relative overflow-hidden group md:col-span-1 shadow-2xl isolate z-20"
+            className="p-8 rounded-3xl bg-[#090A10] border border-white/10 relative overflow-hidden group md:col-span-1 shadow-2xl isolate z-20 flex flex-col"
             style={{
               opacity: card1Visible ? 1 : 0,
               transform: card1Visible ? 'translateY(0)' : 'translateY(40px)',
@@ -55,19 +57,19 @@ export default function HowItWorks() {
             }}
           >
             <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-6">
-              <Database className="text-white/40 group-hover:text-white transition" size={24} strokeWidth={1.5} />
+              <Database className="text-white/70 group-hover:text-white transition" size={24} strokeWidth={1.5} />
             </div>
-            <h3 className="text-2xl font-light mb-3">1. Raw Telemetry</h3>
-            <p className="text-sm text-white/40 font-light leading-relaxed mb-6">
-              We ingest thousands of daily events from Stripe, Mixpanel, and Postgres. No manual CSV uploads. No broken spreadsheets.
+            <h3 className="text-2xl font-light mb-3">1. Connect your tools</h3>
+            <p className="text-sm text-white/70 font-light leading-relaxed mb-6">
+              We read your payments, product analytics and support data from the tools you already use. No CSV uploads, no spreadsheets.
             </p>
-            {/* Raw Telemetry Visual Animation */}
-            <div className="w-full h-48 rounded-xl bg-white/[0.03] border border-white/5 overflow-hidden">
-              <RawTelemetryVisual />
+            {/* Tools wired into Velodesk */}
+            <div className="w-full md:flex-1 rounded-xl bg-white/[0.03] border border-white/5 overflow-hidden flex">
+              <ConnectToolsVisual />
             </div>
           </div>
 
-          {/* Row 1 — Card 2: Physics Engine (2 cols, taller) */}
+          {/* Row 1 — Card 2: PMF engine (2 cols) */}
           <div
             ref={card2Ref}
             className="p-8 rounded-3xl bg-[#0C0E1A] border border-[#7B61FF]/30 relative overflow-hidden group md:col-span-2 md:row-span-1 shadow-[0_0_40px_rgba(123,97,255,0.05)] isolate z-20"
@@ -84,18 +86,15 @@ export default function HowItWorks() {
               <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#7B61FF]/20 to-[#38BDF8]/20 flex items-center justify-center mb-6">
                 <GitMerge className="text-[#7B61FF]" size={24} strokeWidth={1.5} />
               </div>
-              <h3 className="text-2xl font-light mb-3 bg-gradient-to-r from-[#7B61FF] to-[#38BDF8] bg-clip-text text-transparent">2. The Physics Engine</h3>
-              <p className="text-sm text-white/60 font-light leading-relaxed mb-6 max-w-lg">
-                Our algorithm strips away vanity metrics. It looks for High-Frequency Engagement, Revenue Expansion, and Deep Cohort Retention.
+              <h3 className="text-2xl font-light mb-3 text-white">2. The PMF engine</h3>
+              <p className="text-sm text-white/70 font-light leading-relaxed mb-6 max-w-lg">
+                Each signal has a fixed, published weight. Vanity metrics like page views don&apos;t count.
               </p>
-              {/* Placeholder Image — larger for bento feel */}
-              <div className="w-full h-52 rounded-xl bg-[#7B61FF]/[0.06] border border-[#7B61FF]/10 border-dashed flex items-center justify-center text-[#7B61FF]/30 text-xs font-mono tracking-wider">
-                IMAGE: Algorithm filtering visual
-              </div>
+              <SignalWeightsVisual />
             </div>
           </div>
 
-          {/* Row 2 — Card 3: Pure Signal (full width, horizontal layout) */}
+          {/* Row 2 — Card 3: Score (full width) */}
           <div
             ref={card3Ref}
             className="p-8 rounded-3xl bg-[#090A10] border border-white/10 relative overflow-hidden group md:col-span-3 shadow-2xl isolate z-20"
@@ -109,18 +108,15 @@ export default function HowItWorks() {
               {/* Text left */}
               <div className="md:w-1/2">
                 <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-6">
-                  <LineChart className="text-white/40 group-hover:text-white transition" size={24} strokeWidth={1.5} />
+                  <LineChart className="text-white/70 group-hover:text-white transition" size={24} strokeWidth={1.5} />
                 </div>
-                <h3 className="text-2xl font-light mb-3">3. Pure Signal</h3>
-                <p className="text-sm text-white/40 font-light leading-relaxed">
-                  The noise is gone. You are left with a single, undeniable score between 0 and 100 that dictates exactly how close you are to true Product-Market Fit.
+                <h3 className="text-2xl font-light mb-3">3. Your PMF Score</h3>
+                <p className="text-sm text-white/70 font-light leading-relaxed">
+                  One number from 0 to 100, with the band it falls in and the signals behind it. It updates as your connected data changes.
                 </p>
               </div>
-              {/* Placeholder right */}
               <div className="md:w-1/2">
-                <div className="w-full h-48 rounded-xl bg-white/[0.03] border border-white/5 border-dashed flex items-center justify-center text-white/20 text-xs font-mono tracking-wider">
-                  IMAGE: Clean score output visual
-                </div>
+                <ScoreGaugeVisual />
               </div>
             </div>
           </div>

@@ -200,3 +200,8 @@
     animation: none;
   }
 }
+
+/* Homepage display fonts (loaded with next/font in layout.tsx) */
+.font-instrument { font-family: var(--font-instrument-serif), "Instrument Serif", Georgia, serif; }
+.font-orbitron { font-family: var(--font-orbitron), "Orbitron", system-ui, sans-serif; }
+.font-dm-mono { font-family: var(--font-dm-mono), "DM Mono", ui-monospace, monospace; }

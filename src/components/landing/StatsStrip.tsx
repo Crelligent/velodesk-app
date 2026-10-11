@@ -1,55 +1,49 @@
 'use client'
 
 import React from 'react'
+import { Clock, Code2, Plug, Wallet } from 'lucide-react'
 import { useScrollReveal } from '@/hooks/useScrollAnimations'
-import { INTEGRATIONS } from '@/lib/integrations'
+import { LIVE_COUNT } from './liveIntegrations'
 
-const SCORING_SOURCES = INTEGRATIONS.filter((i) => i.feedsScore).length
+type Stat = { value: string; label: string; icon: typeof Plug }
 
-// Stats that can't be verified yet are hidden. Set to true only once each one is backed by data.
-const SHOW_UNVERIFIED_CLAIMS = false
-
-type Stat = { value: string; label: string; unverified?: boolean }
-
-// Values render statically (no count-up), so they never show "0" before animating or without JS.
+// Every value here is a product fact. Count comes from the integrations catalog (tools that sync today).
 const stats: Stat[] = [
-  // Derived from the integrations source of truth: only providers that feed the score count.
-  { value: `${SCORING_SOURCES}`, label: 'Live data sources (Paystack, Stripe)' },
-  { value: '14 days', label: 'Free trial' },
-  { value: '₦ or $', label: 'Naira or USD billing' },
-  { value: 'No code', label: 'Needed to connect' },
-  // UNVERIFIED: no measurement backs these.
-  { value: '<45s', label: 'Time to Connect', unverified: true },
-  { value: '84', label: 'Avg. PMF Score', unverified: true },
+  { value: `${LIVE_COUNT}`, label: 'Tools you can connect today', icon: Plug },
+  { value: '14 days', label: 'Free trial, no card needed', icon: Clock },
+  { value: '₦ or $', label: 'Naira or USD billing', icon: Wallet },
+  { value: 'No code', label: 'Needed to connect', icon: Code2 },
 ]
 
 export default function StatsStrip() {
   const { ref, isVisible } = useScrollReveal(0.2)
-  const visibleStats = stats.filter((s) => SHOW_UNVERIFIED_CLAIMS || !s.unverified)
 
   return (
-    <section
-      ref={ref}
-      className="bg-[#04060D] py-20 border-t border-white/5"
-    >
-      <div className="max-w-6xl mx-auto px-6">
+    <section ref={ref} aria-label="Velodesk at a glance" className="bg-[#04060D] py-16 md:py-20 border-t border-white/5">
+      <div className="max-w-6xl mx-auto px-4 md:px-6">
         <dl
-          className={`grid grid-cols-2 md:grid-cols-4 gap-10 text-center transition-all duration-1000 ease-out ${
-            isVisible
-              ? 'opacity-100 translate-y-0'
-              : 'opacity-0 translate-y-8'
+          className={`grid grid-cols-2 md:grid-cols-4 gap-x-4 gap-y-10 md:gap-10 text-center transition-all duration-700 ease-out motion-reduce:transition-none ${
+            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
         >
-          {visibleStats.map((stat) => (
-            <div key={stat.label} className="flex flex-col-reverse items-center gap-3">
-              <dt className="text-[#8A8A8A] text-sm font-mono uppercase tracking-widest">
-                {stat.label}
-              </dt>
-              <dd className="text-5xl md:text-6xl font-light bg-gradient-to-r from-[#7B61FF] via-[#5B8DEF] to-[#38BDF8] bg-clip-text text-transparent">
-                {stat.value}
-              </dd>
-            </div>
-          ))}
+          {stats.map((stat) => {
+            const Icon = stat.icon
+            return (
+              <div key={stat.label} className="flex flex-col-reverse items-center gap-3">
+                <dt className="text-white/70 text-xs md:text-sm font-dm-mono uppercase tracking-widest max-w-[14ch] md:max-w-none leading-snug">
+                  {stat.label}
+                </dt>
+                <dd className="flex flex-col items-center gap-3">
+                  <span aria-hidden="true" className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-gradient-to-br from-[#7B61FF]/20 to-[#38BDF8]/10">
+                    <Icon className="h-5 w-5 text-[#8FA8F5]" />
+                  </span>
+                  <span className="text-4xl md:text-6xl font-light bg-gradient-to-r from-[#7B61FF] via-[#5B8DEF] to-[#38BDF8] bg-clip-text text-transparent whitespace-nowrap">
+                    {stat.value}
+                  </span>
+                </dd>
+              </div>
+            )
+          })}
         </dl>
       </div>
     </section>
