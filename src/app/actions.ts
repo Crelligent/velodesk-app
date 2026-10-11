@@ -47,6 +47,31 @@ export async function signUpUser(
     return { data: { user: data.user, session: data.session } }
 }
 
+/**
+ * Resends the sign-up confirmation email. Supabase also enforces its own minimum gap
+ * between emails to the same address; if it refuses, we return how long to wait.
+ * For an unknown or already-confirmed address Supabase reports success without sending,
+ * so this never reveals whether an account exists.
+ */
+export async function resendSignupEmail(email: string, origin: string) {
+    const clean = email.trim().toLowerCase()
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(clean)) {
+        return { error: 'Please enter a valid email address.' }
+    }
+    const supabase = await createClient()
+    const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: clean,
+        options: { emailRedirectTo: `${origin}/auth/callback?next=/onboarding` },
+    })
+    if (error) {
+        const wait = error.message.match(/after (\d+) seconds?/i)
+        if (wait) return { error: 'Please wait a little before asking again.', retryAfter: Number(wait[1]) }
+        return { error: 'We could not resend the email. Please try again in a minute.' }
+    }
+    return { ok: true }
+}
+
 export async function signInUser(email: string, password: string) {
     const supabase = await createClient()
 
