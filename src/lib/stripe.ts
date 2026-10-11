@@ -1,7 +1,11 @@
 import Stripe from 'stripe'
 import { TRIAL_DAYS } from '@/lib/plans'
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+// Stripe is optional (no account yet). Never throw at import time: a missing key used to
+// crash the whole Vercel build ("Neither apiKey nor config.authenticator provided").
+// Calls made without a real key fail at request time instead, inside each route's try/catch.
+export const stripeConfigured = () => Boolean(process.env.STRIPE_SECRET_KEY)
+export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_not_configured')
 
 // Price ids come from env so placeholder ids never reach Stripe. Unset = plan unavailable.
 export const STRIPE_PRICES: Record<string, string | undefined> = {

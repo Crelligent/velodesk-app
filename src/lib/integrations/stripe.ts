@@ -39,7 +39,7 @@ function itemMonthlyAmount(item: Stripe.SubscriptionItem): number {
 async function client(accessToken: string, stripeUserId?: string) {
     const StripeSDK = (await import('stripe')).default
     return stripeUserId
-        ? { stripe: new StripeSDK(process.env.STRIPE_SECRET_KEY!), requestOptions: { stripeAccount: stripeUserId } as Stripe.RequestOptions }
+        ? { stripe: new StripeSDK(process.env.STRIPE_SECRET_KEY || 'sk_not_configured'), requestOptions: { stripeAccount: stripeUserId } as Stripe.RequestOptions }
         : { stripe: new StripeSDK(accessToken), requestOptions: undefined }
 }
 

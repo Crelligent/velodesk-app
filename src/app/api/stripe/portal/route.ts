@@ -30,7 +30,7 @@ export async function POST() {
 
         // Dynamic import Stripe
         const Stripe = (await import('stripe')).default
-        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_not_configured')
 
         // Create portal session
         const session = await stripe.billingPortal.sessions.create({
