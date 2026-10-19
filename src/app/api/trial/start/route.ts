@@ -2,9 +2,11 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { ensureTrial } from '@/lib/plans'
+import { cookies } from 'next/headers'
+import { PERK_COOKIE } from '@/lib/perks'
 
 // POST /api/trial/start: called when onboarding completes.
-// Idempotent: creates the 14-day trial once per user, never re-grants.
+// Idempotent: creates the trial (14 days, or 90 with a partner perk) once per user, never re-grants.
 export async function POST() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -14,7 +16,7 @@ export async function POST() {
 
     try {
         const admin = createAdminClient()
-        await ensureTrial(admin, user)
+        await ensureTrial(admin, user, (await cookies()).get(PERK_COOKIE)?.value)
 
         const { data: sub } = await admin
             .from('subscriptions')

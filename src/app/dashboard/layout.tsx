@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { ensureTrial, getEntitlement } from '@/lib/plans'
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
+import { PERK_COOKIE } from '@/lib/perks'
 import DashboardClientLayout from '@/components/dashboard/DashboardClientLayout'
 
 export default async function DashboardLayout({
@@ -26,10 +28,10 @@ export default async function DashboardLayout({
 
     let { data: subscription } = await loadSubscription()
 
-    // First visit: start the server-side 14-day trial (once per user, never re-granted)
+    // First visit: start the server-side trial (14 days, or 90 with a partner perk; once per user)
     if (!subscription) {
         try {
-            await ensureTrial(createAdminClient(), user)
+            await ensureTrial(createAdminClient(), user, (await cookies()).get(PERK_COOKIE)?.value)
             subscription = (await loadSubscription()).data
         } catch (error) {
             console.error('Failed to start trial:', error)

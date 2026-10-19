@@ -3,6 +3,7 @@
  * Plan ids match src/app/pricing/page.tsx (founder_monthly, startup_monthly, ...).
  */
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { normalisePerk, PERK_TRIAL_DAYS } from '@/lib/perks'
 
 export type PlanTier = 'free' | 'founder' | 'startup' | 'accelerator' | 'pro' | 'enterprise'
 
@@ -105,10 +106,24 @@ export async function getUserPlan(
  */
 export async function ensureTrial(
     admin: SupabaseClient,
-    user: { id: string; email?: string | null; user_metadata?: Record<string, unknown> }
+    user: { id: string; email?: string | null; user_metadata?: Record<string, unknown> },
+    perkFromCookie?: string | null
 ): Promise<void> {
     const userId = user.id
     const selectedPlan = user.user_metadata?.selected_plan
+
+    // Never re-grant or extend: a trial is only created once per user.
+    const { data: existing, error: existingError } = await admin
+        .from('subscriptions')
+        .select('user_id')
+        .eq('user_id', userId)
+        .maybeSingle()
+    if (existingError) throw existingError
+    if (existing) return
+
+    // Partner perk: code saved at email sign-up, or the claim cookie (Google sign-up).
+    const perkCode = normalisePerk(user.user_metadata?.perk_code) ?? normalisePerk(perkFromCookie)
+    const trialDays = perkCode ? PERK_TRIAL_DAYS : TRIAL_DAYS
 
     // subscriptions.user_id references profiles(id): make sure the profile exists
     // (the signup trigger may not have created it). Never overwrites an existing profile.
@@ -131,11 +146,19 @@ export async function ensureTrial(
             plan,
             status: 'trialing',
             provider: null,
-            trial_ends_at: new Date(Date.now() + TRIAL_DAYS * 24 * 60 * 60 * 1000).toISOString(),
+            trial_ends_at: new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000).toISOString(),
         },
         { onConflict: 'user_id', ignoreDuplicates: true }
     )
     if (error) throw error
+
+    // Attribution: keep the perk code on the user (merged, never replacing other metadata).
+    if (perkCode && user.user_metadata?.perk_code !== perkCode) {
+        const { error: metaError } = await admin.auth.admin.updateUserById(userId, {
+            user_metadata: { ...(user.user_metadata ?? {}), perk_code: perkCode },
+        })
+        if (metaError) console.error('Failed to record perk code:', metaError)
+    }
 }
 
 /**

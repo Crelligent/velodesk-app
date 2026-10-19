@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { normalisePerk } from '@/lib/perks'
 
 const ALLOWED_PLANS = ['founder_monthly', 'startup_monthly'] as const
 const ALLOWED_CURRENCIES = ['USD', 'NGN'] as const
@@ -15,8 +16,10 @@ export async function signUpUser(
     origin: string,
     selectedPlan?: string | null,
     selectedCurrency?: string | null,
+    perkCode?: string | null,
 ) {
     const supabase = await createClient()
+    const perk = normalisePerk(perkCode)
 
     // Only persist values we recognise; anything else from the query string is dropped.
     const plan = ALLOWED_PLANS.includes(selectedPlan as SelectedPlan) ? (selectedPlan as SelectedPlan) : null
@@ -35,6 +38,7 @@ export async function signUpUser(
                 full_name: fullName,
                 ...(plan ? { selected_plan: plan } : {}),
                 ...(currency ? { selected_currency: currency } : {}),
+                ...(perk ? { perk_code: perk } : {}),
             },
             emailRedirectTo: `${origin}/auth/callback?next=/onboarding`,
         },

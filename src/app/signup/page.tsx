@@ -6,6 +6,7 @@ import { resendSignupEmail, signUpUser } from '@/app/actions'
 import { FormEngine, FormSchema } from '@/components/forms/FormEngine'
 import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
+import { getPerk, PERK_TRIAL_DAYS } from '@/lib/perks'
 import Link from 'next/link'
 import { Database, LineChart } from 'lucide-react'
 
@@ -120,6 +121,15 @@ function SignupForm() {
     // Only accept plans we actually sell; anything else is ignored.
     const planId = planParam && PLAN_NAMES[planParam] ? planParam : null
     const currency = searchParams.get('currency') === 'NGN' ? 'NGN' : 'USD'
+    // Partner perk (?perk=<code>, set by /api/perks/claim): longer trial, attributed to the partner.
+    const perk = getPerk(searchParams.get('perk'))
+    const schema: FormSchema = perk
+        ? {
+            ...signupSchema,
+            title: `Start your ${PERK_TRIAL_DAYS}-day free trial`,
+            description: `${perk.partner} founder offer. No credit card required. Your company details come next.`,
+        }
+        : signupSchema
 
     useEffect(() => {
         if (planId) {
@@ -155,7 +165,7 @@ function SignupForm() {
         // The chosen plan + currency are saved to the user's metadata (survives email
         // confirmation). No checkout at signup — the trial starts without a card.
         // Company name is collected in onboarding.
-        const { data, error } = await signUpUser(email, password, fullName, window.location.origin, planId, currency)
+        const { data, error } = await signUpUser(email, password, fullName, window.location.origin, planId, currency, perk?.code)
 
         if (error) {
             throw new Error(error)
@@ -219,7 +229,7 @@ function SignupForm() {
                         )}
                         {sessionId && (
                             <FormEngine 
-                                schema={signupSchema}
+                                schema={schema}
                                 sessionId={sessionId}
                                 onSubmit={handleFormSubmit}
                             />
