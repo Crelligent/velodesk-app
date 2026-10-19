@@ -6,7 +6,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { DEMO_EMAILS } from '@/lib/demo'
 
 /**
- * Sign-in with an emailed 6-digit code.
+ * Sign-in with an emailed one-time code (length set in Supabase, currently 8 digits).
  *
  * Two ways in, both ending at the same code screen:
  *  1. Email + password -> password is checked WITHOUT creating a browser session,
@@ -15,14 +15,14 @@ import { DEMO_EMAILS } from '@/lib/demo'
  * Google sign-in is unchanged (handled in the page).
  *
  * The code is Supabase's email OTP: the "Magic Link" email template must include
- * {{ .Token }} for the 6-digit code to appear in the email.
+ * {{ .Token }} for the code to appear in the email.
  */
 
 // Shared demo accounts use non-deliverable addresses, so they keep password-only sign-in
 // (same as /api/demo-login).
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const CODE_RE = /^\d{6}$/
+const CODE_RE = /^\d{6,10}$/ // Supabase Email OTP Length (currently 8)
 
 type Result =
     | { ok: true; step: 'code' }
@@ -103,7 +103,7 @@ export async function sendSignInCode(emailRaw: string): Promise<Result> {
 export async function verifySignInCode(emailRaw: string, codeRaw: string, next?: string | null): Promise<Result> {
     const email = clean(emailRaw)
     const code = codeRaw.replace(/\D/g, '')
-    if (!EMAIL_RE.test(email) || !CODE_RE.test(code)) return { ok: false, error: 'Enter the 6-digit code from your email.' }
+    if (!EMAIL_RE.test(email) || !CODE_RE.test(code)) return { ok: false, error: 'Enter the code from your email.' }
 
     const supabase = await createClient()
     const { error } = await supabase.auth.verifyOtp({ email, token: code, type: 'email' })

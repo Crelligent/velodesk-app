@@ -9,7 +9,7 @@ import { sendSignInCode, startPasswordSignIn, verifySignInCode } from './actions
 
 type Step = 'password' | 'email' | 'code'
 const RESEND_SECONDS = 60
-const CODE_LENGTH = 6
+const CODE_LENGTH = 8 // must match Supabase: Auth > Email > Email OTP Length
 
 const inputClass =
     'w-full rounded-md border border-border-strong bg-surface px-4 py-3 text-text placeholder:text-text-dim transition-colors focus:border-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg'
@@ -133,8 +133,8 @@ function LoginFlow() {
                     <h1 className="text-center font-display text-3xl text-text">Sign in to your account</h1>
                     <p className="mt-3 text-center text-text-muted">
                         {step === 'password'
-                            ? 'Enter your email and password. We’ll then email you a 6-digit code.'
-                            : 'Enter your email and we’ll send you a 6-digit sign-in code.'}
+                            ? 'Enter your email and password. We’ll then email you a sign-in code.'
+                            : 'Enter your email and we’ll send you a sign-in code.'}
                     </p>
 
                     <form onSubmit={step === 'password' ? handlePassword : handleEmailOnly} className="mt-10 space-y-5" noValidate>
@@ -272,7 +272,7 @@ function CodeStep({
             </div>
             <h1 className="mt-6 text-center font-display text-3xl text-text">Check your email</h1>
             <p className="mt-3 text-center text-text-muted">
-                Enter the 6-digit code we sent to <span className="break-all text-text">{email}</span>
+                Enter the {CODE_LENGTH}-digit code we sent to <span className="inline-block max-w-full break-words text-text">{email}</span>
             </p>
 
             <form
@@ -280,8 +280,8 @@ function CodeStep({
                 className="mt-10"
             >
                 <fieldset disabled={busy}>
-                    <legend className="sr-only">6-digit sign-in code</legend>
-                    <div className="flex justify-center gap-2 sm:gap-3">
+                    <legend className="sr-only">{CODE_LENGTH}-digit sign-in code</legend>
+                    <div className="flex justify-center gap-1.5 sm:gap-2.5">
                         {digits.map((d, i) => (
                             <input
                                 key={i}
@@ -296,7 +296,7 @@ function CodeStep({
                                 maxLength={CODE_LENGTH}
                                 aria-label={`Digit ${i + 1} of ${CODE_LENGTH}`}
                                 aria-invalid={!!error}
-                                className={`h-14 w-11 rounded-md border bg-surface text-center font-mono text-2xl text-text tabular-nums transition-colors focus:border-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg sm:h-16 sm:w-14 ${error ? 'border-danger' : 'border-border-strong'}`}
+                                className={`h-12 w-9 rounded-md border bg-surface text-center font-mono text-xl text-text tabular-nums transition-colors focus:border-accent focus:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg sm:h-14 sm:w-12 sm:text-2xl ${error ? 'border-danger' : 'border-border-strong'}`}
                             />
                         ))}
                     </div>
