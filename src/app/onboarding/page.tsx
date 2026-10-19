@@ -82,14 +82,16 @@ export default function OnboardingPage() {
             if (user) {
                 const { error: updateError } = await supabase
                     .from('profiles')
-                    .update({
-                        company_name: formData.companyName.trim(),
-                        // Stage is stored in `team_size`, as in the previous onboarding.
-                        team_size: formData.stage,
-                    })
+                    .update({ company_name: formData.companyName.trim() })
                     .eq('id', user.id)
-
                 if (updateError) throw updateError
+
+                // Stage is text (e.g. "mvp"); profiles.team_size is an integer column, so
+                // writing the stage there failed with a 400. Keep it on the user instead.
+                const { error: stageError } = await supabase.auth.updateUser({
+                    data: { company_stage: formData.stage },
+                })
+                if (stageError) throw stageError
             }
         } catch (err) {
             console.error('Error saving:', err)
