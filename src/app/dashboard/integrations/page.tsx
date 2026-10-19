@@ -50,18 +50,18 @@ export default function IntegrationsPage() {
         loadConnectedIntegrations()
     }, [])
 
-    // Handle ?connect=paystack|stripe (sent from onboarding)
+    // Handle ?connect=<provider> (sent from onboarding): Stripe uses OAuth, the rest an API key
     useEffect(() => {
         if (connectParamHandled.current) return
         const connect = searchParams.get('connect')
-        if (connect !== 'paystack' && connect !== 'stripe') return
+        const target = INTEGRATIONS.find(i => i.id === connect && i.syncSupported)
+        if (!target) return
         connectParamHandled.current = true
 
-        if (connect === 'paystack') {
-            const paystack = INTEGRATIONS.find(i => i.id === 'paystack')
-            if (paystack) openKeyModal(paystack)
-        } else {
+        if (target.id === 'stripe') {
             setStripePrompt(true)
+        } else if (target.authType === 'api_key') {
+            openKeyModal(target)
         }
         window.history.replaceState({}, '', '/dashboard/integrations')
     }, [searchParams])

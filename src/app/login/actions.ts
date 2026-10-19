@@ -3,6 +3,7 @@
 import { createClient as createStatelessClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { DEMO_EMAILS } from '@/lib/demo'
 
 /**
  * Sign-in with an emailed 6-digit code.
@@ -19,12 +20,6 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 // Shared demo accounts use non-deliverable addresses, so they keep password-only sign-in
 // (same as /api/demo-login).
-const DEMO_EMAILS = new Set([
-    'demo@velodesk.com',
-    'demo-ng@velodesk.com',
-    'investor@velodesk.com',
-    'investor-ng@velodesk.com',
-])
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const CODE_RE = /^\d{6}$/

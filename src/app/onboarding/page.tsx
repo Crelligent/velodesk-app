@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createBrowserClient } from '@supabase/ssr'
+import { CATEGORIES, INTEGRATIONS } from '@/lib/integrations'
 
 // NOTE: Logo upload was removed from onboarding to get founders to their real score faster.
 // It belongs in Settings (company profile) — see the previous version of this file for the
@@ -33,18 +34,10 @@ const stages = [
     },
 ]
 
-const dataSources = [
-    {
-        id: 'paystack',
-        name: 'Paystack',
-        description: 'For businesses collecting payments in Naira and across Africa.',
-    },
-    {
-        id: 'stripe',
-        name: 'Stripe',
-        description: 'For businesses billing internationally.',
-    },
-]
+// Every live connector, grouped as on the Integrations page.
+const sourceGroups = CATEGORIES
+    .map((c) => ({ ...c, items: INTEGRATIONS.filter((i) => i.category === c.id && i.syncSupported) }))
+    .filter((g) => g.items.length > 0)
 
 const totalSteps = 3
 
@@ -265,26 +258,45 @@ export default function OnboardingPage() {
                                     Connect your first<br />data source
                                 </h1>
                                 <p className="text-[#8A8A8A] text-[1.1rem] font-light leading-relaxed">
-                                    Your PMF Score is calculated from your real payment data. Connect the provider
-                                    you use to collect payments. More integrations are coming soon.
+                                    Your PMF Score is calculated from your real data. Start with the tool you rely on
+                                    most; payments give the strongest signal. You can add the rest later.
                                 </p>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12">
-                                {dataSources.map((source) => (
-                                    <button
-                                        key={source.id}
-                                        type="button"
-                                        onClick={() => connectSource(source.id)}
-                                        className={`text-left p-6 border border-[rgba(255,255,255,0.12)] bg-white/[0.02] hover:border-white hover:bg-white/[0.04] transition ${focusRing}`}
-                                    >
-                                        <span className="block font-outfit text-[1.25rem] font-light text-white mb-2">
-                                            Connect {source.name} <span aria-hidden="true">→</span>
-                                        </span>
-                                        <span className="block text-[0.8rem] text-[#8A8A8A] leading-relaxed">
-                                            {source.description}
-                                        </span>
-                                    </button>
+                            <div className="mb-12 space-y-10">
+                                {sourceGroups.map((group) => (
+                                    <section key={group.id} aria-labelledby={`group-${group.id}`}>
+                                        <h2 id={`group-${group.id}`} className="text-[0.7rem] text-[#8A8A8A] uppercase tracking-[0.2em] mb-4">
+                                            {group.label}
+                                        </h2>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            {group.items.map((source) => (
+                                                <button
+                                                    key={source.id}
+                                                    type="button"
+                                                    onClick={() => connectSource(source.id)}
+                                                    className={`flex items-center gap-4 text-left p-4 border border-[rgba(255,255,255,0.12)] bg-white/[0.02] hover:border-white hover:bg-white/[0.04] transition ${focusRing}`}
+                                                >
+                                                    <span className="flex h-10 w-10 flex-none items-center justify-center rounded-md bg-white" aria-hidden="true">
+                                                        {source.logo ? (
+                                                            // eslint-disable-next-line @next/next/no-img-element -- small static logos
+                                                            <img src={source.logo} alt="" className="h-6 w-6 object-contain" />
+                                                        ) : (
+                                                            <span className="text-sm font-semibold text-[#050505]">{source.name.charAt(0)}</span>
+                                                        )}
+                                                    </span>
+                                                    <span className="min-w-0">
+                                                        <span className="block font-outfit text-[1.05rem] font-light text-white">
+                                                            {source.name} <span aria-hidden="true" className="text-[#8A8A8A]">→</span>
+                                                        </span>
+                                                        <span className="block text-[0.8rem] text-[#8A8A8A] leading-relaxed">
+                                                            {source.signals?.length ? source.signals.join(' · ') : source.description}
+                                                        </span>
+                                                    </span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </section>
                                 ))}
                             </div>
 

@@ -5,6 +5,11 @@ import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { PERK_COOKIE } from '@/lib/perks'
 import DashboardClientLayout from '@/components/dashboard/DashboardClientLayout'
+import { DEMO_EMAILS } from '@/lib/demo'
+
+function daysUntil(iso: string): number {
+    return Math.max(0, Math.ceil((new Date(iso).getTime() - Date.now()) / 86_400_000))
+}
 
 export default async function DashboardLayout({
     children,
@@ -48,11 +53,23 @@ export default async function DashboardLayout({
     // If past_due, we could show a banner in the client layout, but we still render children
     // Same for paused (read-only). 
 
+    const tier = (subscription.plan || 'founder').split('_')[0]
+    const tierName = tier.charAt(0).toUpperCase() + tier.slice(1)
+    let planLabel = `${tierName} plan`
+    if (subscription.status === 'trialing' && subscription.trial_ends_at) {
+        const days = daysUntil(subscription.trial_ends_at)
+        planLabel = `${tierName} trial · ${days} day${days === 1 ? '' : 's'} left`
+    }
+    const fullName = typeof user.user_metadata?.full_name === 'string' ? user.user_metadata.full_name.trim() : ''
+
     return (
         <DashboardClientLayout
             user={{
                 email: user.email || '',
-                avatarUrl: user.user_metadata?.avatar_url
+                name: fullName || (user.email || '').split('@')[0],
+                avatarUrl: user.user_metadata?.avatar_url,
+                planLabel,
+                isDemo: DEMO_EMAILS.has((user.email || '').toLowerCase()),
             }}
         >
             {/* Inject a banner if past_due or paused? Let's just render children for now */}

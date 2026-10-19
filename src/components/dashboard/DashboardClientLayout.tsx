@@ -15,12 +15,7 @@ import {
     FolderOpen,
     FileText,
     Plug,
-    Sparkles,
     Search,
-    Link2,
-    Copy,
-    MessageSquare,
-    Users,
     TrendingUp,
     Network
 } from 'lucide-react'
@@ -30,42 +25,38 @@ import AIAgentWindow from './AIAgentWindow'
 import CommandPalette from './CommandPalette'
 import InvestorModeOverlay from './InvestorModeOverlay'
 
-const navSections = [
-    {
-        title: 'Favorites',
-        items: [
-            { href: '/dashboard/agent-insights', icon: Sparkles, label: 'Agent Insights', color: 'text-fuchsia-400' },
-        ]
-    },
+// `sample: true` pages still show illustrative figures, not the user's own data.
+// Only the shared demo accounts see them; real accounts get a clean workspace.
+type NavItem = { href: string; icon: typeof LayoutDashboard; label: string; color: string; sample?: boolean }
+const navSections: { title: string; items: NavItem[] }[] = [
     {
         title: 'The Score',
         items: [
             { href: '/dashboard', icon: LayoutDashboard, label: 'Overview', color: 'text-blue-400' },
-            { href: '/dashboard/pulse', icon: Activity, label: 'The Pulse', color: 'text-[#FF6B35]' },
+            { href: '/dashboard/pulse', icon: Activity, label: 'The Pulse', color: 'text-[#FF6B35]', sample: true },
         ]
     },
     {
         title: 'The Math',
         items: [
-            { href: '/dashboard/analytics', icon: BarChart3, label: 'Analytics', color: 'text-purple-400' },
-            { href: '/dashboard/cohort-dvr', icon: PlaySquare, label: 'Cohort DVR', color: 'text-pink-400' },
-            { href: '/dashboard/simulator', icon: SlidersHorizontal, label: 'Simulator', color: 'text-amber-400' },
+            { href: '/dashboard/analytics', icon: BarChart3, label: 'Analytics', color: 'text-purple-400', sample: true },
+            { href: '/dashboard/cohort-dvr', icon: PlaySquare, label: 'Cohort DVR', color: 'text-pink-400', sample: true },
+            { href: '/dashboard/simulator', icon: SlidersHorizontal, label: 'Simulator', color: 'text-amber-400', sample: true },
         ]
     },
     {
         title: 'The Proof',
         items: [
-            { href: '/dashboard/benchmarks', icon: TrendingUp, label: 'Cohort Benchmarks', color: 'text-teal-400' },
-            { href: '/dashboard/data-room', icon: FolderOpen, label: 'Live Data Room', color: 'text-emerald-400' },
-            { href: '/dashboard/pmf-report', icon: FileText, label: 'PMF Report', color: 'text-cyan-400' },
-            { href: '/dashboard/investor-api', icon: Network, label: 'Investor API Sync', color: 'text-indigo-400' },
+            { href: '/dashboard/benchmarks', icon: TrendingUp, label: 'Cohort Benchmarks', color: 'text-teal-400', sample: true },
+            { href: '/dashboard/data-room', icon: FolderOpen, label: 'Live Data Room', color: 'text-emerald-400', sample: true },
+            { href: '/dashboard/pmf-report', icon: FileText, label: 'PMF Report', color: 'text-cyan-400', sample: true },
+            { href: '/dashboard/investor-api', icon: Network, label: 'Investor API Sync', color: 'text-indigo-400', sample: true },
         ]
     },
     {
         title: 'Workspace',
         items: [
             { href: '/dashboard/integrations', icon: Plug, label: 'Integrations', color: 'text-slate-400' },
-            { href: '/dashboard/team', icon: Users, label: 'Team Members', color: 'text-slate-400' },
             { href: '/dashboard/settings', icon: Settings, label: 'Settings', color: 'text-slate-400' },
         ]
     },
@@ -78,7 +69,10 @@ interface DashboardClientLayoutProps {
     children: React.ReactNode
     user: {
         email: string
+        name: string
         avatarUrl?: string
+        planLabel: string
+        isDemo: boolean
     }
 }
 
@@ -88,6 +82,11 @@ export default function DashboardClientLayout({ children, user }: DashboardClien
     const [isInvestorModeOpen, setIsInvestorModeOpen] = useState(false)
 
     const showSidebar = !fullWidthPages.includes(pathname)
+    const sections = navSections
+        .map((section) => ({ ...section, items: section.items.filter((item) => user.isDemo || !item.sample) }))
+        .filter((section) => section.items.length > 0)
+    const paletteItems = sections.flatMap((section) => section.items.map(({ href, label }) => ({ href, label })))
+    const initials = (user.name || user.email).split(/[\s@._-]+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join('') || 'V'
 
     return (
         <div className="min-h-screen bg-[#04060D] text-white flex flex-col">
@@ -126,35 +125,21 @@ export default function DashboardClientLayout({ children, user }: DashboardClien
 
                         {/* Right Actions & Profile */}
                         <div className="flex items-center justify-end gap-4 flex-shrink-0">
-                            <button className="px-4 py-2 bg-white/5 border border-white/10 text-white text-xs font-medium hover:bg-white/10 transition rounded flex items-center gap-2 whitespace-nowrap">
-                                <Activity size={14} className="text-[#7B61FF]" /> Live Sync
-                            </button>
-                            <button
-                                onClick={() => setIsInvestorModeOpen(true)}
-                                className="px-4 py-2 bg-[#22c55e]/10 border border-[#22c55e]/30 text-[#22c55e] text-xs font-medium hover:bg-[#22c55e]/20 transition rounded whitespace-nowrap flex items-center gap-2"
-                            >
-                                <PlaySquare size={14} /> Fundraising Deck
-                            </button>
-                            <Link
+                            {user.isDemo && (
+                                <button
+                                    onClick={() => setIsInvestorModeOpen(true)}
+                                    className="px-4 py-2 bg-[#22c55e]/10 border border-[#22c55e]/30 text-[#22c55e] text-xs font-medium hover:bg-[#22c55e]/20 transition rounded whitespace-nowrap flex items-center gap-2"
+                                >
+                                    <PlaySquare size={14} /> Fundraising Deck
+                                </button>
+                            )}
+                            {user.isDemo && <Link
                                 href="/dashboard/pmf-report"
                                 className="px-4 py-2 bg-[#7B61FF] text-white text-xs font-medium hover:bg-[#8A73FF] transition rounded whitespace-nowrap"
                             >
                                 Export Report
-                            </Link>
+                            </Link>}
 
-                            {/* Linear-Style Actions Header */}
-                            <div className="flex items-center gap-1 text-white/40 border-l border-white/10 pl-4 ml-2">
-                                <span className="text-[12px] font-medium text-white/60 mr-2 font-mono">SIG-1042</span>
-                                <button className="p-1.5 hover:bg-white/5 hover:text-white rounded transition-colors" title="Copy Link">
-                                    <Link2 className="w-4 h-4" />
-                                </button>
-                                <button className="p-1.5 hover:bg-white/5 hover:text-white rounded transition-colors" title="Copy ID">
-                                    <Copy className="w-4 h-4" />
-                                </button>
-                                <button className="p-1.5 hover:bg-white/5 hover:text-[#7B61FF] rounded transition-colors" title="Send to Slack">
-                                    <MessageSquare className="w-4 h-4" />
-                                </button>
-                            </div>
                         </div>
                     </>
                 )}
@@ -166,7 +151,7 @@ export default function DashboardClientLayout({ children, user }: DashboardClien
                     <aside className="w-[260px] bg-[#04060D] border-r border-white/5 fixed top-16 left-0 bottom-0 flex flex-col z-40">
                         {/* Navigation */}
                         <nav className="px-6 py-6 space-y-8 flex-1 overflow-y-auto">
-                            {navSections.map((section) => (
+                            {sections.map((section) => (
                                 <div key={section.title}>
                                     <div className="px-4 mb-4 text-xs uppercase tracking-[0.25em] text-[#404040] font-medium">
                                         {section.title}
@@ -202,14 +187,15 @@ export default function DashboardClientLayout({ children, user }: DashboardClien
                                 className="w-full flex items-center justify-between px-2 py-2 rounded-lg hover:bg-white/5 transition"
                             >
                                 <div className="flex items-center gap-3">
-                                    <img 
-                                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" 
-                                        alt="Alex" 
-                                        className="w-8 h-8 rounded-full border border-white/10 object-cover"
-                                    />
-                                    <div className="flex flex-col items-start">
-                                        <span className="text-sm font-medium text-white/90">Alex</span>
-                                        <span className="text-[10px] text-white/40">VeloDesk Pro</span>
+                                    {user.avatarUrl ? (
+                                        // eslint-disable-next-line @next/next/no-img-element -- remote avatar from the auth provider
+                                        <img src={user.avatarUrl} alt="" className="w-8 h-8 rounded-full border border-white/10 object-cover" />
+                                    ) : (
+                                        <span aria-hidden="true" className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs font-medium text-white/80">{initials}</span>
+                                    )}
+                                    <div className="flex min-w-0 flex-col items-start">
+                                        <span className="max-w-[150px] truncate text-sm font-medium text-white/90">{user.name}</span>
+                                        <span className="text-[10px] text-white/50">{user.planLabel}</span>
                                     </div>
                                 </div>
                                 <ChevronDown className={`w-4 h-4 text-white/40 transition ${userMenuOpen ? 'rotate-180' : ''}`} />
@@ -224,8 +210,8 @@ export default function DashboardClientLayout({ children, user }: DashboardClien
                                     />
                                     <div className="absolute left-4 bottom-full mb-2 w-56 bg-[#141518] border border-white/10 rounded-lg shadow-2xl z-50 overflow-hidden">
                                         <div className="px-4 py-3 border-b border-white/5">
-                                            <div className="text-sm font-medium text-white/90 truncate">alex@velodesk.app</div>
-                                            <div className="text-xs text-[#7B61FF]">VeloDesk (Pro Plan)</div>
+                                            <div className="text-sm font-medium text-white/90 truncate">{user.email}</div>
+                                            <div className="text-xs text-white/50">{user.planLabel}</div>
                                         </div>
                                         <div className="py-1">
                                             <Link
@@ -254,25 +240,25 @@ export default function DashboardClientLayout({ children, user }: DashboardClien
                 )}
 
                 {/* Main Content */}
-                <main className={`flex-1 px-4 md:px-8 lg:px-12 py-8 ${showSidebar ? 'ml-[260px] mr-[280px]' : ''}`}>
+                <main className={`flex-1 px-4 md:px-8 lg:px-12 py-8 ${showSidebar ? `ml-[260px] ${user.isDemo ? 'mr-[280px]' : ''}` : ''}`}>
                     {children}
                 </main>
 
                 {showSidebar && (
                     <>
-                        <PropertiesSidebar />
+                        {user.isDemo && <PropertiesSidebar />}
                         <AIAgentWindow />
                     </>
                 )}
                 
                 {/* Global Command Palette */}
-                <CommandPalette />
+                <CommandPalette items={paletteItems} />
 
                 {/* Investor Mode Overlay */}
                 <InvestorModeOverlay 
                     isOpen={isInvestorModeOpen} 
                     onClose={() => setIsInvestorModeOpen(false)} 
-                    companyName="Crelligent" 
+                    companyName="Your company" 
                 />
             </div>
         </div>

@@ -1,9 +1,11 @@
 'use client'
 
 import React, { useState, useEffect, useRef, useCallback } from 'react'
-import { Search, Command, Users, BarChart2, FolderOpen, Zap, ArrowRight, CornerDownLeft } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { Search, ArrowRight, CornerDownLeft } from 'lucide-react'
 
-export default function CommandPalette() {
+export default function CommandPalette({ items = [] }: { items?: { href: string; label: string }[] }) {
+    const router = useRouter()
     const [isOpen, setIsOpen] = useState(false)
     const [query, setQuery] = useState('')
     const [activeIndex, setActiveIndex] = useState(-1)
@@ -61,32 +63,16 @@ export default function CommandPalette() {
 
     if (!isOpen) return null
 
-    const mockResults = [
-        {
-            group: 'Suggested Actions',
-            items: [
-                { icon: Zap, label: 'Analyze recent Stripe MRR drop', type: 'AI Action' },
-                { icon: Users, label: 'View Enterprise Churn Cohort', type: 'Navigate' },
-                { icon: BarChart2, label: 'Go to PMF Analytics', type: 'Navigate' },
-            ]
-        },
-        {
-            group: 'Customer Search',
-            items: [
-                { icon: Search, label: 'Acme Corp', type: 'Customer' },
-                { icon: Search, label: 'Globex Inc', type: 'Customer' },
-            ]
-        },
-        {
-            group: 'Recent Data Rooms',
-            items: [
-                { icon: FolderOpen, label: 'Q3 Board Report Data', type: 'Room' },
-                { icon: FolderOpen, label: 'Series B Diligence', type: 'Room' },
-            ]
-        }
-    ]
-
-    const allItems = mockResults.flatMap(g => g.items)
+    // Only real destinations: the pages this account can open.
+    const q = query.trim().toLowerCase()
+    const results = [{
+        group: 'Go to',
+        items: items
+            .filter((item) => !q || item.label.toLowerCase().includes(q))
+            .map((item) => ({ ...item, icon: ArrowRight, type: 'Navigate' })),
+    }]
+    const go = (href: string) => { setIsOpen(false); router.push(href) }
+    const allItems = results.flatMap(g => g.items)
 
     return (
         <div
@@ -137,8 +123,11 @@ export default function CommandPalette() {
                     aria-label="Search results"
                     className="max-h-[400px] overflow-y-auto p-2"
                 >
-                    {mockResults.map((group, groupIdx) => {
-                        const groupStartIdx = mockResults
+                    {results[0].items.length === 0 && (
+                        <p className="px-3 py-6 text-center text-sm text-white/50">{q ? <>No pages match “{query}”.</> : 'Nothing to search yet.'}</p>
+                    )}
+                    {results.map((group, groupIdx) => {
+                        const groupStartIdx = results
                             .slice(0, groupIdx)
                             .reduce((acc, g) => acc + g.items.length, 0)
                         return (
@@ -163,8 +152,8 @@ export default function CommandPalette() {
                                                 aria-selected={isActive}
                                                 tabIndex={0}
                                                 className={`flex items-center justify-between px-3 py-2.5 rounded-lg cursor-pointer group/item transition-colors ${isActive ? 'bg-white/10' : 'hover:bg-white/5'} focus:outline-none focus-visible:ring-1 focus-visible:ring-white/30`}
-                                                onClick={() => setIsOpen(false)}
-                                                onKeyDown={(e) => { if (e.key === 'Enter') setIsOpen(false) }}
+                                                onClick={() => go(item.href)}
+                                                onKeyDown={(e) => { if (e.key === 'Enter') go(item.href) }}
                                                 onMouseEnter={() => setActiveIndex(flatIdx)}
                                             >
                                                 <div className="flex items-center gap-3">
