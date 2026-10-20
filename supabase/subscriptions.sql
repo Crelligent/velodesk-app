@@ -23,3 +23,8 @@ CREATE POLICY "Users can view own subscriptions" ON public.subscriptions
 CREATE POLICY "Service role can manage subscriptions" ON public.subscriptions
   USING (true)
   WITH CHECK (true);
+
+-- Data API grants (required for new tables in "public" from 30 Oct 2026).
+-- Mirrors production. Row Level Security still controls which rows each user can reach.
+grant select, insert, update, delete on public.subscriptions to anon, authenticated;
+grant all on public.subscriptions to service_role;

@@ -91,3 +91,8 @@ alter table public.subscriptions add column if not exists plan_amount bigint;   
 alter table public.subscriptions add column if not exists upcoming_charge_notified_for timestamptz;
 
 commit;
+
+-- Data API grants (required for new tables in "public" from 30 Oct 2026).
+-- Mirrors production. Row Level Security still controls which rows each user can reach.
+grant select, insert, update, delete on public.invoices to anon, authenticated;
+grant all on public.invoices to service_role;

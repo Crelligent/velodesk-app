@@ -103,3 +103,18 @@ CREATE POLICY "Allow public to update their own partial submissions" ON public.f
 
 -- Allow reading of published forms by anyone
 CREATE POLICY "Allow public to read published forms" ON public.forms FOR SELECT USING (is_published = TRUE);
+
+-- Data API grants (required for new tables in "public" from 30 Oct 2026).
+-- Mirrors production. Row Level Security still controls which rows each user can reach.
+grant select, insert, update, delete on public.form_workspaces to anon, authenticated;
+grant all on public.form_workspaces to service_role;
+grant select, insert, update, delete on public.forms to anon, authenticated;
+grant all on public.forms to service_role;
+grant select, insert, update, delete on public.form_versions to anon, authenticated;
+grant all on public.form_versions to service_role;
+grant select, insert, update, delete on public.form_submissions to anon, authenticated;
+grant all on public.form_submissions to service_role;
+grant select, insert, update, delete on public.form_partial_submissions to anon, authenticated;
+grant all on public.form_partial_submissions to service_role;
+grant select, insert, update, delete on public.form_dropoff_events to anon, authenticated;
+grant all on public.form_dropoff_events to service_role;

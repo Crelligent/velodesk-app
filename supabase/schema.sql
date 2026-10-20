@@ -231,3 +231,18 @@ drop trigger if exists update_subscriptions_updated_at on public.subscriptions;
 create trigger update_subscriptions_updated_at
   before update on public.subscriptions
   for each row execute procedure public.update_updated_at();
+
+-- Data API grants (required for new tables in "public" from 30 Oct 2026).
+-- Mirrors production. Row Level Security still controls which rows each user can reach.
+grant select, insert, update, delete on public.profiles to anon, authenticated;
+grant all on public.profiles to service_role;
+grant select, insert, update, delete on public.organizations to anon, authenticated;
+grant all on public.organizations to service_role;
+-- Tokens are server-only: no read/write for browser roles.
+grant all on public.integration_tokens to service_role;
+grant select, insert, update, delete on public.experiments to anon, authenticated;
+grant all on public.experiments to service_role;
+grant select, insert, update, delete on public.pmf_scores to anon, authenticated;
+grant all on public.pmf_scores to service_role;
+grant select, insert, update, delete on public.subscriptions to anon, authenticated;
+grant all on public.subscriptions to service_role;

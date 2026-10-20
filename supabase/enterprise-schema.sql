@@ -223,3 +223,18 @@ drop trigger if exists update_pmf_reports_updated_at on public.pmf_reports;
 create trigger update_pmf_reports_updated_at
   before update on public.pmf_reports
   for each row execute procedure public.update_updated_at();
+
+-- Data API grants (required for new tables in "public" from 30 Oct 2026).
+-- Mirrors production. Row Level Security still controls which rows each user can reach.
+grant select, insert, update, delete on public.organization_members to anon, authenticated;
+grant all on public.organization_members to service_role;
+grant select, insert, update, delete on public.team_invites to anon, authenticated;
+grant all on public.team_invites to service_role;
+grant select, insert, update, delete on public.enterprise_settings to anon, authenticated;
+grant all on public.enterprise_settings to service_role;
+grant select, insert, update, delete on public.api_keys to anon, authenticated;
+grant all on public.api_keys to service_role;
+grant select, insert, update, delete on public.api_usage_log to anon, authenticated;
+grant all on public.api_usage_log to service_role;
+grant select, insert, update, delete on public.pmf_reports to anon, authenticated;
+grant all on public.pmf_reports to service_role;
