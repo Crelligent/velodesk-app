@@ -8,6 +8,7 @@ import { INTEGRATIONS } from '@/lib/integrations'
 import { getProviderModule, parseCredentials } from '@/lib/integrations/registry'
 import { deriveMetrics, type SourcedSignalSet } from '@/lib/integrations/signals'
 import { describeError, runWithSyncContext } from '@/lib/integrations/http'
+import { DEMO_EMAILS } from '@/lib/demo'
 
 // PMF Score weights (from strategy)
 const WEIGHTS = {
@@ -183,6 +184,11 @@ export async function refreshPmfScore(
     options: { force?: boolean } = {}
 ): Promise<void> {
     try {
+        // Shared demo accounts carry placeholder connections and a seeded score for sales demos.
+        // Never recalculate them: their sources have no real credentials, so a rescore would wipe the demo.
+        const { data: account } = await admin.auth.admin.getUserById(userId)
+        if (DEMO_EMAILS.has((account?.user?.email || '').toLowerCase())) return
+
         if (!options.force && !(await claimRescoreSlot(admin, userId))) {
             console.log(`PMF refresh skipped for user ${userId}: last scored under 15 minutes ago`)
             return
