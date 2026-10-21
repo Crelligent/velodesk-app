@@ -5,20 +5,20 @@ import { ShieldCheck, Download, Link2, CheckCircle2, Lock, Activity, Database, G
 
 // Mock Data
 const CERTIFICATE_DATA = {
-    startupName: 'Nexus AI',
-    score: 84,
+    startupName: 'Brightloop',
+    score: 69,
     generatedAt: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
     cryptoHash: 'SHA-256: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
     sources: [
         { name: 'Stripe', type: 'Revenue & Billing', status: 'Verified' },
         { name: 'Mixpanel', type: 'Product Telemetry', status: 'Verified' },
-        { name: 'Postgres', type: 'Core Database', status: 'Verified' },
+        { name: 'HubSpot', type: 'CRM & Pipeline', status: 'Verified' },
     ],
     dimensions: [
-        { name: 'Cohort Retention', score: 88 },
-        { name: 'Revenue Expansion', score: 92 },
-        { name: 'High-Frequency Engagement', score: 76 },
-        { name: 'Sentiment & Satisfaction', score: 80 }
+        { name: 'Cohort Retention', score: 78 },
+        { name: 'Revenue Expansion', score: 66 },
+        { name: 'High-Frequency Engagement', score: 70 },
+        { name: 'Sentiment & Satisfaction', score: 64 }
     ]
 }
 
@@ -303,7 +303,7 @@ export default function PMFCertificatePage() {
                     <div className="flex-1 flex flex-col">
                         <h3 className="text-3xl font-['Instrument_Serif'] italic text-white mb-8">Executive Summary</h3>
                         <p className="text-white/70 text-sm leading-relaxed mb-12">
-                            Based on real-time ingestion of Stripe revenue data and Mixpanel event telemetry, {CERTIFICATE_DATA.startupName} exhibits top-quartile Product-Market Fit. Net Dollar Retention (NDR) is expanding rapidly driven by organic seat expansion, and the L30 power user curve indicates a deeply ingrained daily habit among the core user base. All data points have been cryptographically sealed at the time of generation to prevent manual tampering.
+                            Based on real-time ingestion of Stripe revenue data and Mixpanel event telemetry, {CERTIFICATE_DATA.startupName} shows emerging Product-Market Fit, with its score up from 52 to 69 in two months. Net Dollar Retention (NDR) of 112% is driven by account upgrades, and the L30 power user curve shows a growing core of daily users. Referral and time to value are the main gaps to close. All data points have been cryptographically sealed at the time of generation to prevent manual tampering.
                         </p>
 
                         <h4 className="text-xs font-mono text-white/50 uppercase tracking-widest mb-6">Cryptographic Audit Log</h4>
@@ -321,7 +321,7 @@ export default function PMFCertificatePage() {
                             </div>
                             <div>
                                 <span className="text-[#00B67A]">[PHYSICS ENGINE]</span> Calculating Dimensions...<br/>
-                                <span className="text-white/30 pl-4">Cohort Retention: 88/100 | Expansion: 92/100 | Engagement: 76/100</span>
+                                <span className="text-white/30 pl-4">Cohort Retention: 78/100 | Expansion: 66/100 | Engagement: 70/100</span>
                             </div>
                             <div className="pt-4 mt-4 border-t border-white/10 text-[#00B67A]">
                                 FINAL SEAL: {CERTIFICATE_DATA.cryptoHash}
@@ -454,21 +454,21 @@ export default function PMFCertificatePage() {
                                     <div>
                                         <div className="flex justify-between text-xs mb-2">
                                             <span className="text-white/60">Net Dollar Retention (NDR)</span>
-                                            <span className="text-[#00B67A] font-mono font-medium">124%</span>
+                                            <span className="text-[#00B67A] font-mono font-medium">112%</span>
                                         </div>
                                         <div className="h-2 bg-white/5 rounded-full"><div className="h-full bg-[#00B67A] rounded-full w-[100%]" /></div>
                                     </div>
                                     <div>
                                         <div className="flex justify-between text-xs mb-2">
-                                            <span className="text-white/60">Logo Churn (Annualized)</span>
-                                            <span className="text-[#FF6B35] font-mono font-medium">4.2%</span>
+                                            <span className="text-white/60">Logo Churn (Monthly)</span>
+                                            <span className="text-[#FF6B35] font-mono font-medium">2.1%</span>
                                         </div>
                                         <div className="h-2 bg-white/5 rounded-full"><div className="h-full bg-[#FF6B35] rounded-full w-[15%]" /></div>
                                     </div>
                                 </div>
                                 <div className="w-32 h-32 rounded-full border-[6px] border-[#00B67A] flex items-center justify-center bg-[#00B67A]/10 relative">
                                     <div className="text-center">
-                                        <div className="text-2xl font-bold text-white">124<span className="text-sm text-white/50">%</span></div>
+                                        <div className="text-2xl font-bold text-white">112<span className="text-sm text-white/50">%</span></div>
                                         <div className="text-[8px] uppercase tracking-widest text-white/50 mt-1">NDR</div>
                                     </div>
                                 </div>

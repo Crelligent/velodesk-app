@@ -10,7 +10,7 @@ const trajectoryData = [
     { month: 'Mar', score: 48, median: 50 },
     { month: 'Apr', score: 56, median: 51 },
     { month: 'May', score: 63, median: 51 },
-    { month: 'Jun', score: 72, median: 52 },
+    { month: 'Jun', score: 69, median: 52 },
 ]
 
 const CustomTooltip = ({ active, payload, label }: any) => {
@@ -38,9 +38,12 @@ export default function BenchmarksPage() {
             {/* Header */}
             <div className="mb-8">
                 <h1 className="text-2xl font-light text-white mb-2">Cohort Benchmarks</h1>
-                <p className="text-sm text-white/60 mb-4">See how your metrics stack up against 214 B2B SaaS companies in the VeloDesk network.</p>
-                <div className="inline-flex items-center px-3 py-1 bg-[#7B61FF]/10 border border-[#7B61FF]/20 rounded-full text-xs text-[#7B61FF] font-medium">
-                    Cohort: Series A · B2B SaaS · 214 companies
+                <p className="text-sm text-white/60 mb-4">See how your metrics stack up against 180 B2B SaaS companies in the VeloDesk network.</p>
+                <div className="flex flex-wrap gap-2">
+                    <div className="inline-flex items-center px-3 py-1 bg-[#7B61FF]/10 border border-[#7B61FF]/20 rounded-full text-xs text-[#7B61FF] font-medium">
+                        Cohort: Series A · B2B SaaS · 180 companies
+                    </div>
+                    <div className="inline-flex items-center px-3 py-1 border border-white/10 rounded-full text-xs text-white/50">Sample data</div>
                 </div>
             </div>
 
@@ -51,7 +54,7 @@ export default function BenchmarksPage() {
                     { title: 'NPS Score', yours: '52', median: '45', top25: '62', percentile: 65, color: 'from-[#7B61FF] to-[#38BDF8]' },
                     { title: 'Revenue Growth (MoM)', yours: '14.2%', median: '11.8%', top25: '18.5%', percentile: 72, color: 'from-[#7B61FF] to-[#38BDF8]' },
                     { title: 'Activation Rate', yours: '84%', median: '68%', top25: '82%', percentile: 85, color: 'from-[#7B61FF] to-[#38BDF8]' },
-                    { title: 'Time to Value', yours: '2.4 days', median: '4.1 days', top25: '2.8 days', percentile: 82, color: 'from-[#7B61FF] to-[#38BDF8]' },
+                    { title: 'Time to Value', yours: '3.2 days', median: '4.1 days', top25: '2.8 days', percentile: 64, color: 'from-[#7B61FF] to-[#38BDF8]' },
                 ].map((metric) => (
                     <div key={metric.title} className="p-5 bg-white/[0.02] border border-white/5 rounded-xl flex flex-col">
                         <div className="text-[10px] uppercase tracking-widest text-white/40 mb-3">{metric.title}</div>
@@ -135,16 +138,16 @@ export default function BenchmarksPage() {
                     {/* Your Ranking */}
                     <div className="p-5 bg-white/[0.02] border border-white/5 rounded-2xl flex flex-col items-center">
                         <h3 className="text-sm font-medium text-white/80 mb-6 self-start">Your Ranking</h3>
-                        <div className="text-5xl font-light bg-clip-text text-transparent bg-gradient-to-r from-[#7B61FF] to-[#38BDF8] mb-2">#38 of 214</div>
-                        <div className="text-sm text-white/50 mb-8">Top 18% in your cohort</div>
+                        <div className="text-5xl font-light bg-clip-text text-transparent bg-gradient-to-r from-[#7B61FF] to-[#38BDF8] mb-2">#38 of 180</div>
+                        <div className="text-sm text-white/50 mb-8">Top 21% in your cohort</div>
                         
                         <div className="w-full space-y-2">
                             {[
-                                { rank: 36, name: 'Anon Company', score: 74, isYou: false },
-                                { rank: 37, name: 'Anon Company', score: 73, isYou: false },
-                                { rank: 38, name: 'You', score: 72, isYou: true },
-                                { rank: 39, name: 'Anon Company', score: 71, isYou: false },
-                                { rank: 40, name: 'Anon Company', score: 70, isYou: false },
+                                { rank: 36, name: 'Anon Company', score: 71, isYou: false },
+                                { rank: 37, name: 'Anon Company', score: 70, isYou: false },
+                                { rank: 38, name: 'You', score: 69, isYou: true },
+                                { rank: 39, name: 'Anon Company', score: 68, isYou: false },
+                                { rank: 40, name: 'Anon Company', score: 67, isYou: false },
                             ].map((row) => (
                                 <div key={row.rank} className={`flex items-center justify-between p-2 rounded text-sm ${row.isYou ? 'bg-[#7B61FF]/10 text-white font-medium' : 'text-white/40'}`}>
                                     <div className="flex items-center gap-4">
