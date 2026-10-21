@@ -1,6 +1,12 @@
 ﻿import React from 'react'
 import { Activity, MapPin } from 'lucide-react'
 
+const LIVE_SIGNALS = [
+    { label: 'Payment Successful', when: 'Just now', detail: 'Stripe: $299 MRR (Pro Plan)', place: 'London, UK', accent: true },
+    { label: 'Core Action', when: '12s ago', detail: 'Mixpanel: Dashboard_Created', place: 'Austin, TX', accent: true },
+    { label: 'Feedback', when: '45s ago', detail: 'Zendesk: Ticket Resolved (CSAT 5/5)', place: 'Berlin, DE', accent: false },
+]
+
 export default function PulsePage() {
     return (
         <div className="min-h-[calc(100vh-80px)] -mt-8 -mx-8 relative overflow-y-auto overflow-x-hidden bg-[#050505] flex flex-col justify-between p-8">
@@ -18,42 +24,26 @@ export default function PulsePage() {
             </div>
 
             {/* Simulated Live Feed */}
-            <div className="relative z-20 w-80 space-y-3 mt-8">
+            <div className="relative z-20 w-80 mt-8">
                 <div className="text-xs uppercase tracking-widest text-gray-500 mb-4">Live Signals</div>
-                
-                <div className="p-4 bg-white/[0.05] border border-white/10 rounded-lg backdrop-blur-md animate-in slide-in-from-left duration-500">
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs text-[#FF6B35] font-mono">Payment Successful</span>
-                        <span className="text-[10px] text-gray-500">Just now</span>
-                    </div>
-                    <div className="text-sm text-white">Stripe: $299 MRR (Pro Plan)</div>
-                    <div className="flex items-center gap-1 mt-2 text-[10px] text-gray-400">
-                        <MapPin size={10} /> London, UK
-                    </div>
-                </div>
-
-                <div className="p-4 bg-white/[0.05] border border-white/10 rounded-lg backdrop-blur-md animate-in slide-in-from-left duration-500 delay-150 relative overflow-y-auto overflow-x-hidden">
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF6B35]" />
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs text-[#FF6B35] font-mono">Core Action</span>
-                        <span className="text-[10px] text-gray-500">12s ago</span>
-                    </div>
-                    <div className="text-sm text-white">Mixpanel: Dashboard_Created</div>
-                    <div className="flex items-center gap-1 mt-2 text-[10px] text-gray-400">
-                        <MapPin size={10} /> Austin, TX
-                    </div>
-                </div>
-
-                <div className="p-4 bg-white/[0.05] border border-white/10 rounded-lg backdrop-blur-md opacity-50">
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs text-white/70 font-mono">Feedback</span>
-                        <span className="text-[10px] text-gray-500">45s ago</span>
-                    </div>
-                    <div className="text-sm text-white">Zendesk: Ticket Resolved (CSAT 5/5)</div>
-                    <div className="flex items-center gap-1 mt-2 text-[10px] text-gray-400">
-                        <MapPin size={10} /> Berlin, DE
-                    </div>
-                </div>
+                <ul className="flex flex-col gap-3">
+                    {LIVE_SIGNALS.map((signal, i) => (
+                        <li
+                            key={signal.label}
+                            className="p-4 bg-white/[0.05] border border-white/10 rounded-lg backdrop-blur-md animate-in slide-in-from-left duration-500"
+                            style={{ animationDelay: `${i * 150}ms` }}
+                        >
+                            <div className="flex items-center justify-between mb-2">
+                                <span className={`text-xs font-mono ${signal.accent ? 'text-[#FF6B35]' : 'text-white/70'}`}>{signal.label}</span>
+                                <span className="text-[10px] text-gray-500">{signal.when}</span>
+                            </div>
+                            <div className="text-sm text-white">{signal.detail}</div>
+                            <div className="flex items-center gap-1 mt-2 text-[10px] text-gray-400">
+                                <MapPin size={10} aria-hidden="true" /> {signal.place}
+                            </div>
+                        </li>
+                    ))}
+                </ul>
             </div>
 
             {/* Metrics Overlay Right */}
