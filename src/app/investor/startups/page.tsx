@@ -9,7 +9,7 @@ const portfolioCompanies = [
         name: 'PayFlow',
         industry: 'Fintech',
         stage: 'growth',
-        pmfScore: 28,
+        pmfScore: 80,
         status: 'Strong',
         signal: 'positive',
         lastUpdated: '2 hours ago',
@@ -19,7 +19,7 @@ const portfolioCompanies = [
         name: 'EduStream',
         industry: 'Edtech',
         stage: 'mvp',
-        pmfScore: 12,
+        pmfScore: 34,
         status: 'Weak Signal',
         signal: 'warning',
         lastUpdated: '5 hours ago',
@@ -29,7 +29,7 @@ const portfolioCompanies = [
         name: 'HealthSync',
         industry: 'Healthtech',
         stage: 'scaling',
-        pmfScore: 32,
+        pmfScore: 91,
         status: 'Strong',
         signal: 'positive',
         lastUpdated: '1 day ago',
@@ -39,7 +39,7 @@ const portfolioCompanies = [
         name: 'AgriMarket',
         industry: 'Agritech',
         stage: 'ideation',
-        pmfScore: 5,
+        pmfScore: 14,
         status: 'Pre-PMF',
         signal: 'negative',
         lastUpdated: '2 days ago',
@@ -49,7 +49,7 @@ const portfolioCompanies = [
         name: 'LogisX',
         industry: 'Logistics',
         stage: 'growth',
-        pmfScore: 19,
+        pmfScore: 54,
         status: 'Developing',
         signal: 'positive',
         lastUpdated: '3 days ago',
@@ -125,7 +125,7 @@ export default function StartupsPage() {
                                     <td className="py-4 px-6">
                                         <div className="flex items-center gap-2">
                                             <span className="text-lg font-outfit font-light">{company.pmfScore}</span>
-                                            <span className="text-xs text-[#606060]">/ 35</span>
+                                            <span className="text-xs text-[#606060]">/ 100</span>
                                         </div>
                                     </td>
                                     <td className="py-4 px-6">

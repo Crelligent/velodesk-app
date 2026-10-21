@@ -273,7 +273,7 @@ export default function InvestorLayout({ children, user }: InvestorLayoutProps) 
                                         </li>
                                         <li className="flex items-center gap-2">
                                             <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                                            PMF Score flatlined at 19/35
+                                            PMF Score flatlined at 54/100
                                         </li>
                                     </ul>
                                     <button className="mt-3 text-purple-400 hover:text-purple-300 transition-colors text-xs font-medium flex items-center gap-1">

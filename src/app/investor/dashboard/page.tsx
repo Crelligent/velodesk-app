@@ -13,7 +13,7 @@ const usCompanies = [
         name: 'PayFlow',
         industry: 'Fintech',
         stage: 'growth',
-        pmfScore: 28,
+        pmfScore: 80,
         status: 'Strong',
         signal: 'positive',
         lastUpdated: '2 hours ago',
@@ -23,7 +23,7 @@ const usCompanies = [
         name: 'EduStream',
         industry: 'Edtech',
         stage: 'mvp',
-        pmfScore: 12,
+        pmfScore: 34,
         status: 'Weak Signal',
         signal: 'warning',
         lastUpdated: '5 hours ago',
@@ -33,7 +33,7 @@ const usCompanies = [
         name: 'HealthSync',
         industry: 'Healthtech',
         stage: 'scaling',
-        pmfScore: 32,
+        pmfScore: 91,
         status: 'Strong',
         signal: 'positive',
         lastUpdated: '1 day ago',
@@ -43,7 +43,7 @@ const usCompanies = [
         name: 'AgriMarket',
         industry: 'Agritech',
         stage: 'ideation',
-        pmfScore: 5,
+        pmfScore: 14,
         status: 'Pre-PMF',
         signal: 'negative',
         lastUpdated: '2 days ago',
@@ -53,7 +53,7 @@ const usCompanies = [
         name: 'LogisX',
         industry: 'Logistics',
         stage: 'growth',
-        pmfScore: 19,
+        pmfScore: 54,
         status: 'Developing',
         signal: 'positive',
         lastUpdated: '3 days ago',
@@ -61,11 +61,11 @@ const usCompanies = [
 ]
 
 const ngCompanies = [
-    { id: '1', name: 'Ledgerloop', industry: 'Fintech', stage: 'growth', pmfScore: 28, status: 'Strong', signal: 'positive', lastUpdated: '2 hours ago' },
-    { id: '2', name: 'Classwise', industry: 'Edtech', stage: 'scaling', pmfScore: 12, status: 'Weak Signal', signal: 'warning', lastUpdated: '5 hours ago' },
-    { id: '3', name: 'Medora Health', industry: 'Healthtech', stage: 'scaling', pmfScore: 32, status: 'Strong', signal: 'positive', lastUpdated: '1 day ago' },
-    { id: '4', name: 'Harvestline', industry: 'Agritech', stage: 'growth', pmfScore: 5, status: 'Developing', signal: 'warning', lastUpdated: '2 days ago' },
-    { id: '5', name: 'Routemark', industry: 'Logistics', stage: 'growth', pmfScore: 19, status: 'Developing', signal: 'positive', lastUpdated: '3 days ago' },
+    { id: '1', name: 'Ledgerloop', industry: 'Fintech', stage: 'growth', pmfScore: 80, status: 'Strong', signal: 'positive', lastUpdated: '2 hours ago' },
+    { id: '2', name: 'Classwise', industry: 'Edtech', stage: 'scaling', pmfScore: 34, status: 'Weak Signal', signal: 'warning', lastUpdated: '5 hours ago' },
+    { id: '3', name: 'Medora Health', industry: 'Healthtech', stage: 'scaling', pmfScore: 91, status: 'Strong', signal: 'positive', lastUpdated: '1 day ago' },
+    { id: '4', name: 'Harvestline', industry: 'Agritech', stage: 'growth', pmfScore: 14, status: 'Developing', signal: 'warning', lastUpdated: '2 days ago' },
+    { id: '5', name: 'Routemark', industry: 'Logistics', stage: 'growth', pmfScore: 54, status: 'Developing', signal: 'positive', lastUpdated: '3 days ago' },
 ]
 
 export default function AcceleratorDashboard() {
@@ -121,9 +121,9 @@ export default function AcceleratorDashboard() {
                         <TrendingUp className="w-4 h-4" />
                         <span className="text-[0.7rem] uppercase tracking-[0.15em]">Avg. PMF Score</span>
                     </div>
-                    <div className="text-4xl font-outfit font-light mb-1 relative z-10">19.2</div>
+                    <div className="text-4xl font-outfit font-light mb-1 relative z-10">54.6</div>
                     <div className="text-sm text-[#22c55e] flex items-center gap-1 relative z-10">
-                        +2.4 this month
+                        +6.9 this month
                     </div>
                 </div>
 
@@ -186,7 +186,7 @@ export default function AcceleratorDashboard() {
                                     <td className="py-4 px-6">
                                         <div className="flex items-center gap-2">
                                             <span className="text-lg font-outfit font-light">{company.pmfScore}</span>
-                                            <span className="text-xs text-[#606060]">/ 35</span>
+                                            <span className="text-xs text-[#606060]">/ 100</span>
                                         </div>
                                     </td>
                                     <td className="py-4 px-6 text-right">

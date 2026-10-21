@@ -110,7 +110,7 @@ export default function LPReportsPage() {
                                     <div className="p-4 bg-white/[0.02] border border-white/5 rounded-lg">
                                         <div className="text-xs text-[#606060] mb-1">Portfolio Aggregate PMF Score</div>
                                         <div className="text-2xl font-outfit font-light text-white flex items-baseline gap-2">
-                                            24.8 <span className="text-sm text-[#606060]">/ 35</span>
+                                            71 <span className="text-sm text-[#606060]">/ 100</span>
                                         </div>
                                     </div>
                                     <div className="p-4 bg-white/[0.02] border border-white/5 rounded-lg">
