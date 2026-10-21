@@ -11,7 +11,7 @@ const pipelineStages = [
         prospects: [
             { name: 'NexaHealth', industry: 'Healthtech', date: 'Added 2d ago', aiRisk: 'Low Risk', aiScore: 88, aiColor: 'text-emerald-400', aiBg: 'bg-emerald-500/10' },
             { name: 'OmniChain', industry: 'Web3', date: 'Added 4d ago', aiRisk: 'High Risk', aiScore: 32, aiColor: 'text-red-400', aiBg: 'bg-red-500/10' },
-            { name: 'BuildOps', industry: 'Contech', date: 'Added 5d ago', aiRisk: 'Medium Risk', aiScore: 65, aiColor: 'text-amber-400', aiBg: 'bg-amber-500/10' },
+            { name: 'Sitewright', industry: 'Contech', date: 'Added 5d ago', aiRisk: 'Medium Risk', aiScore: 65, aiColor: 'text-amber-400', aiBg: 'bg-amber-500/10' },
         ]
     },
     {
@@ -21,7 +21,7 @@ const pipelineStages = [
         border: 'border-blue-500/20',
         prospects: [
             { name: 'Lumina AI', industry: 'Enterprise SaaS', date: '2 weeks in DD', aiRisk: 'Very Low Risk', aiScore: 94, aiColor: 'text-emerald-400', aiBg: 'bg-emerald-500/10' },
-            { name: 'AeroFarms', industry: 'Agtech', date: '1 week in DD', aiRisk: 'Medium Risk', aiScore: 58, aiColor: 'text-amber-400', aiBg: 'bg-amber-500/10' },
+            { name: 'Verdant Rows', industry: 'Agtech', date: '1 week in DD', aiRisk: 'Medium Risk', aiScore: 58, aiColor: 'text-amber-400', aiBg: 'bg-amber-500/10' },
         ]
     },
     {

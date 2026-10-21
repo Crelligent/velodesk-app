@@ -61,11 +61,11 @@ const usCompanies = [
 ]
 
 const ngCompanies = [
-    { id: '1', name: 'Paystack', industry: 'Fintech', stage: 'growth', pmfScore: 28, status: 'Strong', signal: 'positive', lastUpdated: '2 hours ago' },
-    { id: '2', name: 'uLesson', industry: 'Edtech', stage: 'scaling', pmfScore: 12, status: 'Weak Signal', signal: 'warning', lastUpdated: '5 hours ago' },
-    { id: '3', name: 'Helium Health', industry: 'Healthtech', stage: 'scaling', pmfScore: 32, status: 'Strong', signal: 'positive', lastUpdated: '1 day ago' },
-    { id: '4', name: 'ThriveAgric', industry: 'Agritech', stage: 'growth', pmfScore: 5, status: 'Developing', signal: 'warning', lastUpdated: '2 days ago' },
-    { id: '5', name: 'Kobo360', industry: 'Logistics', stage: 'growth', pmfScore: 19, status: 'Developing', signal: 'positive', lastUpdated: '3 days ago' },
+    { id: '1', name: 'Ledgerloop', industry: 'Fintech', stage: 'growth', pmfScore: 28, status: 'Strong', signal: 'positive', lastUpdated: '2 hours ago' },
+    { id: '2', name: 'Classwise', industry: 'Edtech', stage: 'scaling', pmfScore: 12, status: 'Weak Signal', signal: 'warning', lastUpdated: '5 hours ago' },
+    { id: '3', name: 'Medora Health', industry: 'Healthtech', stage: 'scaling', pmfScore: 32, status: 'Strong', signal: 'positive', lastUpdated: '1 day ago' },
+    { id: '4', name: 'Harvestline', industry: 'Agritech', stage: 'growth', pmfScore: 5, status: 'Developing', signal: 'warning', lastUpdated: '2 days ago' },
+    { id: '5', name: 'Routemark', industry: 'Logistics', stage: 'growth', pmfScore: 19, status: 'Developing', signal: 'positive', lastUpdated: '3 days ago' },
 ]
 
 export default function AcceleratorDashboard() {
@@ -234,7 +234,7 @@ export default function AcceleratorDashboard() {
                                 <div className="p-5 border-b border-[rgba(255,255,255,0.05)]">
                                     <div className="flex items-start justify-between mb-2">
                                         <div>
-                                            <h3 className="text-sm font-medium text-white/90 mb-1">{isNG ? 'uLesson (Edtech)' : 'EduStream (Edtech)'}</h3>
+                                            <h3 className="text-sm font-medium text-white/90 mb-1">{isNG ? 'Classwise (Edtech)' : 'EduStream (Edtech)'}</h3>
                                             <div className="text-xs text-red-400 font-medium">PMF Score dropped 12% in 30 days</div>
                                         </div>
                                         <div className="px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-[10px] text-red-400 uppercase tracking-wider font-medium">
@@ -253,7 +253,7 @@ export default function AcceleratorDashboard() {
                                     <div className="space-y-2">
                                         <button className="w-full text-left p-3 rounded-lg bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.05)] hover:border-purple-500/30 hover:bg-purple-500/5 transition-colors group">
                                             <div className="text-sm text-white/90 font-medium mb-1 group-hover:text-purple-300">Schedule Pivot Strategy Call</div>
-                                            <div className="text-xs text-[#606060]">Draft calendar invite to {isNG ? 'uLesson CEO' : 'EduStream CEO'}</div>
+                                            <div className="text-xs text-[#606060]">Draft calendar invite to {isNG ? 'Classwise CEO' : 'EduStream CEO'}</div>
                                         </button>
                                         <button className="w-full text-left p-3 rounded-lg bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.05)] hover:border-purple-500/30 hover:bg-purple-500/5 transition-colors group">
                                             <div className="text-sm text-white/90 font-medium mb-1 group-hover:text-purple-300">Introduce to network expert</div>
@@ -269,7 +269,7 @@ export default function AcceleratorDashboard() {
                                 <div className="p-5">
                                     <div className="flex items-start justify-between mb-2">
                                         <div>
-                                            <h3 className="text-sm font-medium text-white/90 mb-1">{isNG ? 'ThriveAgric (Agritech)' : 'AgriMarket (Agritech)'}</h3>
+                                            <h3 className="text-sm font-medium text-white/90 mb-1">{isNG ? 'Harvestline (Agritech)' : 'AgriMarket (Agritech)'}</h3>
                                             <div className="text-xs text-amber-400 font-medium">Burn rate accelerating</div>
                                         </div>
                                     </div>
