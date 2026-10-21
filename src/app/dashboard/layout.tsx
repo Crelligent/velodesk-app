@@ -41,6 +41,8 @@ export default async function DashboardLayout({
         } catch (error) {
             console.error('Failed to start trial:', error)
         }
+        // A parallel first request (e.g. a prefetch) may have created the trial meanwhile
+        if (!subscription) subscription = (await loadSubscription()).data
     }
 
     // Expired trial / ended subscription -> pricing, with a reason the page can show

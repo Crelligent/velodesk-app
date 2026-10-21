@@ -34,7 +34,9 @@ const clean = (email: string) => email.trim().toLowerCase()
 /** Only same-site paths, never protocol-relative URLs. */
 function safeNext(next: string | null | undefined, email: string): string {
     if (next && next.startsWith('/') && !next.startsWith('//') && !next.startsWith('/\\')) return next
-    return email.includes('investor') ? '/investor/dashboard' : '/dashboard'
+    if (email.includes('investor')) return '/investor/dashboard'
+    // Demo founder walks through the product: connected sources first, then the dashboard.
+    return DEMO_EMAILS.has(email) ? '/dashboard/integrations' : '/dashboard'
 }
 
 function rateLimited(message: string) {
