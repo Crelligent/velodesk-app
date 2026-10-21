@@ -20,7 +20,6 @@ import {
     Network
 } from 'lucide-react'
 
-import PropertiesSidebar from './PropertiesSidebar'
 import AIAgentWindow from './AIAgentWindow'
 import CommandPalette from './CommandPalette'
 import InvestorModeOverlay from './InvestorModeOverlay'
@@ -240,15 +239,12 @@ export default function DashboardClientLayout({ children, user }: DashboardClien
                 )}
 
                 {/* Main Content */}
-                <main className={`flex-1 px-4 md:px-8 lg:px-12 py-8 ${showSidebar ? `ml-[260px] ${user.isDemo ? 'mr-[280px]' : ''}` : ''}`}>
+                <main className={`flex-1 px-4 md:px-8 lg:px-12 py-8 ${showSidebar ? 'ml-[260px]' : ''}`}>
                     {children}
                 </main>
 
                 {showSidebar && (
-                    <>
-                        {user.isDemo && <PropertiesSidebar />}
-                        <AIAgentWindow />
-                    </>
+                    <AIAgentWindow />
                 )}
                 
                 {/* Global Command Palette */}

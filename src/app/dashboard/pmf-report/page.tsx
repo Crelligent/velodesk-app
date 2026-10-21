@@ -173,13 +173,13 @@ export default function PMFCertificatePage() {
                                 <img src="/velodesk (2).png" alt="VeloDesk" className="w-12 h-12 object-contain" />
                                 <div className="h-8 w-px bg-white/20" />
                                 <div className="w-12 h-12 rounded-xl border border-[#7B61FF]/30 bg-[#0A0C14] flex items-center justify-center shadow-lg">
-                                    <span className="text-xl font-bold text-white tracking-tighter" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>N</span>
+                                    <span className="text-xl font-bold text-white tracking-tighter" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.5)' }}>{CERTIFICATE_DATA.startupName.charAt(0)}</span>
                                 </div>
                             </div>
                             <div className="text-right flex gap-12 border border-[#7B61FF]/20 bg-[#0C0E1A]/80 backdrop-blur-sm px-6 py-3 rounded-lg">
                                 <div>
                                     <p className="text-[10px] font-mono text-[#7B61FF] uppercase tracking-widest mb-1">Serial Number</p>
-                                    <p className="text-sm font-mono text-white tracking-widest">VD-2026-NEXUS-084</p>
+                                    <p className="text-sm font-mono text-white tracking-widest">VD-2026-BRIGHTLOOP-069</p>
                                 </div>
                                 <div>
                                     <p className="text-[10px] font-mono text-[#7B61FF] uppercase tracking-widest mb-1">Date of Issue</p>
@@ -287,7 +287,7 @@ export default function PMFCertificatePage() {
                     <div className="flex justify-between items-center border-b border-white/10 pb-6 mb-10">
                         <div className="flex items-center gap-4">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#7B61FF] to-[#38BDF8] flex items-center justify-center">
-                                <span className="text-sm font-bold text-white tracking-tighter">N</span>
+                                <span className="text-sm font-bold text-white tracking-tighter">{CERTIFICATE_DATA.startupName.charAt(0)}</span>
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-white">{CERTIFICATE_DATA.startupName}</p>
@@ -345,7 +345,7 @@ export default function PMFCertificatePage() {
                     <div className="flex justify-between items-center border-b border-white/10 pb-6 mb-10">
                         <div className="flex items-center gap-4">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#7B61FF] to-[#38BDF8] flex items-center justify-center">
-                                <span className="text-sm font-bold text-white tracking-tighter">N</span>
+                                <span className="text-sm font-bold text-white tracking-tighter">{CERTIFICATE_DATA.startupName.charAt(0)}</span>
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-white">{CERTIFICATE_DATA.startupName}</p>
@@ -430,7 +430,7 @@ export default function PMFCertificatePage() {
                     <div className="flex justify-between items-center border-b border-white/10 pb-6 mb-10">
                         <div className="flex items-center gap-4">
                             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#7B61FF] to-[#38BDF8] flex items-center justify-center">
-                                <span className="text-sm font-bold text-white tracking-tighter">N</span>
+                                <span className="text-sm font-bold text-white tracking-tighter">{CERTIFICATE_DATA.startupName.charAt(0)}</span>
                             </div>
                             <div>
                                 <p className="text-sm font-medium text-white">{CERTIFICATE_DATA.startupName}</p>
