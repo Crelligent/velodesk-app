@@ -114,7 +114,7 @@ ${opts.body}
         <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
           <td style="padding:0 5px;"><a href="https://linkedin.com/company/crelligent" style="text-decoration:none;"><img src="${A}/icon-linkedin.png" width="28" height="28" alt="LinkedIn" style="display:block;border:0;outline:none;width:28px;height:28px;"></a></td>
           <td style="padding:0 5px;"><a href="https://x.com/crelligent" style="text-decoration:none;"><img src="${A}/icon-x.png" width="28" height="28" alt="X" style="display:block;border:0;outline:none;width:28px;height:28px;"></a></td>
-          <td style="padding:0 5px;"><a href="https://instagram.com/crelligent" style="text-decoration:none;"><img src="${A}/icon-instagram.png" width="28" height="28" alt="Instagram" style="display:block;border:0;outline:none;width:28px;height:28px;"></a></td>
+          <td style="padding:0 5px;"><a href="https://instagram.com/crelligenthq" style="text-decoration:none;"><img src="${A}/icon-instagram.png" width="28" height="28" alt="Instagram" style="display:block;border:0;outline:none;width:28px;height:28px;"></a></td>
         </tr></table>
       </td></tr>
       <tr><td align="center" style="padding-top:8px;font-family:${FONT};font-size:11px;color:#8A97AA;">Lagos, Nigeria &middot; Sent from billing@crelligent.com</td></tr>
