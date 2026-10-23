@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowRight, Check, Gauge, PlugZap, LineChart } from 'lucide-react'
-import { getPerk, PERK_TRIAL_DAYS } from '@/lib/perks'
+import { getPerk } from '@/lib/perks'
 
 // Partner perk landing page: /perks/<code> (e.g. /perks/posthog).
 // The CTA goes through /api/perks/claim, which remembers the code and opens sign-up.
@@ -29,8 +29,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const perk = getPerk((await params).code)
     if (!perk) return { title: 'Velodesk' }
     return {
-        title: `${PERK_TRIAL_DAYS}-day Velodesk trial for ${perk.partner} founders`,
-        description: `Measure product-market fit from your real data. ${PERK_TRIAL_DAYS} days free for ${perk.partner} founders, no credit card required.`,
+        title: `${perk.trialDays}-day Velodesk trial for ${perk.partner} founders`,
+        description: `Measure product-market fit from your real data. ${perk.trialDays} days free for ${perk.partner} founders, no credit card required.`,
         robots: { index: false },
     }
 }
@@ -65,10 +65,10 @@ export default async function PerkPage({ params }: Props) {
                 </p>
 
                 <div className="mt-10 rounded-xl border border-border bg-surface p-6 md:p-8">
-                    <p className="font-display text-2xl">{PERK_TRIAL_DAYS} days free</p>
+                    <p className="font-display text-2xl">{perk.trialDays} days free</p>
                     <ul className="mt-4 space-y-2 text-text-muted">
                         {[
-                            `${PERK_TRIAL_DAYS}-day free trial instead of the usual 14 days`,
+                            `${perk.trialDays}-day free trial instead of the usual 14 days`,
                             'No credit card required',
                             'Then from $15 a month (₦30,000 in Nigeria). Cancel any time.',
                         ].map(item => (
@@ -82,7 +82,7 @@ export default async function PerkPage({ params }: Props) {
                         href={claimHref}
                         className="mt-6 inline-flex items-center gap-2 rounded-md bg-accent px-5 py-3 font-medium text-on-accent transition-colors hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-bg"
                     >
-                        Claim your {PERK_TRIAL_DAYS}-day trial
+                        Claim your {perk.trialDays}-day trial
                         <ArrowRight className="h-4 w-4" aria-hidden="true" />
                     </Link>
                     <p className="mt-3 text-sm text-text-muted">For new Velodesk accounts. Existing trials are not extended.</p>

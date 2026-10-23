@@ -33,7 +33,7 @@ export default async function DashboardLayout({
 
     let { data: subscription } = await loadSubscription()
 
-    // First visit: start the server-side trial (14 days, or 90 with a partner perk; once per user)
+    // First visit: start the server-side trial (14 days, or the partner perk length; once per user)
     if (!subscription) {
         try {
             await ensureTrial(createAdminClient(), user, (await cookies()).get(PERK_COOKIE)?.value)

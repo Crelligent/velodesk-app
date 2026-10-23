@@ -1,6 +1,6 @@
 /**
  * Partner perks: founders who arrive through a partner or perks marketplace get a
- * longer free trial than the public 14 days. Each partner has its own code so
+ * longer free trial than the public 14 days (90 by default; a partner may set its own). Each partner has its own code so
  * sign-ups can be attributed (stored as user_metadata.perk_code).
  *
  * Flow: /perks/<code> landing page -> /api/perks/claim?code=<code> (sets a cookie)
@@ -13,18 +13,21 @@
 
 export const PERK_COOKIE = 'vd_perk'
 export const PERK_COOKIE_MAX_AGE = 60 * 60 * 24 * 30 // 30 days
+/** Default perk trial length; a partner can override it with `trialDays`. */
 export const PERK_TRIAL_DAYS = 90
 
 export interface Perk {
     /** Shown on the landing page and signup form: "for <partner> founders" */
     partner: string
+    /** Free trial length for this partner, when it differs from PERK_TRIAL_DAYS */
+    trialDays?: number
 }
 
 export const PERKS: Record<string, Perk> = {
     posthog: { partner: 'PostHog' },
     mixpanel: { partner: 'Mixpanel' },
     paystack: { partner: 'Paystack' },
-    hubspot: { partner: 'HubSpot for Startups' },
+    hubspot: { partner: 'HubSpot for Startups', trialDays: 30 },
     google: { partner: 'Google for Startups' },
     vc4a: { partner: 'VC4A' },
     cchub: { partner: 'CcHub' },
@@ -42,7 +45,12 @@ export function normalisePerk(code: unknown): string | null {
     return Object.prototype.hasOwnProperty.call(PERKS, clean) ? clean : null
 }
 
-export function getPerk(code: unknown): (Perk & { code: string }) | null {
+/** Trial length for a known perk code (the partner's own length, else the default). */
+export function perkTrialDays(code: string): number {
+    return PERKS[code]?.trialDays ?? PERK_TRIAL_DAYS
+}
+
+export function getPerk(code: unknown): (Perk & { code: string; trialDays: number }) | null {
     const clean = normalisePerk(code)
-    return clean ? { code: clean, ...PERKS[clean] } : null
+    return clean ? { code: clean, ...PERKS[clean], trialDays: perkTrialDays(clean) } : null
 }

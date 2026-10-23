@@ -6,7 +6,7 @@ import { resendSignupEmail, signUpUser } from '@/app/actions'
 import { FormEngine, FormSchema } from '@/components/forms/FormEngine'
 import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
-import { getPerk, PERK_TRIAL_DAYS } from '@/lib/perks'
+import { getPerk } from '@/lib/perks'
 import Link from 'next/link'
 import { Database, LineChart } from 'lucide-react'
 
@@ -126,7 +126,7 @@ function SignupForm() {
     const schema: FormSchema = perk
         ? {
             ...signupSchema,
-            title: `Start your ${PERK_TRIAL_DAYS}-day free trial`,
+            title: `Start your ${perk.trialDays}-day free trial`,
             description: `${perk.partner} founder offer. No credit card required. Your company details come next.`,
         }
         : signupSchema

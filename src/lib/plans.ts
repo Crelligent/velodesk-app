@@ -3,7 +3,7 @@
  * Plan ids match src/app/pricing/page.tsx (founder_monthly, startup_monthly, ...).
  */
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { normalisePerk, PERK_TRIAL_DAYS } from '@/lib/perks'
+import { normalisePerk, perkTrialDays } from '@/lib/perks'
 
 export type PlanTier = 'free' | 'founder' | 'startup' | 'accelerator' | 'pro' | 'enterprise'
 
@@ -123,7 +123,7 @@ export async function ensureTrial(
 
     // Partner perk: code saved at email sign-up, or the claim cookie (Google sign-up).
     const perkCode = normalisePerk(user.user_metadata?.perk_code) ?? normalisePerk(perkFromCookie)
-    const trialDays = perkCode ? PERK_TRIAL_DAYS : TRIAL_DAYS
+    const trialDays = perkCode ? perkTrialDays(perkCode) : TRIAL_DAYS
 
     // subscriptions.user_id references profiles(id): make sure the profile exists
     // (the signup trigger may not have created it). Never overwrites an existing profile.

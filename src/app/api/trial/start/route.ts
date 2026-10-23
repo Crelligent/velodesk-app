@@ -6,7 +6,7 @@ import { cookies } from 'next/headers'
 import { PERK_COOKIE } from '@/lib/perks'
 
 // POST /api/trial/start: called when onboarding completes.
-// Idempotent: creates the trial (14 days, or 90 with a partner perk) once per user, never re-grants.
+// Idempotent: creates the trial (14 days, or the partner perk length) once per user, never re-grants.
 export async function POST() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
