@@ -159,6 +159,16 @@ export async function ensureTrial(
         })
         if (metaError) console.error('Failed to record perk code:', metaError)
     }
+
+    // Programme membership for the programme benchmark (service-role only table).
+    // First programme wins; a later perk code never moves a founder to another cohort.
+    if (perkCode) {
+        const { error: memberError } = await admin.from('programme_members').upsert(
+            { user_id: userId, programme: perkCode },
+            { onConflict: 'user_id', ignoreDuplicates: true }
+        )
+        if (memberError) console.error('Failed to record programme membership:', memberError.message)
+    }
 }
 
 /**
