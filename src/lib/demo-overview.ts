@@ -44,3 +44,15 @@ export const DEMO_ACTIONS = [
     'Launch an in-app referral prompt after the first weekly report, when satisfaction peaks.',
     'Share the Data Room with your lead investor before the seed round: PMF Score 69 and rising.',
 ]
+
+// Go-to-Market Score for the demo founder (Brightloop, fictional). Sample data, demo accounts only.
+export const DEMO_GTM = {
+    score: 66,
+    history: [52, 55, 58, 61, 63, 66],
+    components: {
+        winRate: { score: 74, value: 27.5, unit: '%' },
+        pipelineGrowth: { score: 64, value: 11.6, unit: '% change' },
+        leadConversion: { score: 60, value: 3.4, unit: '%' },
+        dealSpeed: { score: 66, value: 51, unit: 'days' },
+    },
+} as const

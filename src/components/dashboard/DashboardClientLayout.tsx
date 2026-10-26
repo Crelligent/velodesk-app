@@ -17,7 +17,8 @@ import {
     Plug,
     Search,
     TrendingUp,
-    Network
+    Network,
+    UserCheck,
 } from 'lucide-react'
 
 import AIAgentWindow from './AIAgentWindow'
@@ -48,6 +49,7 @@ const navSections: { title: string; items: NavItem[] }[] = [
         items: [
             { href: '/dashboard/benchmarks', icon: TrendingUp, label: 'Cohort Benchmarks', color: 'text-teal-400', sample: true },
             { href: '/dashboard/data-room', icon: FolderOpen, label: 'Live Data Room', color: 'text-emerald-400', sample: true },
+            { href: '/dashboard/investors', icon: UserCheck, label: 'Investor Access', color: 'text-emerald-400' },
             { href: '/dashboard/pmf-report', icon: FileText, label: 'PMF Report', color: 'text-cyan-400', sample: true },
             { href: '/dashboard/investor-api', icon: Network, label: 'Investor API Sync', color: 'text-indigo-400', sample: true },
         ]

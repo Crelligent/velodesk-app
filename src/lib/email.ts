@@ -347,3 +347,37 @@ export async function sendTeamInviteEmail(
   })
 }
 
+
+const escapeHtml = (s: string) =>
+  s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+
+// A founder shared their PMF and Go-to-Market Scores with an investor
+export async function sendInvestorAccessEmail(
+  investorEmail: string,
+  data: { companyName: string; founderName: string; portalUrl: string }
+): Promise<boolean> {
+  const company = escapeHtml(data.companyName)
+  const founder = escapeHtml(data.founderName)
+  const html = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#050505;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <div style="max-width:600px;margin:0 auto;padding:40px 20px;">
+    <p style="color:#22C55E;font-size:11px;font-weight:700;letter-spacing:2px;margin:0 0 12px;">VELODESK</p>
+    <div style="background:#0A0A0A;border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:32px;">
+      <h1 style="color:#ffffff;font-size:22px;font-weight:300;margin:0 0 16px;">${company} shared its scores with you</h1>
+      <p style="color:#B4B4B4;font-size:15px;line-height:1.6;margin:0 0 16px;">
+        ${founder} has given you access to ${company}'s <strong style="color:#ffffff;">PMF Score</strong> (is the product working?) and
+        <strong style="color:#ffffff;">Go-to-Market Score</strong> (is the selling working?), both calculated from the company's own connected data.
+      </p>
+      <p style="color:#B4B4B4;font-size:15px;line-height:1.6;margin:0 0 28px;">
+        Sign in to Velodesk with this email address to see them in your portfolio. If you don't have an account yet, create one with this same email first; viewing shared scores is free. ${founder} can withdraw access at any time.
+      </p>
+      <a href="${data.portalUrl}" style="display:inline-block;background:#22C55E;color:#050505;padding:14px 28px;text-decoration:none;font-weight:600;border-radius:8px;font-size:14px;">Open your portfolio</a>
+    </div>
+    <p style="color:#8A8A8A;font-size:12px;margin:24px 0 0;">Velodesk by Crelligent &amp; Company Limited · velodesk.crelligent.com</p>
+  </div>
+</body>
+</html>`
+  return sendEmail({ to: investorEmail, subject: `${data.companyName} shared its Velodesk scores with you`, html })
+}

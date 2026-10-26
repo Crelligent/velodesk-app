@@ -41,6 +41,20 @@ export interface SignalSet {
         postsLast30d: number | null
         votesLast30d: number | null
     }
+    /** Sales funnel from a CRM. Feeds the Go-to-Market Score (src/lib/gtm-score.ts) and two PMF fallbacks. */
+    sales?: {
+        wonDeals90d: number | null // deals won, last 90 days
+        lostDeals90d: number | null // deals lost, last 90 days
+        medianDaysToClose: number | null // won deals, created -> closed
+        daysToCloseSample: number | null // won deals the median was taken over
+        dealsCreatedLast30: number | null
+        dealsCreatedPrev30: number | null
+        leadCohort: number | null // contacts created 31-120 days ago
+        leadCohortCustomers: number | null // of those, now customers
+        expansionDeals90d: number | null // won deals marked existing business (renewal/upsell)
+        medianDaysLeadToCustomer: number | null // contacts that became customers in the last 90 days
+        leadToCustomerSample: number | null
+    }
     notes?: string[]
 }
 
@@ -79,6 +93,10 @@ export const STICKINESS_BANDS: Array<[number, number]> = [[0, 0], [0.1, 40], [0.
 export const PIPELINE_GROWTH_BANDS: Array<[number, number]> = [[-50, 0], [0, 30], [10, 60], [25, 85], [50, 100]]
 /** Expansion MRR as % of MRR per month */
 export const EXPANSION_BANDS: Array<[number, number]> = [[0, 0], [1, 30], [2, 50], [5, 100]]
+/** CRM fallback for expansion: % of won deals (90 days) that are existing-business (renewal/upsell) */
+export const EXPANSION_DEAL_BANDS: Array<[number, number]> = [[0, 0], [10, 40], [20, 60], [35, 85], [50, 100]]
+/** CRM proxy for time to value: median days from lead to customer (shorter is better) */
+export const LEAD_TO_CUSTOMER_DAYS_BANDS: Array<[number, number]> = [[7, 100], [30, 80], [60, 60], [120, 35], [240, 0]]
 
 /** Minimum sample sizes below which a signal is ignored (not scored) */
 export const MIN_SAMPLES = {
@@ -86,6 +104,8 @@ export const MIN_SAMPLES = {
     csatRatings: 30,
     billingSubscriptions: 10,
     retentionCohort: 20,
+    crmWonDeals: 10, // expansion share
+    crmNewCustomers: 10, // lead-to-customer time
 } as const
 
 export type PmfMetric =
@@ -206,6 +226,26 @@ export function deriveMetrics(sets: SourcedSignalSet[]): DerivedMetrics {
         }
     }
 
-    // timeToValue, referral: no connected source measures these yet -> stay missing
+    // expansion (CRM fallback): share of won deals that are renewals/upsells
+    if (metrics.expansion === undefined) {
+        for (const s of sets.filter(x => x.kind === 'crm')) {
+            const sl = s.signals.sales
+            if (typeof sl?.expansionDeals90d !== 'number') continue
+            if (!enough(s, sl.wonDeals90d, MIN_SAMPLES.crmWonDeals, 'won deals in 90 days')) continue
+            set('expansion', interpolate(EXPANSION_DEAL_BANDS, (sl.expansionDeals90d / sl.wonDeals90d!) * 100), s.provider)
+            break
+        }
+    }
+
+    // timeToValue (CRM proxy): median days from lead to customer
+    for (const s of sets.filter(x => x.kind === 'crm')) {
+        const sl = s.signals.sales
+        if (typeof sl?.medianDaysLeadToCustomer !== 'number') continue
+        if (!enough(s, sl.leadToCustomerSample, MIN_SAMPLES.crmNewCustomers, 'new customers in 90 days')) continue
+        set('timeToValue', interpolate(LEAD_TO_CUSTOMER_DAYS_BANDS, sl.medianDaysLeadToCustomer), s.provider)
+        break
+    }
+
+    // referral: no connected source measures this yet -> stays missing
     return { metrics, sources, revenue, ignored, selfReported }
 }

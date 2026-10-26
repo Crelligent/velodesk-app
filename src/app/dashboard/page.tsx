@@ -3,7 +3,8 @@ import Link from 'next/link'
 import { Plug, RefreshCw, TrendingUp, TrendingDown, Lightbulb, CheckCircle2, AlertTriangle, ArrowRight } from 'lucide-react'
 import { DEMO_EMAILS } from '@/lib/demo'
 import { INTEGRATIONS } from '@/lib/integrations'
-import { DEMO_KPIS, DEMO_RETENTION, DEMO_SIGNALS, DEMO_ACTIONS } from '@/lib/demo-overview'
+import { DEMO_KPIS, DEMO_RETENTION, DEMO_SIGNALS, DEMO_ACTIONS, DEMO_GTM } from '@/lib/demo-overview'
+import { GtmPanel, type GtmPanelData } from '@/components/dashboard/GtmPanel'
 
 // This page used to render hard-coded figures (PMF Score 84, MRR ₦142.5M/$142,500, NRR, CAC,
 // users, economics, TAM, competitors and a mock signal feed) to every user. Those were removed:
@@ -125,10 +126,11 @@ export default async function DashboardPage() {
     let history: { score: number; calculated_at: string }[] = []
     let sources: { provider: string; last_sync_at: string | null }[] = []
     let connectedCount = 0
+    let gtm: GtmPanelData | null = null
     const isDemo = DEMO_EMAILS.has((user?.email || '').toLowerCase())
 
     if (user) {
-        const [{ data: scoreRows }, { data: tokenRows }] = await Promise.all([
+        const [{ data: scoreRows }, { data: tokenRows }, { data: gtmRows }] = await Promise.all([
             supabase
                 .from('pmf_scores')
                 .select('*')
@@ -140,7 +142,25 @@ export default async function DashboardPage() {
                 .select('provider, last_sync_at')
                 .eq('user_id', user.id)
                 .eq('status', 'connected'),
+            supabase
+                .from('gtm_scores')
+                .select('score, components, calculated_at')
+                .eq('user_id', user.id)
+                .order('calculated_at', { ascending: false })
+                .limit(2),
         ])
+        if (isDemo) {
+            const h = DEMO_GTM.history
+            gtm = { score: DEMO_GTM.score, change: h[h.length - 1] - h[h.length - 2], calculatedAt: null, components: DEMO_GTM.components }
+        } else if (gtmRows && gtmRows.length > 0) {
+            const [latest, prev] = gtmRows
+            gtm = {
+                score: Number(latest.score),
+                change: prev ? Math.round(Number(latest.score)) - Math.round(Number(prev.score)) : null,
+                calculatedAt: latest.calculated_at as string,
+                components: (latest.components ?? {}) as GtmPanelData['components'],
+            }
+        }
         const row = scoreRows?.[0]
         if (row && typeof row.score === 'number') latestScore = row as ScoreRow
         history = (scoreRows ?? [])
@@ -243,6 +263,8 @@ export default async function DashboardPage() {
                     ))}
                 </dl>
             </div>
+
+            <GtmPanel data={gtm} sample={isDemo} />
 
             {isDemo && (
                 <section aria-labelledby="kpi-heading" className="mb-4">

@@ -9,6 +9,7 @@ import { getProviderModule, parseCredentials } from '@/lib/integrations/registry
 import { deriveMetrics, type SourcedSignalSet } from '@/lib/integrations/signals'
 import { describeError, runWithSyncContext } from '@/lib/integrations/http'
 import { DEMO_EMAILS } from '@/lib/demo'
+import { deriveGtm, gtmScoreLabel, type GtmResult } from '@/lib/gtm-score'
 
 // PMF Score weights (from strategy)
 const WEIGHTS = {
@@ -125,6 +126,21 @@ export async function calculateAndSavePmfScore(
 
     if (error) throw error
 
+    // Go-to-Market Score from the same sync (CRM funnel). Saved only when there is enough data;
+    // a failure here never blocks the PMF Score.
+    let gtm: { score: number; label: string; components: GtmResult['components']; missing: GtmResult['missing'] } | null = null
+    if (integrated.gtm.score !== null) {
+        const { error: gtmError } = await admin.from('gtm_scores').insert({
+            user_id: userId,
+            score: integrated.gtm.score,
+            components: integrated.gtm.components,
+            inputs: { inputsUsed: integrated.gtm.inputsUsed, missing: integrated.gtm.missing, ignored: integrated.gtm.ignored },
+            calculated_at: savedScore.calculated_at,
+        })
+        if (gtmError) console.error(`GTM: save failed for user ${userId}:`, gtmError.message)
+        else gtm = { score: integrated.gtm.score, label: gtmScoreLabel(integrated.gtm.score), components: integrated.gtm.components, missing: integrated.gtm.missing }
+    }
+
     // Throttle marker for background rescoring (see refreshPmfScore)
     await admin.from('profiles').update({ last_scored_at: new Date().toISOString() }).eq('id', userId)
 
@@ -146,6 +162,7 @@ export async function calculateAndSavePmfScore(
         selfReported,
         basis, // 'self_reported' = no connected data behind this score
         basisLabel: BASIS_LABELS[basis],
+        gtm, // Go-to-Market Score, null when the CRM data is too thin
     }
 }
 
@@ -299,6 +316,7 @@ interface IntegratedMetrics {
     sourceErrors: Record<string, string>
     /** Metrics that came from a founder-run survey */
     surveyMetrics: MetricKey[]
+    gtm: GtmResult
 }
 
 /** Overall budget for syncing all sources; aborts every in-flight provider request. */
@@ -328,7 +346,7 @@ async function fetchIntegratedMetrics(userId: string, supabase: SupabaseClient, 
         .eq('status', 'connected')
 
     if (error || !rows || rows.length === 0) {
-        return { metrics: {}, sources: {}, revenue: null, sourceErrors: {}, surveyMetrics: [] }
+        return { metrics: {}, sources: {}, revenue: null, sourceErrors: {}, surveyMetrics: [], gtm: deriveGtm([]) }
     }
 
     // Catalog order keeps precedence deterministic within a source kind
@@ -369,5 +387,6 @@ async function fetchIntegratedMetrics(userId: string, supabase: SupabaseClient, 
         revenue: derived.revenue,
         sourceErrors,
         surveyMetrics: derived.selfReported,
+        gtm: deriveGtm(sets),
     }
 }
