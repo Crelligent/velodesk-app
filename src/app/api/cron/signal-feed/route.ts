@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { INTEGRATIONS } from '@/lib/integrations'
 import { refreshPmfScore } from '@/lib/pmf-score'
+import { syncAllInvestorHubSpot } from '@/lib/hubspot-investor'
 
 // Daily recalculation can take a while (provider APIs are paginated)
 export const maxDuration = 300
@@ -91,6 +92,9 @@ export async function GET(request: Request) {
         // 1. Fresh PMF Scores from connected sources (the dashboard reads the latest row)
         const recalculated = await recalculateScores()
 
+        // 2. Write the fresh shared scores onto investors' HubSpot deals (never throws)
+        const investorsSynced = await syncAllInvestorHubSpot(createAdminClient())
+
         // TODO: Fetch active users and their PMF history
         // TODO: For each user, find max drop and generate message
         // TODO: Send via WhatsApp / Resend
@@ -99,7 +103,7 @@ export async function GET(request: Request) {
         // Mock response for now
         console.log("Velodesk Signal Feed Triggered")
 
-        return NextResponse.json({ success: true, recalculated, processed: 0 })
+        return NextResponse.json({ success: true, recalculated, investorsSynced, processed: 0 })
     } catch (error) {
         console.error('Error generating signal feed:', error)
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })

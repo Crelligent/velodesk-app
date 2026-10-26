@@ -32,7 +32,7 @@ export function ShareForm({ disabled }: { disabled?: boolean }) {
                 </button>
             </div>
             <p id="investor-email-help" className="text-xs text-text-muted">
-                They&apos;ll see your PMF Score and Go-to-Market Score when they sign in to Velodesk with this email. Nothing else from your account is shared.
+                They&apos;ll see your PMF Score and Go-to-Market Score when they sign in to Velodesk with this email. Nothing else from your account is shared. If they track deals in HubSpot, your two scores can also appear on your deal in their HubSpot; removing access stops any further updates.
             </p>
             <div aria-live="polite">
                 {state.status === 'error' && (

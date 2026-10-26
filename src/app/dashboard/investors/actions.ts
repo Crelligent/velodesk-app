@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { DEMO_EMAILS } from '@/lib/demo'
 import { sendInvestorAccessEmail } from '@/lib/email'
+import { companyDomainFromEmail } from '@/lib/hubspot-investor'
 
 /**
  * Founder-controlled investor access. Runs as the signed-in founder: row-level security
@@ -54,6 +55,7 @@ export async function shareWithInvestor(_prev: ShareState, formData: FormData): 
         investor_email: email,
         company_name: profile?.company_name || null,
         industry: profile?.industry || null,
+        company_domain: companyDomainFromEmail(user.email),
     })
     if (error) {
         if (error.code === '23505') return { status: 'error', message: 'You already share your scores with this investor.' }
