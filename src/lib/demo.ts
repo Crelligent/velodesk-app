@@ -7,4 +7,7 @@ export const DEMO_EMAILS = new Set([
     'demo-ng@velodesk.com',
     'investor@velodesk.com',
     'investor-ng@velodesk.com',
+    // Partner trial logins (HubSpot, Oct 2026): sample data, password sign-in
+    'hubspot.founder@crelligent.com',
+    'hubspot.investor@crelligent.com',
 ])
