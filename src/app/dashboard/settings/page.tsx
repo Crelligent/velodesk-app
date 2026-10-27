@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { PrivacySettings } from '@/components/privacy/PrivacySettings'
 
 export default function SettingsPage() {
     const [user, setUser] = useState<{ email?: string } | null>(null)
@@ -159,6 +160,8 @@ export default function SettingsPage() {
                         Manage billing
                     </a>
                 </div>
+
+                <PrivacySettings />
 
                 {/* Danger Zone */}
                 <div className="p-6 bg-red-500/5 border border-red-500/20 rounded-lg">

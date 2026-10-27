@@ -6,6 +6,7 @@ import { cookies } from 'next/headers'
 import { PERK_COOKIE } from '@/lib/perks'
 import DashboardClientLayout from '@/components/dashboard/DashboardClientLayout'
 import { DEMO_EMAILS } from '@/lib/demo'
+import { needsPrivacyChoices } from '@/lib/privacy-server'
 
 function daysUntil(iso: string): number {
     return Math.max(0, Math.ceil((new Date(iso).getTime() - Date.now()) / 86_400_000))
@@ -54,6 +55,9 @@ export default async function DashboardLayout({
 
     // If past_due, we could show a banner in the client layout, but we still render children
     // Same for paused (read-only). 
+
+    // First visit after sign-up (and once for existing users): the privacy choices screen
+    if (await needsPrivacyChoices(supabase, user)) redirect('/welcome/privacy?next=/dashboard')
 
     const tier = (subscription.plan || 'founder').split('_')[0]
     const tierName = tier.charAt(0).toUpperCase() + tier.slice(1)

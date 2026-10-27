@@ -35,6 +35,8 @@ export interface ProgrammeBenchmark {
     programmeName: string
     pmf: ScoreBenchmark
     gtm: ScoreBenchmark
+    /** Whether this founder opted in, so others see their scores in the aggregate */
+    included: boolean
 }
 
 /** Linear-interpolated quantile of a sorted array (q in 0..1). */
@@ -97,6 +99,15 @@ export async function getProgrammeBenchmark(admin: SupabaseClient, userId: strin
     const demoIds = new Set((demoProfiles ?? []).filter(p => DEMO_EMAILS.has(String(p.email ?? '').toLowerCase())).map(p => p.id as string))
     ids = ids.filter(id => !demoIds.has(id))
 
+    // Opt-in only: other companies count only if they chose to take part (privacy_choices.benchmark).
+    // The viewer's own score is always used for their own position, never shown to others unless they opted in.
+    const { data: optIns } = ids.length
+        ? await admin.from('privacy_choices').select('user_id').in('user_id', ids).eq('benchmark', true)
+        : { data: [] }
+    const optedIn = new Set((optIns ?? []).map(r => r.user_id as string))
+    const included = optedIn.has(userId)
+    ids = ids.filter(id => optedIn.has(id) || id === userId)
+
     const since = new Date(Date.now() - BENCHMARK_WINDOW_DAYS * 86_400_000).toISOString()
     const read = async (table: 'pmf_scores' | 'gtm_scores') => {
         if (ids.length === 0) return new Map<string, number>()
@@ -116,5 +127,6 @@ export async function getProgrammeBenchmark(admin: SupabaseClient, userId: strin
         programmeName: PERKS[programme]?.partner ?? programme,
         pmf: benchmarkScores([...pmf.values()], pmf.get(userId) ?? null),
         gtm: benchmarkScores([...gtm.values()], gtm.get(userId) ?? null),
+        included,
     }
 }

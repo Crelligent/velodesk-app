@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { CookieChoicesLink } from "@/components/privacy/CookieChoicesLink";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
@@ -96,6 +97,17 @@ export default function PrivacyPage() {
                 support@crelligent.com
               </a>
               .
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-xl font-light text-white mb-4">
+              Cookies
+            </h2>
+            <p className="text-gray-400 leading-relaxed">
+              We only load site measurement (Google Tag Manager and Apollo) if you accept it.
+              Signed-in users can also change this, and other optional uses of their data, in Settings → Privacy.{" "}
+              <CookieChoicesLink />
             </p>
           </section>
 

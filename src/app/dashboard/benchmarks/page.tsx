@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Users } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -13,6 +14,7 @@ const DEMO_PROGRAMME: ProgrammeBenchmark = {
     programmeName: 'HubSpot for Startups',
     pmf: { distribution: { companies: 38, median: 54, p25: 41, p75: 66 }, companies: 38, yours: 69, aheadOf: 82 },
     gtm: { distribution: { companies: 31, median: 49, p25: 36, p75: 61 }, companies: 31, yours: 66, aheadOf: 84 },
+    included: true,
 }
 
 function ScoreRange({ title, b }: { title: string; b: ScoreBenchmark }) {
@@ -64,8 +66,13 @@ function ProgrammePanel({ data, sample }: { data: ProgrammeBenchmark; sample?: b
                 {sample && <span className="text-xs text-text-muted px-2 py-0.5 border border-border-strong rounded-md">Sample data</span>}
             </div>
             <p className="text-sm text-text-muted max-w-prose">
-                How your scores compare with other companies that joined Velodesk through {data.programmeName}, from their latest scores in the last 90 days. Only combined figures are shown; no other company is named or identifiable.
+                How your scores compare with other companies that joined Velodesk through {data.programmeName} and chose to take part, from their latest scores in the last 90 days. Only combined figures are shown; no other company is named or identifiable.
             </p>
+            {!data.included && (
+                <p className="text-sm text-text-muted">
+                    Your own scores aren&apos;t part of the comparison other founders see. To take part, turn on the benchmark under <Link href="/dashboard/settings" className="text-accent hover:underline">Settings → Privacy</Link>.
+                </p>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <ScoreRange title="PMF Score" b={data.pmf} />
                 <ScoreRange title="Go-to-Market Score" b={data.gtm} />
