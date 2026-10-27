@@ -90,7 +90,7 @@ export default function DashboardClientLayout({ children, user }: DashboardClien
     const initials = (user.name || user.email).split(/[\s@._-]+/).filter(Boolean).slice(0, 2).map((w) => w[0]?.toUpperCase()).join('') || 'V'
 
     return (
-        <div className="min-h-screen bg-[#04060D] text-white flex flex-col">
+        <div data-clarity-mask="True" className="min-h-screen bg-[#04060D] text-white flex flex-col">
             {/* Top Header Bar */}
             <header className="h-16 bg-[#04060D] border-b border-white/5 fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6">
                 

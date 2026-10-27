@@ -12,6 +12,9 @@ import { CONSENT_COOKIE, CONSENT_MAX_AGE } from '@/lib/privacy'
  */
 const GTM_ID = 'GTM-N2BXLJ76'
 const APOLLO_APP_ID = '6a900322ed90b0001c04ad81'
+const CLARITY_ID = 'z49tp5d9v3'
+/** Session recording stays off signed-in pages: they show founders' business data. */
+const NO_RECORDING = ['/dashboard', '/investor', '/welcome', '/billing', '/onboarding', '/login', '/signup', '/auth']
 
 function readConsent(): 'granted' | 'denied' | null {
     const m = document.cookie.match(new RegExp(`(?:^|; )${CONSENT_COOKIE}=(granted|denied)`))
@@ -29,6 +32,20 @@ const subscribe = (cb: () => void) => {
 }
 const snapshot = () => readConsent() ?? 'unset'
 const serverSnapshot = () => 'server' as const
+
+let clarityLoaded = false
+function loadClarity() {
+    if (clarityLoaded) return
+    clarityLoaded = true
+    const w = window as unknown as { clarity?: ((...a: unknown[]) => void) & { q?: unknown[][] } }
+    w.clarity = w.clarity || Object.assign((...a: unknown[]) => { (w.clarity!.q = w.clarity!.q || []).push(a) }, {})
+    const s = document.createElement('script')
+    s.async = true
+    s.src = `https://www.clarity.ms/tag/${CLARITY_ID}`
+    document.head.appendChild(s)
+    // The visitor has already accepted measurement; tell Clarity (required for EEA/UK visitors)
+    w.clarity('consent')
+}
 
 let loaded = false
 function loadMeasurement() {
@@ -60,7 +77,11 @@ export function ConsentScripts() {
     const [reopened, setReopened] = useState(false)
 
     useEffect(() => {
-        if (consent === 'granted') loadMeasurement()
+        if (consent !== 'granted') return
+        loadMeasurement()
+        // Clarity records sessions: public pages only. Once loaded it can't be unloaded, so a
+        // visitor who lands on a public page and then signs in is masked by the app layouts.
+        if (!NO_RECORDING.some(p => pathname?.startsWith(p))) loadClarity()
     }, [consent, pathname])
 
     useEffect(() => {
@@ -83,7 +104,7 @@ export function ConsentScripts() {
         <div role="region" aria-label="Cookie choices" className="fixed inset-x-0 bottom-0 z-[100] p-4">
             <div className="mx-auto max-w-3xl bg-surface border border-border-strong rounded-lg p-5 flex flex-col sm:flex-row sm:items-center gap-4 shadow-2xl">
                 <p className="text-sm text-text flex-1">
-                    We&apos;d like to use cookies to measure how this site is used (Google Tag Manager and Apollo). They only load if you accept. <Link href="/privacy" className="text-accent hover:underline">Privacy Policy</Link>
+                    We&apos;d like to use cookies to measure how this site is used (Google Tag Manager, Apollo and Microsoft Clarity, which records visits to our public pages). They only load if you accept. <Link href="/privacy" className="text-accent hover:underline">Privacy Policy</Link>
                 </p>
                 <div className="flex gap-2 shrink-0">
                     <button type="button" onClick={() => choose('denied')}

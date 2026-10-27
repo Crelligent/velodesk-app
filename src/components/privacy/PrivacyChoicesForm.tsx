@@ -53,7 +53,7 @@ export function PrivacyChoicesForm({ initial, programmeName, mode, next = '/dash
                 body="Occasional emails about new features and how to raise your scores. Account and security emails are sent either way." />
             <Switch id="pc-analytics" checked={choices.usageAnalytics} onChange={set('usageAnalytics')}
                 title="Help improve Velodesk"
-                body="Lets the website measure how pages are used, with cookies from Google Tag Manager and Apollo. Off means none of these load." />
+                body="Lets the website measure how its public pages are used, with cookies from Google Tag Manager, Apollo and Microsoft Clarity. Never on your dashboard. Off means none of these load." />
 
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-3">
                 <button type="button" onClick={submit} disabled={pending}

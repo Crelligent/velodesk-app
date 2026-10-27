@@ -27,7 +27,7 @@ export default async function WelcomePrivacyPage({ searchParams }: { searchParam
     const programmeName = member?.programme ? (PERKS[member.programme]?.partner ?? null) : null
 
     return (
-        <main className="min-h-screen bg-bg flex items-start sm:items-center justify-center px-4 py-12">
+        <main data-clarity-mask="True" className="min-h-screen bg-bg flex items-start sm:items-center justify-center px-4 py-12">
             <div className="w-full max-w-xl flex flex-col gap-8">
                 <div>
                     <ShieldCheck size={28} className="text-accent mb-5" aria-hidden="true" />

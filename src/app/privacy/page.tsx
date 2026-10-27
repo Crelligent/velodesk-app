@@ -105,7 +105,7 @@ export default function PrivacyPage() {
               Cookies
             </h2>
             <p className="text-gray-400 leading-relaxed">
-              We only load site measurement (Google Tag Manager and Apollo) if you accept it.
+              We only load site measurement (Google Tag Manager, Apollo, and Microsoft Clarity, which records how visitors use our public pages) if you accept it. Clarity is never used on signed-in pages, where your business data is shown.
               Signed-in users can also change this, and other optional uses of their data, in Settings → Privacy.{" "}
               <CookieChoicesLink />
             </p>
