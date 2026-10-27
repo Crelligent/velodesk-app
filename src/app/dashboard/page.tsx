@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import { Plug, RefreshCw, TrendingUp, TrendingDown, Lightbulb, CheckCircle2, AlertTriangle, ArrowRight } from 'lucide-react'
 import { DEMO_EMAILS } from '@/lib/demo'
@@ -137,11 +138,14 @@ export default async function DashboardPage() {
                 .eq('user_id', user.id)
                 .order('calculated_at', { ascending: false })
                 .limit(6),
-            supabase
+            // last_sync_at isn't readable by the browser role (token columns are locked down),
+            // so read this non-secret pair server-side, scoped to the session user.
+            createAdminClient()
                 .from('integration_tokens')
                 .select('provider, last_sync_at')
                 .eq('user_id', user.id)
-                .eq('status', 'connected'),
+                .eq('status', 'connected')
+                .neq('provider', 'hubspot_investor'),
             supabase
                 .from('gtm_scores')
                 .select('score, components, calculated_at')

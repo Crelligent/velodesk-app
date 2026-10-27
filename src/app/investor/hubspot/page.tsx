@@ -16,7 +16,7 @@ export default async function InvestorHubSpotPage() {
 
     // RLS: investors read their own integration row (token column is never selected here)
     const { data: row } = user
-        ? await supabase.from('integration_tokens').select('status, config, last_sync_at')
+        ? await supabase.from('integration_tokens').select('status, config')
             .eq('user_id', user.id).eq('provider', INVESTOR_HUBSPOT_PROVIDER).maybeSingle()
         : { data: null }
     const last = (row?.config as { lastSync?: SyncSummary } | null)?.lastSync ?? null
