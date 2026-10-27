@@ -3,7 +3,7 @@
  * Plan ids match src/app/pricing/page.tsx (founder_monthly, startup_monthly, ...).
  */
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { normalisePerk, perkTrialDays } from '@/lib/perks'
+import { normalisePerk, perkTrialDays, PERKS } from '@/lib/perks'
 
 export type PlanTier = 'free' | 'founder' | 'startup' | 'accelerator' | 'pro' | 'enterprise'
 
@@ -194,4 +194,42 @@ export async function checkIntegrationLimit(
         return `Your ${tier} plan allows ${limits.integrations} active integrations. Disconnect one or upgrade.`
     }
     return null
+}
+
+
+/**
+ * Partner connect bonus (e.g. HubSpot for Startups: +30 days for connecting HubSpot).
+ * Applied once per user, only while the trial is still running, and only for founders
+ * who signed up through that partner's perk. Requires the service role. Never throws.
+ */
+export async function applyConnectBonus(
+    admin: SupabaseClient,
+    user: { id: string; user_metadata?: Record<string, unknown> },
+    provider: string
+): Promise<boolean> {
+    try {
+        const perkCode = normalisePerk(user.user_metadata?.perk_code)
+        const bonus = perkCode ? PERKS[perkCode]?.connectBonus : undefined
+        if (!bonus || bonus.provider !== provider || user.user_metadata?.connect_bonus_applied) return false
+
+        const { data: sub } = await admin.from('subscriptions')
+            .select('status, trial_ends_at').eq('user_id', user.id).maybeSingle()
+        if (!sub || sub.status !== 'trialing' || !sub.trial_ends_at) return false
+        const ends = new Date(sub.trial_ends_at).getTime()
+        if (!(ends > Date.now())) return false
+
+        // Mark first, so a second connect can't apply it twice
+        const { error: metaError } = await admin.auth.admin.updateUserById(user.id, {
+            user_metadata: { ...(user.user_metadata ?? {}), connect_bonus_applied: new Date().toISOString() },
+        })
+        if (metaError) throw metaError
+        const { error } = await admin.from('subscriptions')
+            .update({ trial_ends_at: new Date(ends + bonus.days * 86_400_000).toISOString() })
+            .eq('user_id', user.id).eq('status', 'trialing')
+        if (error) throw error
+        return true
+    } catch (error) {
+        console.error('Connect bonus failed:', error instanceof Error ? error.message : error)
+        return false
+    }
 }

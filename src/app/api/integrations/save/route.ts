@@ -2,7 +2,7 @@ import { after, NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getIntegrationByProvider } from '@/lib/integrations'
-import { checkIntegrationLimit } from '@/lib/plans'
+import { applyConnectBonus, checkIntegrationLimit } from '@/lib/plans'
 import { refreshPmfScore } from '@/lib/pmf-score'
 import { getProviderModule, parseCredentials } from '@/lib/integrations/registry'
 import type { Credentials } from '@/lib/integrations/signals'
@@ -99,6 +99,9 @@ export async function POST(request: NextRequest) {
                 { status: 500 }
             )
         }
+
+        // Partner perk: extra trial days for connecting the partner's own tool (once)
+        after(() => applyConnectBonus(admin, user, integration.id))
 
         // Pull the new data and write a fresh PMF Score after the response is sent
         if (integration.feedsScore) {

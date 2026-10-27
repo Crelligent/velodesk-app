@@ -69,6 +69,7 @@ export default async function PerkPage({ params }: Props) {
                     <ul className="mt-4 space-y-2 text-text-muted">
                         {[
                             `${perk.trialDays}-day free trial instead of the usual 14 days`,
+                            ...(perk.connectBonus ? [`${perk.connectBonus.days} more days free when you connect ${perk.connectBonus.label} during your trial`] : []),
                             'No credit card required',
                             'Then from $15 a month (₦30,000 in Nigeria). Cancel any time.',
                         ].map(item => (

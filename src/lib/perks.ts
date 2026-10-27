@@ -21,13 +21,15 @@ export interface Perk {
     partner: string
     /** Free trial length for this partner, when it differs from PERK_TRIAL_DAYS */
     trialDays?: number
+    /** Extra trial days, once, when the founder connects this integration during the trial */
+    connectBonus?: { provider: string; days: number; label: string }
 }
 
 export const PERKS: Record<string, Perk> = {
     posthog: { partner: 'PostHog' },
     mixpanel: { partner: 'Mixpanel' },
     paystack: { partner: 'Paystack' },
-    hubspot: { partner: 'HubSpot for Startups', trialDays: 30 },
+    hubspot: { partner: 'HubSpot for Startups', trialDays: 30, connectBonus: { provider: 'hubspot', days: 30, label: 'HubSpot' } },
     google: { partner: 'Google for Startups' },
     vc4a: { partner: 'VC4A' },
     cchub: { partner: 'CcHub' },
