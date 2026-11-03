@@ -1,0 +1,26 @@
+{
+  "uid": "velodesk_app",
+  "type": "app",
+  "config": {
+    "name": "Velodesk",
+    "description": "Scores product-market fit and go-to-market performance from a company's HubSpot deals and contacts: win rate, deal speed, pipeline growth and lead-to-customer conversion. Read-only.",
+    "distribution": "marketplace",
+    "auth": {
+      "type": "oauth",
+      "redirectUrls": ["https://velodesk.crelligent.com/api/integrations/callback"],
+      "requiredScopes": ["crm.objects.contacts.read", "crm.objects.deals.read"],
+      "optionalScopes": [],
+      "conditionallyRequiredScopes": []
+    },
+    "permittedUrls": {
+      "fetch": ["https://api.hubapi.com"],
+      "iframe": [],
+      "img": []
+    },
+    "support": {
+      "supportEmail": "support@crelligent.com",
+      "documentationUrl": "https://velodesk.crelligent.com/help/hubspot",
+      "supportUrl": "https://velodesk.crelligent.com/contact"
+    }
+  }
+}

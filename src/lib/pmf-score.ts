@@ -2,6 +2,7 @@
  * PMF Score calculation, shared by POST /api/pmf/calculate, the post-connect /
  * post-sync background refresh and the daily cron. Server only.
  */
+import { freshAccessToken } from '@/lib/integrations/oauth-tokens'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { RevenueSummary } from '@/lib/revenue-score'
 import { INTEGRATIONS } from '@/lib/integrations'
@@ -339,11 +340,16 @@ function untilAborted<T>(promise: Promise<T>, signal: AbortSignal): Promise<T> {
  * analytics > CRM for engagement). `sources` records which provider each signal came from.
  */
 async function fetchIntegratedMetrics(userId: string, supabase: SupabaseClient, background: boolean): Promise<IntegratedMetrics> {
-    const { data: rows, error } = await supabase
+    const { data: storedRows, error } = await supabase
         .from('integration_tokens')
-        .select('provider, access_token, config')
+        .select('provider, access_token, refresh_token, expires_at, config')
         .eq('user_id', userId)
         .eq('status', 'connected')
+
+    // Expiring OAuth tokens (HubSpot) are refreshed first; a failed refresh drops that source
+    const rows = storedRows
+        ? await Promise.all(storedRows.map(async r => ({ ...r, access_token: await freshAccessToken(supabase, userId, r) })))
+        : storedRows
 
     if (error || !rows || rows.length === 0) {
         return { metrics: {}, sources: {}, revenue: null, sourceErrors: {}, surveyMetrics: [], gtm: deriveGtm([]) }

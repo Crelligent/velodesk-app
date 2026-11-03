@@ -1,6 +1,7 @@
 import { after, NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { freshAccessToken } from '@/lib/integrations/oauth-tokens'
 import { getIntegrationByProvider } from '@/lib/integrations'
 import { refreshPmfScore } from '@/lib/pmf-score'
 import { getProviderModule, parseCredentials } from '@/lib/integrations/registry'
@@ -40,12 +41,13 @@ export async function POST(request: NextRequest) {
         const admin = createAdminClient()
         const { data: integration, error: tokenError } = await admin
             .from('integration_tokens')
-            .select('access_token, config')
+            .select('provider, access_token, refresh_token, expires_at, config')
             .eq('user_id', user.id)
             .eq('provider', catalog.id)
             .single()
 
-        if (tokenError || !integration?.access_token) {
+        const accessToken = integration ? await freshAccessToken(admin, user.id, integration) : null
+        if (tokenError || !accessToken) {
             return NextResponse.json(
                 { error: 'Integration not connected' },
                 { status: 404 }
@@ -55,7 +57,7 @@ export async function POST(request: NextRequest) {
         let signals
         try {
             signals = await module.sync(
-                parseCredentials(catalog.id, integration.access_token),
+                parseCredentials(catalog.id, accessToken),
                 { config: integration.config as Record<string, unknown> | null }
             )
         } catch (error) {

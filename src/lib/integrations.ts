@@ -136,7 +136,9 @@ export const INTEGRATIONS: Integration[] = [
 
     // CRM & Sales
     {
-        id: 'hubspot', name: 'HubSpot', description: 'CRM and marketing automation', category: 'crm', icon: '🟠', logo: '/hubspot.svg', authType: 'api_key', recommended: true, syncSupported: true, feedsScore: true, signals: ['Growth (deals won)'],
+        id: 'hubspot', name: 'HubSpot', description: 'CRM and marketing automation', category: 'crm', icon: '🟠', logo: '/hubspot.svg',
+        // OAuth ("Connect HubSpot") once the HubSpot app's client ID is set; a pasted private-app token until then
+        authType: process.env.NEXT_PUBLIC_HUBSPOT_CLIENT_ID ? 'oauth' : 'api_key', recommended: true, syncSupported: true, feedsScore: true, signals: ['Growth (deals won)'],
         credentialFields: [
             { key: 'accessToken', label: 'Private app access token', help: 'Settings → Integrations → Private Apps → create an app with crm.objects.deals.read and crm.objects.contacts.read.', secret: true, placeholder: 'pat-...' },
         ],

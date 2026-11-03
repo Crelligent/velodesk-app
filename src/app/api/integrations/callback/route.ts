@@ -1,7 +1,8 @@
 import { after, NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { checkIntegrationLimit } from '@/lib/plans'
+import { applyConnectBonus, checkIntegrationLimit } from '@/lib/plans'
+import { HUBSPOT_TOKEN_URL } from '@/lib/integrations/oauth-tokens'
 import { getIntegrationByProvider } from '@/lib/integrations'
 import { refreshPmfScore } from '@/lib/pmf-score'
 import { OAUTH_STATE_COOKIE, oauthStateCookieOptions, verifyOAuthState } from '@/lib/oauth-state'
@@ -117,6 +118,9 @@ async function handleCallback(request: NextRequest, state: string) {
             throw dbError
         }
 
+        // Partner perk: extra trial days for connecting the partner's own tool (once)
+        after(() => applyConnectBonus(admin, user, state))
+
         // Pull the new data and write a fresh PMF Score after the redirect is sent
         if (getIntegrationByProvider(state)?.feedsScore) {
             after(() => refreshPmfScore(admin, user.id))
@@ -136,7 +140,7 @@ async function handleCallback(request: NextRequest, state: string) {
 // Token exchange functions for each provider
 
 async function exchangeHubSpotCode(code: string) {
-    const response = await fetch('https://api.hubapi.com/oauth/v1/token', {
+    const response = await fetch(HUBSPOT_TOKEN_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: new URLSearchParams({

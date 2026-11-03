@@ -3,6 +3,7 @@
  * cookie by /api/integrations/oauth-start and must match on the callback.
  */
 import { randomBytes, timingSafeEqual } from 'crypto'
+import { HUBSPOT_SCOPES } from './integrations/oauth-tokens'
 
 export const OAUTH_STATE_COOKIE = 'vd_oauth_state'
 export const OAUTH_STATE_MAX_AGE = 10 * 60 // seconds
@@ -53,7 +54,7 @@ export function buildAuthorizeUrl(provider: string, state: string): string | nul
         case 'hubspot':
             return `https://app.hubspot.com/oauth/authorize?${q({
                 client_id: process.env.NEXT_PUBLIC_HUBSPOT_CLIENT_ID, redirect_uri: redirectUri,
-                scope: 'crm.objects.contacts.read', state,
+                scope: HUBSPOT_SCOPES.join(' '), state,
             })}`
         case 'intercom':
             return `https://app.intercom.com/oauth?${q({
