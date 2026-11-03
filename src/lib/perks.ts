@@ -1,6 +1,6 @@
 /**
  * Partner perks: founders who arrive through a partner or perks marketplace get a
- * longer free trial than the public 14 days (90 by default; a partner may set its own). Each partner has its own code so
+ * longer free trial than the public 14 days (30 by default; a partner may set its own). Each partner has its own code so
  * sign-ups can be attributed (stored as user_metadata.perk_code).
  *
  * Flow: /perks/<code> landing page -> /api/perks/claim?code=<code> (sets a cookie)
@@ -14,7 +14,7 @@
 export const PERK_COOKIE = 'vd_perk'
 export const PERK_COOKIE_MAX_AGE = 60 * 60 * 24 * 30 // 30 days
 /** Default perk trial length; a partner can override it with `trialDays`. */
-export const PERK_TRIAL_DAYS = 90
+export const PERK_TRIAL_DAYS = 30
 
 export interface Perk {
     /** Shown on the landing page and signup form: "for <partner> founders" */
