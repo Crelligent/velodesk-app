@@ -51,7 +51,7 @@ const dmMono = DM_Mono({
   display: "swap",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://velodesk.io";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://velodesk.crelligent.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
