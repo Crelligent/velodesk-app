@@ -147,22 +147,8 @@ const jsonLd = {
         {
           "@type": "Offer",
           name: "Founder plan",
-          price: "15",
-          priceCurrency: "USD",
-          description: "Billed monthly. 14-day free trial, no credit card required.",
-        },
-        {
-          "@type": "Offer",
-          name: "Founder plan",
           price: "30000",
           priceCurrency: "NGN",
-          description: "Billed monthly. 14-day free trial, no credit card required.",
-        },
-        {
-          "@type": "Offer",
-          name: "Startup plan",
-          price: "49",
-          priceCurrency: "USD",
           description: "Billed monthly. 14-day free trial, no credit card required.",
         },
         {

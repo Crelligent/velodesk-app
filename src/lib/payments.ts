@@ -217,16 +217,11 @@ export async function createPaystackCheckout(
 // =================== QUICK CHECKOUT HELPERS ===================
 
 /**
- * Start checkout for Pro plan (auto-detects region)
+ * Start checkout for Pro plan (Paystack, NGN only)
  */
 export async function startProCheckout(): Promise<void> {
-    const region = await detectRegion()
-
-    if (region.isNigeria) {
-        await startPaystackCheckout()
-    } else {
-        await startStripeCheckout()
-    }
+    // Velodesk bills in Naira only, through Paystack
+    await startPaystackCheckout()
 }
 
 /**

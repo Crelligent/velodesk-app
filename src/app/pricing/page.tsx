@@ -14,7 +14,6 @@ const planData = {
         id: 'founder_monthly',
         name: 'Founder plan',
         desc: 'Everything you need to validate your first PMF signals.',
-        usd: '15',
         ngn: '30,000',
         featuresTitle: 'Start validating',
         features: [
@@ -28,7 +27,6 @@ const planData = {
         id: 'startup_monthly',
         name: 'Startup plan',
         desc: 'Powerful extra features for your growing business.',
-        usd: '49',
         ngn: '50,000',
         featuresTitle: 'Scale your startup',
         features: [
@@ -43,11 +41,10 @@ const planData = {
 
 export default function PricingPage() {
     const [loading, setLoading] = useState<string | null>(null)
-    const [currency, setCurrency] = useState<'USD' | 'NGN'>('USD')
-    // Gateway is derived from currency so it can never drift: NGN is always billed via Paystack.
-    const gateway: 'stripe' | 'paystack' = currency === 'NGN' ? 'paystack' : 'stripe'
+    // Velodesk bills in Naira only, through Paystack.
+    const currency = 'NGN'
     // TODO(pricing): add a Monthly/Yearly toggle back once yearly prices exist in planData
-    // and in the Stripe/Paystack plan configs. It was removed because it changed nothing.
+    // and in the Paystack plan config. It was removed because it changed nothing.
 
     useEffect(() => {
         console.log('[Analytics] pricing_viewed')
@@ -60,9 +57,9 @@ export default function PricingPage() {
         window.location.href = `/signup?plan=${planId}&currency=${currency}`
     }
 
-    const founderPrice = currency === 'USD' ? planData.founder.usd : planData.founder.ngn
-    const startupPrice = currency === 'USD' ? planData.startup.usd : planData.startup.ngn
-    const symbol = currency === 'USD' ? 'US $' : '\u20A6'
+    const founderPrice = planData.founder.ngn
+    const startupPrice = planData.startup.ngn
+    const symbol = '\u20A6'
 
     return (
         <div className="min-h-screen bg-[#0A0A0A] text-white selection:bg-[#7B61FF]/30 font-inter font-light">
@@ -102,31 +99,9 @@ export default function PricingPage() {
                     </p>
                 </div>
 
-                {/* Toggles */}
                 <div className="flex flex-col items-center gap-6 mb-16">
-                    {/* Currency Toggle Switch */}
-                    <div className="flex items-center gap-3 mt-4">
-                        <span id="currency-usd" className={`text-sm font-medium transition-colors ${currency === 'USD' ? 'text-white' : 'text-[#8A8A8A]'}`}>USD ($)</span>
-                        <button
-                            type="button"
-                            role="switch"
-                            aria-checked={currency === 'NGN'}
-                            aria-label="Show prices in Nigerian Naira (NGN)"
-                            onClick={() => setCurrency(currency === 'USD' ? 'NGN' : 'USD')}
-                            className={`w-12 h-6 rounded-full relative transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#0A0A0A] border border-white/10 ${
-                                currency === 'NGN' ? 'bg-[#7B61FF]' : 'bg-white/10'
-                            }`}
-                        >
-                            <span
-                                className={`absolute top-[3px] left-[3px] bg-white w-4 h-4 rounded-full transition-transform duration-300 shadow-sm ${
-                                    currency === 'NGN' ? 'translate-x-[22px]' : 'translate-x-0'
-                                }`}
-                            />
-                        </button>
-                        <span className={`text-sm font-medium transition-colors ${currency === 'NGN' ? 'text-white' : 'text-[#8A8A8A]'}`}>NGN (&#8358;)</span>
-                    </div>
                     <p className="text-xs text-[#8A8A8A]">
-                        {currency} billing is processed by {gateway === 'paystack' ? 'Paystack' : 'Stripe'}.
+                        Prices in Naira (&#8358;). Billing is processed by Paystack.
                     </p>
                 </div>
 

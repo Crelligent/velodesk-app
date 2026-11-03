@@ -11,7 +11,7 @@ type Stat = { value: string; label: string; icon: typeof Plug }
 const stats: Stat[] = [
   { value: `${LIVE_COUNT}`, label: 'Tools you can connect today', icon: Plug },
   { value: '14 days', label: 'Free trial, no card needed', icon: Clock },
-  { value: '₦ or $', label: 'Naira or USD billing', icon: Wallet },
+  { value: '₦', label: 'Naira billing via Paystack', icon: Wallet },
   { value: 'No code', label: 'Needed to connect', icon: Code2 },
 ]
 

@@ -120,7 +120,8 @@ function SignupForm() {
     const planParam = searchParams.get('plan')
     // Only accept plans we actually sell; anything else is ignored.
     const planId = planParam && PLAN_NAMES[planParam] ? planParam : null
-    const currency = searchParams.get('currency') === 'NGN' ? 'NGN' : 'USD'
+    // Velodesk bills in Naira only (Paystack)
+    const currency = 'NGN'
     // Partner perk (?perk=<code>, set by /api/perks/claim): longer trial, attributed to the partner.
     const perk = getPerk(searchParams.get('perk'))
     const schema: FormSchema = perk

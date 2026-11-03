@@ -4,7 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 import { normalisePerk } from '@/lib/perks'
 
 const ALLOWED_PLANS = ['founder_monthly', 'startup_monthly'] as const
-const ALLOWED_CURRENCIES = ['USD', 'NGN'] as const
+// Velodesk bills in Naira only (Paystack)
+const ALLOWED_CURRENCIES = ['NGN'] as const
 
 export type SelectedPlan = (typeof ALLOWED_PLANS)[number]
 export type SelectedCurrency = (typeof ALLOWED_CURRENCIES)[number]
