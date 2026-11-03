@@ -14,7 +14,7 @@ const planData = {
         id: 'founder_monthly',
         name: 'Founder plan',
         desc: 'Everything you need to validate your first PMF signals.',
-        ngn: '30,000',
+        ngn: '10,000',
         featuresTitle: 'Start validating',
         features: [
             'Up to 3 PMF Scores',
@@ -27,7 +27,7 @@ const planData = {
         id: 'startup_monthly',
         name: 'Startup plan',
         desc: 'Powerful extra features for your growing business.',
-        ngn: '50,000',
+        ngn: '25,000',
         featuresTitle: 'Scale your startup',
         features: [
             'Unlimited PMF Scores',

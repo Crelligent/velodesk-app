@@ -71,7 +71,7 @@ export default async function PerkPage({ params }: Props) {
                             `${perk.trialDays}-day free trial instead of the usual 14 days`,
                             ...(perk.connectBonus ? [`${perk.connectBonus.days} more days free when you connect ${perk.connectBonus.label} during your trial`] : []),
                             'No credit card required',
-                            'Then from ₦30,000 a month. Cancel any time.',
+                            'Then from ₦10,000 a month. Cancel any time.',
                         ].map(item => (
                             <li key={item} className="flex items-start gap-2">
                                 <Check className="mt-0.5 h-4 w-4 flex-none text-accent" aria-hidden="true" />
