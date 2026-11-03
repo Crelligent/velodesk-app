@@ -37,6 +37,7 @@ export const PERKS: Record<string, Perk> = {
     venturesplatform: { partner: 'Ventures Platform' },
     vestbee: { partner: 'Vestbee' },
     openvc: { partner: 'OpenVC' },
+    secret: { partner: 'Secret' },
     f6s: { partner: 'F6S' },
     creditforstartups: { partner: 'Credit for Startups' },
     indiehackers: { partner: 'Indie Hackers' },
