@@ -33,6 +33,8 @@ export const PERKS: Record<string, Perk> = {
     google: { partner: 'Google for Startups' },
     vc4a: { partner: 'VC4A' },
     cchub: { partner: 'CcHub' },
+    cascador: { partner: 'Cascador' },
+    venturesplatform: { partner: 'Ventures Platform' },
     vestbee: { partner: 'Vestbee' },
     openvc: { partner: 'OpenVC' },
     f6s: { partner: 'F6S' },
