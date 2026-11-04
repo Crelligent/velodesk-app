@@ -198,10 +198,10 @@ export default function HeroV2() {
         <div ref={parallaxRef} className="animate-fade-up delay-500 relative w-full max-w-6xl mx-auto">
           <div className="relative rounded-2xl md:rounded-[32px] overflow-hidden border border-white/10 shadow-2xl shadow-[#7B61FF]/10 bg-[#050505]">
             <Image
-              src="/new-velodesk-dashboard.png"
-              alt="Velodesk dashboard showing a PMF Score, revenue metrics and an activity feed (sample data)"
-              width={1387}
-              height={1134}
+              src="/velodesk-dashboard-sample.webp"
+              alt="Velodesk dashboard showing a PMF Score of 69, the Go-to-Market Score and business metrics (sample data)"
+              width={2304}
+              height={1888}
               priority
               sizes="(min-width: 1152px) 1152px, 100vw"
               className="w-full h-auto"
