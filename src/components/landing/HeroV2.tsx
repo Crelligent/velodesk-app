@@ -169,7 +169,7 @@ export default function HeroV2() {
           your <strong className="text-white font-medium">PMF Score</strong>.
         </p>
 
-        <div className="animate-fade-up delay-300 flex flex-col sm:flex-row items-center gap-3 sm:gap-4 mb-16 md:mb-20">
+        <div className="animate-fade-up delay-300 flex flex-col sm:flex-row items-center gap-3 sm:gap-4 mb-6">
           <Link href="/signup" className={`${PRIMARY_CTA} px-8 py-4 text-lg`}>
             Start free trial
           </Link>
@@ -177,6 +177,22 @@ export default function HeroV2() {
             See pricing
           </Link>
         </div>
+
+        {/* Product Hunt badge (launch). The upvote count updates on Product Hunt's side. */}
+        <a
+          href="https://www.producthunt.com/products/velodesk?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-velodesk"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="animate-fade-up delay-300 mb-16 md:mb-20 inline-block rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60 focus-visible:ring-offset-2 focus-visible:ring-offset-[#04060D]"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element -- external SVG badge served by Product Hunt */}
+          <img
+            alt="Velodesk on Product Hunt"
+            width={250}
+            height={54}
+            src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1304491&theme=dark"
+          />
+        </a>
 
         {/* Product screenshot (sample data) */}
         <div ref={parallaxRef} className="animate-fade-up delay-500 relative w-full max-w-6xl mx-auto">
