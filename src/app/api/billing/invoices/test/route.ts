@@ -39,7 +39,7 @@ async function handle(request: Request, setStage: (s: string) => void) {
     const to = typeof body.to === 'string' ? body.to.trim() : ''
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(to)) return NextResponse.json({ error: 'Valid "to" required' }, { status: 400 })
     const currency = body.currency === 'USD' ? 'USD' : 'NGN'
-    const amount = currency === 'NGN' ? 5_000_000 : 4_900
+    const amount = currency === 'NGN' ? 2_500_000 : 4_900
 
     if (body.type === 'upcoming' || body.type === 'trial') {
         const content = upcomingChargeEmail({
