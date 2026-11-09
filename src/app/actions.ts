@@ -46,10 +46,39 @@ export async function signUpUser(
     })
 
     if (error) {
+        if (/rate limit|after \d+ seconds?/i.test(error.message)) {
+            return { error: 'Too many attempts. Please wait a minute and try again.' }
+        }
         return { error: error.message }
     }
 
+    // Supabase answers a sign-up for an address that already has an account with a
+    // placeholder user (no identities) and sends no email. Say so instead of
+    // leaving the person waiting for a code that will never arrive.
+    if (data.user && (data.user.identities?.length ?? 0) === 0) {
+        return { error: 'An account with this email already exists. Sign in instead, or reset your password.', existing: true }
+    }
+
     return { data: { user: data.user, session: data.session } }
+}
+
+/**
+ * Confirms a new account with the code from the sign-up email. The "Confirm signup"
+ * email template must include {{ .Token }} for the code to appear; the link in the
+ * same email keeps working too.
+ */
+export async function verifySignupCode(emailRaw: string, codeRaw: string) {
+    const email = emailRaw.trim().toLowerCase()
+    const code = codeRaw.replace(/\D/g, '')
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || !/^\d{6,10}$/.test(code)) {
+        return { ok: false as const, error: 'Enter the code from your email.' }
+    }
+    const supabase = await createClient()
+    const { error } = await supabase.auth.verifyOtp({ email, token: code, type: 'signup' })
+    if (error) {
+        return { ok: false as const, error: 'That code is wrong or has expired. Check the latest email or ask for a new code.' }
+    }
+    return { ok: true as const }
 }
 
 /**
