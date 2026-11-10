@@ -15,7 +15,7 @@ const later = () => new Date(Date.now() + 3_600_000).toISOString()
 
 async function main() {
     await test('scopes match what Velodesk reads', () => {
-        assert.deepEqual(HUBSPOT_SCOPES, ['crm.objects.contacts.read', 'crm.objects.deals.read'])
+        assert.deepEqual(HUBSPOT_SCOPES, ['oauth', 'crm.objects.contacts.read', 'crm.objects.deals.read'])
     })
     await test('pasted tokens (no refresh token) are never refreshed', () => {
         assert.equal(needsRefresh({ provider: 'hubspot', access_token: 'pat', refresh_token: null, expires_at: null }), false)

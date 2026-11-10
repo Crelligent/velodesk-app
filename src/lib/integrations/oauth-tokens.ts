@@ -6,7 +6,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 export const HUBSPOT_TOKEN_URL = 'https://api.hubapi.com/oauth/v3/token'
 /** Scopes the Velodesk HubSpot app requests. Keep in sync with hubspot/src/app/app-hsmeta.json. */
-export const HUBSPOT_SCOPES = ['crm.objects.contacts.read', 'crm.objects.deals.read']
+export const HUBSPOT_SCOPES = ['oauth', 'crm.objects.contacts.read', 'crm.objects.deals.read']
 
 /** Refresh this long before expiry so a slow sync never starts with a token about to lapse */
 const REFRESH_MARGIN_MS = 5 * 60 * 1000
