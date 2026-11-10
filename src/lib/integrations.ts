@@ -102,7 +102,21 @@ export const INTEGRATIONS: Integration[] = [
             ] },
         ],
     },
-    { id: 'google-analytics', name: 'Google Analytics', description: 'Traffic and acquisition data', category: 'analytics', icon: '📊', logo: '/google-analytics-4.svg', authType: 'oauth', syncSupported: false, feedsScore: false, unsupportedReason: 'Requires an OAuth app; coming soon' },
+    {
+        id: 'google-analytics', name: 'Google Analytics', description: 'Website and app traffic: daily, weekly and monthly active users', category: 'analytics', icon: '📊', logo: '/google-analytics-4.svg',
+        authType: 'oauth', recommended: true,
+        // One Google OAuth app (Google Cloud) serves Analytics and Search Console; until its keys are set it shows as coming soon.
+        syncSupported: Boolean(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID), feedsScore: Boolean(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID),
+        signals: ['Engagement'],
+        unsupportedReason: 'Google sign-in for Analytics is being set up; coming soon',
+    },
+    {
+        id: 'google-search-console', name: 'Google Search Console', description: 'Search demand: clicks and impressions from Google Search', category: 'analytics', icon: '🔎',
+        authType: 'oauth',
+        syncSupported: Boolean(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID), feedsScore: Boolean(process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID),
+        signals: ['Search demand (Go-to-Market)'],
+        unsupportedReason: 'Google sign-in for Search Console is being set up; coming soon',
+    },
     { id: 'segment', name: 'Segment', description: 'Customer data platform', category: 'analytics', icon: '⚙️', logo: '/segment-1.svg', authType: 'api_key', syncSupported: false, feedsScore: false, unsupportedReason: 'Segment routes events but its public API has no metrics to read; connect the analytics tool Segment sends to.' },
     { id: 'hotjar', name: 'Hotjar', description: 'Heatmaps and session recordings', category: 'analytics', icon: '🔥', logo: '/hotjar-2.svg', authType: 'api_key', syncSupported: false, feedsScore: false, unsupportedReason: 'Hotjar\'s API exposes survey responses and user lookups, not usage metrics.' },
     { id: 'heap', name: 'Heap', description: 'Auto-capture analytics', category: 'analytics', icon: '📈', logo: '/Heap_Logo_Horizontal-Color_RGB.webp', authType: 'api_key', syncSupported: false, feedsScore: false, unsupportedReason: 'Heap\'s public APIs only send data; reading metrics needs Heap Connect (a data warehouse), not an API key.' },
@@ -114,6 +128,12 @@ export const INTEGRATIONS: Integration[] = [
         id: 'paystack', name: 'Paystack', description: 'African payments infrastructure', category: 'payments', icon: '💰', logo: '/paystack-2.svg', authType: 'api_key', recommended: true, syncSupported: true, feedsScore: true, signals: ['Revenue', 'Retention (churn)'],
         credentialFields: [
             { key: 'secretKey', label: 'Secret key', help: 'Paystack Dashboard → Settings → API Keys & Webhooks → Secret Key (sk_live_...).', secret: true, placeholder: 'sk_live_...' },
+        ],
+    },
+    {
+        id: 'flutterwave', name: 'Flutterwave', description: 'African payments: cards, transfers and mobile money', category: 'payments', icon: '🦋', authType: 'api_key', recommended: true, syncSupported: true, feedsScore: true, signals: ['Revenue', 'Retention (churn)'],
+        credentialFields: [
+            { key: 'secretKey', label: 'Secret key', help: 'Flutterwave Dashboard → Settings → API Keys → Secret Key (FLWSECK-...). Velodesk only reads payments, plans and subscriptions.', secret: true, placeholder: 'FLWSECK-...' },
         ],
     },
     {

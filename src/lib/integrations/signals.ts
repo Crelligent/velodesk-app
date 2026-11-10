@@ -38,8 +38,12 @@ export interface SignalSet {
         newLeadsPerMonth: number | null
     }
     demand?: {
-        postsLast30d: number | null
-        votesLast30d: number | null
+        postsLast30d?: number | null
+        votesLast30d?: number | null
+        /** Google Search clicks, last 28 days of complete data vs the 28 before (Search Console) */
+        searchClicksLast28?: number | null
+        searchClicksPrev28?: number | null
+        searchImpressionsLast28?: number | null
     }
     /** Sales funnel from a CRM. Feeds the Go-to-Market Score (src/lib/gtm-score.ts) and two PMF fallbacks. */
     sales?: {
@@ -58,7 +62,7 @@ export interface SignalSet {
     notes?: string[]
 }
 
-export type SourceKind = 'billing' | 'analytics' | 'crm' | 'support' | 'survey' | 'feedback'
+export type SourceKind = 'billing' | 'analytics' | 'crm' | 'support' | 'survey' | 'feedback' | 'marketing'
 
 export interface SourcedSignalSet {
     provider: string

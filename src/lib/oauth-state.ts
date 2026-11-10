@@ -3,7 +3,7 @@
  * cookie by /api/integrations/oauth-start and must match on the callback.
  */
 import { randomBytes, timingSafeEqual } from 'crypto'
-import { HUBSPOT_SCOPES } from './integrations/oauth-tokens'
+import { GOOGLE_SCOPES, HUBSPOT_SCOPES } from './integrations/oauth-tokens'
 
 export const OAUTH_STATE_COOKIE = 'vd_oauth_state'
 export const OAUTH_STATE_MAX_AGE = 10 * 60 // seconds
@@ -46,9 +46,11 @@ export function buildAuthorizeUrl(provider: string, state: string): string | nul
                 scope: 'read_only', redirect_uri: redirectUri, state,
             })}`
         case 'google-analytics':
+        case 'google-search-console':
+            // access_type=offline + prompt=consent so Google returns a refresh token every time
             return `https://accounts.google.com/o/oauth2/v2/auth?${q({
                 client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID, redirect_uri: redirectUri,
-                response_type: 'code', scope: 'https://www.googleapis.com/auth/analytics.readonly',
+                response_type: 'code', scope: GOOGLE_SCOPES[provider],
                 access_type: 'offline', prompt: 'consent', state,
             })}`
         case 'hubspot':

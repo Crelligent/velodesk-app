@@ -71,6 +71,7 @@ async function handleCallback(request: NextRequest, state: string) {
                 break
 
             case 'google-analytics':
+            case 'google-search-console':
                 tokenData = await exchangeGoogleCode(code)
                 break
 

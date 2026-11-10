@@ -14,6 +14,9 @@ export const GTM_WEIGHTS = {
     pipelineGrowth: 0.25,
     leadConversion: 0.25,
     dealSpeed: 0.20,
+    // Google Search Console. Added on top: the CRM weights keep their ratios, and the
+    // score is renormalised over the components that have data.
+    searchDemand: 0.15,
 } as const
 
 export type GtmComponent = keyof typeof GTM_WEIGHTS
@@ -24,6 +27,7 @@ export const GTM_LABELS: Record<GtmComponent, string> = {
     pipelineGrowth: 'Pipeline growth',
     leadConversion: 'Lead to customer',
     dealSpeed: 'Deal speed',
+    searchDemand: 'Search demand',
 }
 
 /** Won / (won + lost), last 90 days, % */
@@ -38,6 +42,7 @@ export const GTM_MIN_SAMPLES = {
     wonDeals: 5, // deal speed
     dealsCreated: 10, // pipeline growth (last 30 + previous 30)
     leadCohort: 30, // lead to customer
+    searchClicks: 50, // search demand (last 28 + previous 28 days)
 } as const
 
 /** A GTM Score needs at least this many components; fewer says too little about the funnel. */
@@ -71,7 +76,7 @@ export function gtmScoreLabel(score: number): string {
     return 'Early'
 }
 
-/** Combines CRM SignalSets into the Go-to-Market Score. The first CRM with a usable figure wins per component. */
+/** Combines CRM SignalSets (and Search Console demand) into the Go-to-Market Score. The first source with a usable figure wins per component. */
 export function deriveGtm(sets: SourcedSignalSet[]): GtmResult {
     const crm = sets.filter(s => s.kind === 'crm' && s.signals.sales)
     const ignored: Record<string, string> = {}
@@ -81,7 +86,7 @@ export function deriveGtm(sets: SourcedSignalSet[]): GtmResult {
     }
     const components = Object.fromEntries(GTM_COMPONENTS.map(k => [k, {
         score: null, weight: GTM_WEIGHTS[k], value: null,
-        unit: k === 'dealSpeed' ? 'days' : k === 'pipelineGrowth' ? '% change' : '%',
+        unit: k === 'dealSpeed' ? 'days' : k === 'pipelineGrowth' || k === 'searchDemand' ? '% change' : '%',
         source: null,
     }])) as unknown as Record<GtmComponent, GtmComponentDetail>
     const set = (k: GtmComponent, score: number, value: number, source: string) => {
@@ -126,6 +131,19 @@ export function deriveGtm(sets: SourcedSignalSet[]): GtmResult {
                 set('leadConversion', interpolate(LEAD_CONVERSION_BANDS, rate), rate, s.provider)
             } else ignore(s, `${sl.leadCohort} leads in the cohort, need ${GTM_MIN_SAMPLES.leadCohort} for lead to customer`)
         }
+    }
+
+    // Search demand: Google Search clicks, last 28 days vs the 28 before
+    for (const s of sets.filter(x => typeof x.signals.demand?.searchClicksLast28 === 'number')) {
+        const d = s.signals.demand!
+        const last = d.searchClicksLast28!
+        const prev = d.searchClicksPrev28 ?? 0
+        if (last + prev >= GTM_MIN_SAMPLES.searchClicks && prev > 0) {
+            const growth = ((last - prev) / prev) * 100
+            set('searchDemand', interpolate(PIPELINE_GROWTH_BANDS, growth), growth, s.provider)
+            break
+        }
+        ignore(s, `${last + prev} search clicks in 56 days, need ${GTM_MIN_SAMPLES.searchClicks} for search demand`)
     }
 
     const inputsUsed = GTM_COMPONENTS.filter(k => components[k].score !== null)

@@ -18,10 +18,14 @@ import * as intercom from './intercom'
 import * as zendesk from './zendesk'
 import * as typeform from './typeform'
 import * as canny from './canny'
+import * as flutterwave from './flutterwave'
+import * as googleAnalytics from './google-analytics'
+import * as googleSearchConsole from './google-search-console'
 
 export const PROVIDER_MODULES: Record<string, ProviderModule> = {
-    stripe, paystack, chargebee, paddle,
+    stripe, paystack, flutterwave, chargebee, paddle,
     mixpanel, amplitude, posthog,
+    'google-analytics': googleAnalytics, 'google-search-console': googleSearchConsole,
     hubspot, pipedrive, close,
     intercom, zendesk, typeform, canny,
 }

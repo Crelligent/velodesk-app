@@ -1,5 +1,5 @@
 /**
- * OAuth access tokens that expire (HubSpot: about 30 minutes) are refreshed here before a sync.
+ * OAuth access tokens that expire (HubSpot: about 30 minutes; Google: about 1 hour) are refreshed here before a sync.
  * Server-only: reads refresh tokens with the service-role client.
  */
 import type { SupabaseClient } from '@supabase/supabase-js'
@@ -55,6 +55,42 @@ export async function refreshHubSpotToken(
     }
 }
 
+export const GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'
+/** Read-only Google scopes, one per Velodesk connection (both from the same Google Cloud OAuth client). */
+export const GOOGLE_SCOPES: Record<string, string> = {
+    'google-analytics': 'https://www.googleapis.com/auth/analytics.readonly',
+    'google-search-console': 'https://www.googleapis.com/auth/webmasters.readonly',
+}
+export const GOOGLE_PROVIDERS = Object.keys(GOOGLE_SCOPES)
+
+/** Google access tokens last about an hour; the refresh token is kept (Google rarely issues a new one). */
+export async function refreshGoogleToken(
+    refreshToken: string,
+    fetchImpl: typeof fetch = fetch
+): Promise<{ access_token: string; refresh_token: string; expires_at: string } | null> {
+    const res = await fetchImpl(GOOGLE_TOKEN_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+            grant_type: 'refresh_token',
+            client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? '',
+            client_secret: process.env.GOOGLE_CLIENT_SECRET ?? '',
+            refresh_token: refreshToken,
+        }),
+    })
+    if (!res.ok) {
+        console.error('Google token refresh failed: HTTP', res.status)
+        return null
+    }
+    const data = await res.json()
+    if (!data?.access_token) return null
+    return {
+        access_token: data.access_token,
+        refresh_token: data.refresh_token ?? refreshToken,
+        expires_at: new Date(Date.now() + Number(data.expires_in ?? 3600) * 1000).toISOString(),
+    }
+}
+
 /**
  * Returns a usable access token for the row, refreshing and saving it first if it is about to expire.
  * On a failed refresh the row is marked 'expired' so the dashboard asks the founder to reconnect.
@@ -66,9 +102,12 @@ export async function freshAccessToken(
     fetchImpl: typeof fetch = fetch
 ): Promise<string | null> {
     if (!needsRefresh(row)) return row.access_token
-    if (row.provider !== 'hubspot') return row.access_token
+    const refresher = row.provider === 'hubspot' ? refreshHubSpotToken
+        : GOOGLE_PROVIDERS.includes(row.provider) ? refreshGoogleToken
+        : null
+    if (!refresher) return row.access_token
 
-    const next = await refreshHubSpotToken(row.refresh_token!, fetchImpl)
+    const next = await refresher(row.refresh_token!, fetchImpl)
     if (!next) {
         await admin.from('integration_tokens').update({ status: 'expired', updated_at: new Date().toISOString() })
             .eq('user_id', userId).eq('provider', row.provider)

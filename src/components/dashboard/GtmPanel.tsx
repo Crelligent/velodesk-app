@@ -25,7 +25,7 @@ export function GtmPanel({ data, sample }: { data: GtmPanelData | null; sample?:
                 <div className="flex-1">
                     <h2 id="gtm-heading" className="text-xs uppercase tracking-wide text-text-muted mb-1">Go-to-Market Score</h2>
                     <p className="text-sm text-text-muted max-w-prose">
-                        Connect HubSpot (or keep it syncing) to see whether your selling is working: win rate, deal speed, pipeline growth and lead-to-customer conversion. It appears once there are enough deals and leads to measure.
+                        Connect HubSpot, Pipedrive or Close (and Google Search Console for search demand) to see whether your selling is working: win rate, deal speed, pipeline growth, lead-to-customer conversion and search demand. It appears once there is enough data to measure.
                     </p>
                 </div>
                 <Link href="/dashboard/integrations" className="shrink-0 inline-flex items-center justify-center px-4 py-2 border border-border-strong text-sm text-text rounded-md hover:bg-surface-2 transition">
@@ -55,7 +55,7 @@ export function GtmPanel({ data, sample }: { data: GtmPanelData | null; sample?:
                 )}
             </div>
             <div className="flex-1">
-                <p className="text-sm text-text-muted mb-3">Is the selling working? From your CRM, last 90 days.</p>
+                <p className="text-sm text-text-muted mb-3">Is the selling working? From your CRM (last 90 days) and Google Search.</p>
                 <dl className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
                     {GTM_COMPONENTS.map(key => {
                         const c = data.components[key]
