@@ -2,7 +2,8 @@
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { resendSignupEmail, signUpUser } from '@/app/actions'
+import { resendSignupEmail, signUpUser, verifySignupCode } from '@/app/actions'
+import { CodeStep } from '@/components/auth/CodeStep'
 import { FormEngine, FormSchema } from '@/components/forms/FormEngine'
 import { motion } from 'framer-motion'
 import { createClient } from '@/lib/supabase/client'
@@ -10,60 +11,7 @@ import { getPerk } from '@/lib/perks'
 import Link from 'next/link'
 import { Database, LineChart } from 'lucide-react'
 
-const RESEND_WAIT_SECONDS = 50
-
-/** "Didn't get the email? Resend" with a countdown so people can't hammer the button. */
-function ResendConfirmation({ email }: { email: string }) {
-    const [secondsLeft, setSecondsLeft] = useState(RESEND_WAIT_SECONDS)
-    const [sending, setSending] = useState(false)
-    const [note, setNote] = useState<{ tone: 'ok' | 'error'; text: string } | null>(null)
-
-    useEffect(() => {
-        if (secondsLeft <= 0) return
-        const t = setTimeout(() => setSecondsLeft((s) => s - 1), 1000)
-        return () => clearTimeout(t)
-    }, [secondsLeft])
-
-    const resend = async () => {
-        setSending(true)
-        setNote(null)
-        const res = await resendSignupEmail(email, window.location.origin)
-        setSending(false)
-        if ('ok' in res && res.ok) {
-            setNote({ tone: 'ok', text: 'Sent. Check your inbox and spam folder.' })
-            setSecondsLeft(RESEND_WAIT_SECONDS)
-        } else {
-            setNote({ tone: 'error', text: res.error ?? 'Something went wrong. Please try again.' })
-            if ('retryAfter' in res && res.retryAfter) setSecondsLeft(res.retryAfter)
-        }
-    }
-
-    return (
-        <div className="mb-8 rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 text-sm">
-            <span className="whitespace-nowrap text-gray-400">Didn&apos;t get the email? </span>
-            {secondsLeft > 0 ? (
-                <span className="whitespace-nowrap text-gray-500 tabular-nums" aria-live="polite">
-                    Resend in 0:{String(secondsLeft).padStart(2, '0')}
-                </span>
-            ) : (
-                <button
-                    type="button"
-                    onClick={resend}
-                    disabled={sending}
-                    className="font-medium text-[#7B61FF] hover:text-white transition disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B61FF] rounded"
-                >
-                    {sending ? 'Sending…' : 'Resend email'}
-                </button>
-            )}
-            {note && (
-                <p role="status" className={`mt-2 text-xs ${note.tone === 'ok' ? 'text-emerald-300' : 'text-amber-300'}`}>
-                    {note.text}
-                </p>
-            )}
-            <p className="mt-2 text-xs text-gray-500">Check your spam or promotions folder too.</p>
-        </div>
-    )
-}
+const RESEND_WAIT_SECONDS = 60
 
 const PLAN_NAMES: Record<string, string> = {
     founder_monthly: 'Founder plan',
@@ -142,6 +90,37 @@ function SignupForm() {
         setSessionId(Math.random().toString(36).substring(2, 15))
     }, [])
 
+    const [verifying, setVerifying] = useState(false)
+    const [codeError, setCodeError] = useState<string | null>(null)
+    const [cooldown, setCooldown] = useState(0)
+
+    useEffect(() => {
+        if (cooldown <= 0) return
+        const t = setTimeout(() => setCooldown((s) => s - 1), 1000)
+        return () => clearTimeout(t)
+    }, [cooldown])
+
+    const handleVerifyCode = async (code: string): Promise<boolean> => {
+        setCodeError(null)
+        setVerifying(true)
+        const res = await verifySignupCode(email, code)
+        if (!res.ok) {
+            setVerifying(false)
+            setCodeError(res.error)
+            return false
+        }
+        router.push('/onboarding')
+        return true
+    }
+
+    const handleResendCode = async () => {
+        setCodeError(null)
+        const res = await resendSignupEmail(email, window.location.origin)
+        if ('ok' in res && res.ok) return setCooldown(RESEND_WAIT_SECONDS)
+        setCodeError(res.error ?? 'Something went wrong. Please try again.')
+        if ('retryAfter' in res && res.retryAfter) setCooldown(res.retryAfter)
+    }
+
     const [googleError, setGoogleError] = useState<string | null>(null)
     const [googleLoading, setGoogleLoading] = useState(false)
 
@@ -177,6 +156,7 @@ function SignupForm() {
         if (data?.user && data.session) {
             router.push('/onboarding')
         } else if (data?.user && !data.session) {
+            setCooldown(RESEND_WAIT_SECONDS)
             setShowConfirmation(true)
         } else {
             router.push('/onboarding')
@@ -185,24 +165,31 @@ function SignupForm() {
 
     if (showConfirmation) {
         return (
-            <div className="min-h-screen bg-[#050505] flex items-center justify-center p-6">
-                <div className="w-full max-w-md p-10 bg-white/[0.02] border border-white/10 rounded-2xl text-center relative overflow-hidden">
-                    <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-[#7B61FF] to-transparent" />
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#7B61FF] to-[#38BDF8] flex items-center justify-center mx-auto mb-6 shadow-[0_0_40px_rgba(123,97,255,0.35)]">
-                        <img src="/velodesk (2).png" alt="Velodesk" className="w-10 h-10 object-contain" />
-                    </div>
-                    <h1 className="text-2xl font-['Outfit'] text-white mb-4">Check your email</h1>
-                    <p className="text-gray-400 mb-6 leading-relaxed">
-                        We sent a confirmation link to <strong className="text-white">{email}</strong>.
-                        Click it to verify your email and finish setting up your account.
-                        {planId && <> Your {PLAN_NAMES[planId]} selection is saved.</>}
-                    </p>
-                    <ResendConfirmation email={email} />
-                    <Link href="/login" className="text-sm text-[#7B61FF] hover:text-white transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B61FF] focus-visible:ring-offset-2 focus-visible:ring-offset-black rounded">
-                        ← Back to Sign In
+            <main className="flex min-h-screen flex-col bg-bg">
+                <header className="flex justify-center px-4 pt-10">
+                    <Link href="/" className="flex items-center gap-3 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent">
+                        {/* eslint-disable-next-line @next/next/no-img-element -- small static logo */}
+                        <img src="/velodesk (2).png" alt="" className="h-8 w-auto" />
+                        <span className="font-display text-lg font-light uppercase tracking-[0.35em] text-text">Velodesk</span>
                     </Link>
-                </div>
-            </div>
+                </header>
+                <section className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-16">
+                    <CodeStep
+                        email={email}
+                        busy={verifying}
+                        error={codeError}
+                        cooldown={cooldown}
+                        onSubmit={handleVerifyCode}
+                        onResend={handleResendCode}
+                        onBack={() => { setShowConfirmation(false); setCodeError(null) }}
+                        title="Confirm your email"
+                        submitLabel="Confirm and continue"
+                        busyLabel="Confirming…"
+                        backLabel="Use a different email"
+                        note={planId ? <>Your {PLAN_NAMES[planId]} selection is saved.</> : 'You can also click the link in the same email.'}
+                    />
+                </section>
+            </main>
         )
     }
 
