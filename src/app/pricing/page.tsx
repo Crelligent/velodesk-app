@@ -46,8 +46,19 @@ export default function PricingPage() {
     // TODO(pricing): add a Monthly/Yearly toggle back once yearly prices exist in planData
     // and in the Paystack plan config. It was removed because it changed nothing.
 
+    // Set when the dashboard sends a signed-in user here (?error=trial_ended etc.).
+    const [accountNotice, setAccountNotice] = useState<string | null>(null)
+
     useEffect(() => {
         console.log('[Analytics] pricing_viewed')
+        const reason = new URLSearchParams(window.location.search).get('error')
+        const messages: Record<string, string> = {
+            trial_ended: 'Your free trial on this account has ended.',
+            subscription_ended: 'Your subscription on this account has ended.',
+            subscription_required: 'This account doesn\u2019t have an active plan yet.',
+        }
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- reads the URL once on load
+        if (reason && messages[reason]) setAccountNotice(messages[reason])
     }, [])
 
     const handleCheckout = async (planId: string) => {
@@ -90,6 +101,19 @@ export default function PricingPage() {
 
             {/* Content */}
             <div className="pt-40 pb-24 px-6 md:px-8 max-w-[1000px] mx-auto relative z-10">
+                {accountNotice && (
+                    <div role="status" className="mb-12 rounded-2xl border border-amber-400/30 bg-amber-400/[0.06] px-5 py-4 text-sm text-gray-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <p>
+                            <span className="font-medium text-white">{accountNotice}</span>{' '}
+                            Choose a plan below to keep going, or sign out to use a different account.
+                        </p>
+                        <form action="/auth/signout" method="post" className="shrink-0">
+                            <button type="submit" className="rounded-full border border-white/20 px-4 py-2 text-sm font-medium text-white hover:bg-white/10 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#7B61FF]">
+                                Sign out
+                            </button>
+                        </form>
+                    </div>
+                )}
                 <div className="text-center mb-16 max-w-3xl mx-auto flex flex-col items-center">
                     <h1 className="text-5xl md:text-7xl font-bold mb-6 tracking-tight text-white">
                         Pricing that scales with you
